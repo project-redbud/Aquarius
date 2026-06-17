@@ -23,4 +23,8 @@ public class DailyPush
     public DateTime Date { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>关联的瓶子 ID，可为 null。创建时自动生成 Bottle 实体。</summary>
+    public int? BottleId { get; set; }
+    public Bottle? Bottle { get; set; }
 }

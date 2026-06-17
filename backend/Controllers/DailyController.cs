@@ -36,24 +36,24 @@ public class DailyController : ControllerBase
             .OrderByDescending(d => d.CreatedAt)
             .FirstOrDefaultAsync();
 
+        BottleDto? ToPushBottle(Models.DailyPush? push)
+        {
+            if (push == null) return null;
+            return new BottleDto
+            {
+                Id = push.BottleId ?? 0,
+                Content = push.Content,
+                ImagePath = push.ImagePath,
+                AuthorName = push.Type == "story" ? "📖 每日故事" : "❓ 每日问答",
+                Type = push.Type,
+                CreatedAt = push.CreatedAt
+            };
+        }
+
         return Ok(new DailyPushDto
         {
-            Story = story == null ? null : new BottleDto
-            {
-                Id = story.Id,
-                Content = story.Content,
-                ImagePath = story.ImagePath,
-                Type = story.Type,
-                CreatedAt = story.CreatedAt
-            },
-            Qa = qa == null ? null : new BottleDto
-            {
-                Id = qa.Id,
-                Content = qa.Content,
-                ImagePath = qa.ImagePath,
-                Type = qa.Type,
-                CreatedAt = qa.CreatedAt
-            }
+            Story = ToPushBottle(story),
+            Qa = ToPushBottle(qa)
         });
     }
 }

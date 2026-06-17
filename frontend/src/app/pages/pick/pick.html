@@ -1,56 +1,115 @@
-<div class="page">
-  <h1>🌊 捞瓶</h1>
-
-  @if (loading()) {
-    <div class="loading">打捞中...</div>
-  } @else if (!bottle()) {
-    <div class="empty">
-      <p>海里还没有瓶子 🫙</p>
-      <button class="primary" (click)="pickBottle()">再捞一次</button>
+<div class="page"
+  (touchstart)="onTouchStart($event)"
+  (touchmove)="onTouchMove($event)"
+  (touchend)="onTouchEnd()"
+>
+  @if (pullDistance() > 0) {
+    <div class="pull-indicator" [style.height.px]="pullDistance()">
+      {{ pullDistance() > 60 ? '✨ 松开刷新' : '↓ 下拉刷新' }}
     </div>
+  }
+
+  <div class="header-row">
+    <h1>🌊 捞瓶</h1>
+    <button class="next-btn" (click)="pickBottle()" [disabled]="loading()">
+      {{ loading() ? '捞取中...' : '🔄 下一只' }}
+    </button>
+  </div>
+
+  @if (refreshing()) { <div class="loading">刷新中...</div> }
+  @else if (!bottle()) {
+    <div class="empty"><p>海里还没有瓶子 🫙</p><button class="primary" (click)="pickBottle()">再捞一次</button></div>
   } @else {
     <div class="bottle-card">
       <div class="header">
         <span class="author">{{ bottle()!.authorName || '匿名' }}</span>
-        <span class="time">{{ bottle()!.createdAt | date:'short' }}</span>
+        <span class="right"><span class="bottle-num">#{{ bottle()!.id }}</span><span class="time">{{ bottle()!.createdAt | date:'yyyy-MM-dd HH:mm' }}</span></span>
       </div>
-
-      @if (bottle()!.imagePath) {
-        <img [src]="'/' + bottle()!.imagePath" alt="bottle image" class="bottle-img" />
-      }
-
+      @if (bottle()!.imagePath) { <img [src]="'/' + bottle()!.imagePath" alt="bottle image" class="bottle-img" /> }
       <p class="content">{{ bottle()!.content }}</p>
-
       <div class="actions">
-        <button [class.liked]="bottle()!.likedByMe" (click)="toggleLike()">
-          {{ bottle()!.likedByMe ? '❤️' : '🤍' }} {{ bottle()!.likeCount }}
-        </button>
-        <span>💬 {{ bottle()!.commentCount }}</span>
+        <button [class.liked]="bottle()!.likedByMe" (click)="toggleLike()">{{ bottle()!.likedByMe ? '❤️' : '🤍' }} {{ bottle()!.likeCount }}</button>
+        <span>💬 {{ comments().length }}</span>
       </div>
     </div>
 
-    <!-- comments -->
     <div class="comments">
       <h3>评论</h3>
-      <div class="comment-input">
-        <input
-          type="text"
-          [(ngModel)]="commentText"
-          placeholder="说点什么（匿名）..."
-          maxlength="300"
-          (keydown.enter)="addComment()"
-        />
-        <button (click)="addComment()" [disabled]="!commentText().trim()">发送</button>
-      </div>
+      @if (!replyTo()) {
+        <div class="comment-input">
+          <input type="text" [(ngModel)]="commentText" placeholder="说点什么（匿名）..." maxlength="300" (keydown.enter)="addComment()" />
+          <button (click)="addComment()" [disabled]="!commentText().trim()">发送</button>
+        </div>
+      }
 
-      @for (c of comments(); track c.id) {
+      @for (c of comments(); track c.id; let i = $index) {
         <div class="comment">
-          <p>{{ c.content }}</p>
-          <span class="time">{{ c.createdAt | date:'short' }}</span>
+          @if (replyTo()?.id === c.id) {
+            <div class="reply-bar">
+              <span>回复 #{{ c.id }}</span>
+              <input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" />
+              <button (click)="addComment()" [disabled]="!replyText().trim()">回复</button>
+              <button class="cancel" (click)="cancelReply()">取消</button>
+            </div>
+          }
+          <p><span class="floor">#{{ i + 1 }}</span> {{ c.content }}</p>
+          <div class="comment-meta"><span class="time">{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span><button class="reply-btn" (click)="startReply(c)">回复</button></div>
+
+          @if (c.replyCount! > 0) {
+            <div class="replies">
+              @if (expandedReplies()[c.id]) {
+                @for (r of expandedReplies()[c.id]; track r.id) {
+                  <div class="reply-item">
+                    @if (replyTo()?.id === r.id) {
+                      <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
+                    }
+                    <p>{{ r.content }}</p>
+                    @if (r.parentContent) { <blockquote>{{ r.parentContent }}</blockquote> }
+                    <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span><button class="reply-btn" (click)="startReply(r)">回复</button></div>
+                    @if (r.replyCount! > 0) {
+                      <button class="expand-btn" (click)="toggleReplies(r)">{{ expandedReplies()[r.id] ? '收起' : '展开 ' + r.replyCount + ' 条回复' }}</button>
+                    }
+                    @if (expandedReplies()[r.id]) {
+                      <div class="replies">
+                        @for (sr of expandedReplies()[r.id]; track sr.id) {
+                          <div class="reply-item">
+                            @if (replyTo()?.id === sr.id) {
+                              <div class="reply-bar sub"><span>回复 #{{ sr.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
+                            }
+                            <p>{{ sr.content }}</p>
+                            @if (sr.parentContent) { <blockquote>{{ sr.parentContent }}</blockquote> }
+                            <div class="reply-meta"><span class="rid">#{{ sr.id }}</span><span class="time">{{ sr.createdAt | date:'yyyy-MM-dd HH:mm' }}</span><button class="reply-btn" (click)="startReply(sr)">回复</button></div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+                <button class="expand-btn" (click)="toggleReplies(c)">收起</button>
+              } @else {
+                @if (c.replies && c.replies.length > 0) {
+                  @for (r of c.replies; track r.id) {
+                    <div class="reply-item">
+                      @if (replyTo()?.id === r.id) {
+                        <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
+                      }
+                      <p>{{ r.content }}</p>
+                      @if (r.parentContent) { <blockquote>{{ r.parentContent }}</blockquote> }
+                      <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span><button class="reply-btn" (click)="startReply(r)">回复</button></div>
+                      @if (r.replyCount! > 0) {
+                        <button class="expand-btn" (click)="toggleReplies(r)">展开 {{ r.replyCount }} 条回复</button>
+                      }
+                    </div>
+                  }
+                }
+                @if (c.replyCount! > 3) {
+                  <button class="expand-btn" (click)="toggleReplies(c)">展开全部 {{ c.replyCount }} 条回复</button>
+                }
+              }
+            </div>
+          }
         </div>
       }
     </div>
-
-    <button class="primary outline" (click)="pickBottle()">🔄 捞下一只</button>
   }
 </div>

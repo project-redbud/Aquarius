@@ -3,44 +3,19 @@
   margin: 0 auto;
   padding: 24px 16px;
 
-  .pull-indicator {
-    text-align: center;
+  .back {
+    display: inline-block;
+    margin-bottom: 16px;
     color: #2563eb;
-    font-size: .85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    transition: height .1s;
+    text-decoration: none;
+    font-size: .9rem;
   }
+}
 
-  .header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-
-    h1 { margin: 0; font-size: 1.5rem; }
-
-    .next-btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 20px;
-      background: #2563eb;
-      color: #fff;
-      font-size: .9rem;
-      cursor: pointer;
-      white-space: nowrap;
-      &:disabled { background: #93c5fd; cursor: not-allowed; }
-    }
-  }
-
-  .loading, .empty {
-    text-align: center;
-    padding: 40px 0;
-    color: #888;
-    p { margin-bottom: 16px; }
-  }
+.loading, .empty {
+  text-align: center;
+  padding: 40px 0;
+  color: #888;
 }
 
 .bottle-card {
@@ -88,8 +63,6 @@
 }
 
 .comments {
-  margin-bottom: 20px;
-
   h3 { font-size: 1rem; margin-bottom: 12px; }
 
   .comment-input {
@@ -168,10 +141,7 @@
       cursor: pointer;
       font-size: .85rem;
       &:disabled { background: #93c5fd; }
-      &.cancel {
-        background: #e5e7eb;
-        color: #555;
-      }
+      &.cancel { background: #e5e7eb; color: #555; }
     }
 
     &.sub {
@@ -201,7 +171,6 @@
     margin-left: 16px;
     padding-left: 12px;
     border-left: 2px solid #e0e7ff;
-
     .reply-item {
       padding: 6px 0;
       p { margin: 0; font-size: .95rem; line-height: 1.5; }
@@ -216,7 +185,6 @@
       }
       .time { font-size: .7rem; color: #ccc; }
     }
-
     .expand-btn {
       border: none;
       background: none;
@@ -227,21 +195,4 @@
       margin-top: 4px;
     }
   }
-}
-
-.primary {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  background: #2563eb;
-  color: #fff;
-  font-size: 1.1rem;
-  cursor: pointer;
-  &.outline {
-    background: #fff;
-    color: #2563eb;
-    border: 2px solid #2563eb;
-  }
-  &:disabled { background: #93c5fd; cursor: not-allowed; }
 }

@@ -21,6 +21,20 @@ public class AquariusDbContext : DbContext
             .HasForeignKey(c => c.BottleId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Comment self-ref: CommentId → top-level parent
+        model.Entity<Comment>()
+            .HasOne(c => c.ParentComment)
+            .WithMany(c => c.Replies)
+            .HasForeignKey(c => c.CommentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Comment self-ref: ParentReplyId → specific reply
+        model.Entity<Comment>()
+            .HasOne(c => c.ParentReply)
+            .WithMany()
+            .HasForeignKey(c => c.ParentReplyId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Like unique index: one user → one bottle once
         model.Entity<Like>()
             .HasIndex(l => new { l.BottleId, l.UserToken })

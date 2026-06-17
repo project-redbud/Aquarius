@@ -1,0 +1,98 @@
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 16px;
+
+  h1 { margin-bottom: 20px; font-size: 1.5rem; }
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+
+  button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: #fff;
+    font-size: .95rem;
+    cursor: pointer;
+    transition: background .2s;
+
+    &.active {
+      background: #2563eb;
+      color: #fff;
+    }
+  }
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 40px 0;
+  color: #888;
+}
+
+.card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    .name { font-weight: 600; color: #2563eb; }
+    .time { font-size: .8rem; color: #999; }
+  }
+
+  img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    max-height: 200px;
+    object-fit: cover;
+  }
+
+  p { line-height: 1.6; white-space: pre-wrap; margin: 8px 0; }
+  .stats { font-size: .85rem; color: #666; }
+
+  &.card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow .15s;
+    &:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    &:active { box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  }
+}
+
+.comment-item {
+  background: #fefce8;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+
+  .comment-text {
+    font-size: 1rem;
+    font-style: italic;
+    margin: 0 0 6px;
+  }
+  .comment-ref {
+    font-size: .85rem;
+    color: #888;
+    margin: 0 0 4px;
+  }
+  .time { font-size: .75rem; color: #bbb; }
+
+  &.comment-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    &:hover { background: #fef9c3; }
+  }
+}

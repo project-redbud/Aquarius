@@ -12,8 +12,12 @@
   <div class="image-area">
     @if (!imageBase64()) {
       <label class="upload-btn">
-        📷 添加图片（可选，仅一张）
-        <input type="file" accept="image/*" (change)="onFileChange($event)" hidden />
+        @if (compressing()) {
+          ⏳ 压缩中...
+        } @else {
+          📷 添加图片（可选，仅一张）
+        }
+        <input type="file" accept="image/*" (change)="onFileChange($event)" hidden [disabled]="compressing()" />
       </label>
     } @else {
       <div class="preview">

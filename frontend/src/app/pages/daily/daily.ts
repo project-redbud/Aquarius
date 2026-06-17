@@ -1,10 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { ApiService, DailyPush } from '../../services/api.service';
 
 @Component({
   standalone: true,
-  imports: [DatePipe],
+  imports: [RouterLink],
   templateUrl: './daily.html',
   styleUrls: ['./daily.scss']
 })

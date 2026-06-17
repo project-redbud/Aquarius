@@ -373,7 +373,11 @@ FodyWeavers.xsd
 # 仓库根目录的临时/草稿目录
 /tmp/
 
-# Aquarius - user uploaded images
+# Aquarius - build output
+/wwwroot/
+backend/release/
+backend/wwwroot/*
+!backend/wwwroot/uploads/
 backend/wwwroot/uploads/*
 !backend/wwwroot/uploads/.gitkeep
 

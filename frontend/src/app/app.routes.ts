@@ -6,4 +6,6 @@ export const routes: Routes = [
   { path: 'pick', loadComponent: () => import('./pages/pick/pick').then(m => m.PickPage) },
   { path: 'daily', loadComponent: () => import('./pages/daily/daily').then(m => m.DailyPage) },
   { path: 'admin', loadComponent: () => import('./pages/admin/admin').then(m => m.AdminPage) },
+  { path: 'my', loadComponent: () => import('./pages/my/my').then(m => m.MyPage) },
+  { path: 'bottle/:id', loadComponent: () => import('./pages/bottle-detail/bottle-detail').then(m => m.BottleDetailPage) },
 ];

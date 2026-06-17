@@ -9,33 +9,91 @@
         placeholder="管理员密钥"
         (keydown.enter)="login()"
       />
-      <button (click)="login()">进入</button>
+      <button (click)="login()" [disabled]="loggingIn() || !adminKey().trim()">
+        {{ loggingIn() ? '验证中...' : '进入' }}
+      </button>
     </div>
+    @if (loginError()) {
+      <div class="login-error">{{ loginError() }}</div>
+    }
   } @else {
-    <button class="refresh" (click)="loadBottles()">🔄 刷新</button>
+    <!-- Daily push section -->
+    <details class="daily-push-section">
+      <summary>📰 创建每日推送</summary>
+      <div class="push-form">
+        <div class="row">
+          <label>
+            类型
+            <select [(ngModel)]="pushType">
+              <option value="story">📖 每日故事</option>
+              <option value="qa">❓ 每日问答</option>
+            </select>
+          </label>
+          <label>
+            日期
+            <input type="date" [(ngModel)]="pushDate" />
+          </label>
+        </div>
+        <textarea
+          [(ngModel)]="pushContent"
+          placeholder="推送内容..."
+          maxlength="500"
+          rows="3"
+        ></textarea>
+        <button (click)="createDaily()" [disabled]="!pushContent().trim()">
+          发布推送
+        </button>
+      </div>
+    </details>
+
+    <button class="refresh" (click)="loadBottles()">🔄 刷新瓶子列表</button>
 
     @for (b of bottles(); track b.id) {
       <div class="bottle-row">
         <div class="meta">
           <span class="author">{{ b.authorName || '匿名' }} ({{ b.userToken.slice(0, 8) }}...)</span>
-          <span class="time">{{ b.createdAt | date:'short' }}</span>
+          <span class="time">{{ b.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
           <span class="type">{{ b.type }}</span>
         </div>
         <p class="content">{{ b.content }}</p>
         <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>
         <div class="row-actions">
-          <button (click)="viewComments(b.id)">查看评论</button>
+          <button (click)="toggleComments(b.id)">
+            {{ commentsCache()[b.id] ? '隐藏评论' : '查看评论' }}
+            @if (loadingComments()[b.id]) { ... }
+          </button>
           <button class="danger" (click)="deleteBottle(b.id)">删除</button>
         </div>
 
-        <!-- inline comments -->
-        @for (c of selectedComments(); track c.id) {
-          @if (c.userToken) {
+        <!-- inline comments for THIS bottle only -->
+        @if (commentsCache()[b.id]; as bottleComments) {
+          @for (c of bottleComments; track c.id) {
             <div class="admin-comment">
-              <span class="token">[{{ c.userToken.slice(0, 8) }}...]</span>
+              @if (c.userToken) {
+                <span class="token">[{{ c.userToken.slice(0, 8) }}...]</span>
+              }
+              @if (c.commentId) { <span class="reply-tag">回复</span> }
               {{ c.content }}
-              <span class="time">{{ c.createdAt | date:'short' }}</span>
+              <span class="time">{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+
+              <!-- nested replies -->
+              @if (c.replies && c.replies.length > 0) {
+                <div class="admin-replies">
+                  @for (r of c.replies; track r.id) {
+                    <div class="admin-comment sub">
+                      @if (r.userToken) {
+                        <span class="token">[{{ r.userToken.slice(0, 8) }}...]</span>
+                      }
+                      {{ r.content }}
+                      <span class="time">{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                    </div>
+                  }
+                </div>
+              }
             </div>
+          }
+          @if (bottleComments.length === 0) {
+            <div class="admin-comment empty">暂无评论</div>
           }
         }
       </div>

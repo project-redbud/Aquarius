@@ -28,9 +28,7 @@ public class BottlesController : ControllerBase
 
         string? imagePath = null;
         if (!string.IsNullOrWhiteSpace(req.ImageBase64))
-        {
             imagePath = await SaveImage(req.ImageBase64);
-        }
 
         var bottle = new Bottle
         {
@@ -45,10 +43,10 @@ public class BottlesController : ControllerBase
         _db.Bottles.Add(bottle);
         await _db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetOne), new { id = bottle.Id }, ToDto(bottle, token));
+        return CreatedAtAction(nameof(GetOne), new { id = bottle.Id }, await ToDto(bottle, token));
     }
 
-    /// <summary>随机捞一个普通瓶（排除故事/问答瓶）</summary>
+    /// <summary>随机捞一个普通瓶</summary>
     [HttpGet("random")]
     public async Task<ActionResult<BottleDto?>> Random(
         [FromHeader(Name = "X-User-Token")] string? userToken)
@@ -60,11 +58,12 @@ public class BottlesController : ControllerBase
 
         var skip = System.Random.Shared.Next(count);
         var bottle = await _db.Bottles
+            .Include(b => b.Comments)
             .Where(b => b.Type == "normal")
             .Skip(skip)
             .FirstAsync();
 
-        return Ok(ToDto(bottle, token));
+        return Ok(await ToDto(bottle, token));
     }
 
     /// <summary>查看单个瓶</summary>
@@ -73,10 +72,31 @@ public class BottlesController : ControllerBase
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
         var token = ResolveToken(userToken);
-        var bottle = await _db.Bottles.FindAsync(id);
+        var bottle = await _db.Bottles
+            .Include(b => b.Comments)
+            .FirstOrDefaultAsync(b => b.Id == id);
         if (bottle == null) return NotFound();
 
-        return Ok(ToDto(bottle, token));
+        return Ok(await ToDto(bottle, token));
+    }
+
+    /// <summary>我投的瓶子</summary>
+    [HttpGet("mine")]
+    public async Task<ActionResult<List<BottleDto>>> Mine(
+        [FromHeader(Name = "X-User-Token")] string? userToken)
+    {
+        var token = ResolveToken(userToken);
+        var bottles = await _db.Bottles
+            .Include(b => b.Comments)
+            .Where(b => b.UserToken == token)
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
+
+        var result = new List<BottleDto>();
+        foreach (var b in bottles)
+            result.Add(await ToDto(b, token));
+
+        return Ok(result);
     }
 
     /// <summary>点赞/取消赞（toggle）</summary>
@@ -114,8 +134,9 @@ public class BottlesController : ControllerBase
             : Guid.NewGuid().ToString("N");
     }
 
-    private BottleDto ToDto(Bottle b, string token)
+    private async Task<BottleDto> ToDto(Bottle b, string token)
     {
+        var liked = await _db.Likes.AnyAsync(l => l.BottleId == b.Id && l.UserToken == token);
         return new BottleDto
         {
             Id = b.Id,
@@ -125,7 +146,7 @@ public class BottlesController : ControllerBase
             Type = b.Type,
             LikeCount = b.LikeCount,
             CommentCount = b.Comments.Count,
-            LikedByMe = _db.Likes.Any(l => l.BottleId == b.Id && l.UserToken == token),
+            LikedByMe = liked,
             CreatedAt = b.CreatedAt
         };
     }
@@ -134,7 +155,6 @@ public class BottlesController : ControllerBase
     {
         try
         {
-            // Strip data:image/...;base64, prefix if present
             var comma = base64.IndexOf(',');
             var data = comma >= 0 ? base64[(comma + 1)..] : base64;
             var bytes = Convert.FromBase64String(data);

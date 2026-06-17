@@ -4,6 +4,9 @@ using Aquarius.Api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Listen on all interfaces for mobile testing (port 4200 already firewall-allowed)
+builder.WebHost.UseUrls("http://0.0.0.0:4200");
+
 // ── Database ──────────────────────────────────────────────
 builder.Services.AddDbContext<AquariusDbContext>(opts =>
     opts.UseSqlite(builder.Configuration.GetConnectionString("Default") 
@@ -12,13 +15,14 @@ builder.Services.AddDbContext<AquariusDbContext>(opts =>
 // ── Controllers ───────────────────────────────────────────
 builder.Services.AddControllers();
 
-// ── CORS (dev: Angular on :4200; prod: same origin) ──────
+// ── CORS (dev: allow Angular dev server from any local addr) ──
 builder.Services.AddCors(opts =>
 {
     opts.AddDefaultPolicy(p =>
-        p.WithOrigins("http://localhost:4200")
+        p.SetIsOriginAllowed(_ => true)
          .AllowAnyHeader()
-         .AllowAnyMethod());
+         .AllowAnyMethod()
+         .AllowCredentials());
 });
 
 // ── Swagger / OpenAPI ─────────────────────────────────────

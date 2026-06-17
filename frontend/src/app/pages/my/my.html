@@ -1,0 +1,46 @@
+<div class="page">
+  <h1>👤 我的</h1>
+
+  <div class="tabs">
+    <button [class.active]="tab() === 'bottles'" (click)="switchTab('bottles')">
+      🫧 我的瓶子 ({{ myBottles().length }})
+    </button>
+    <button [class.active]="tab() === 'comments'" (click)="switchTab('comments')">
+      💬 我的评论 ({{ myComments().length }})
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">加载中...</div>
+  } @else if (tab() === 'bottles') {
+    @if (myBottles().length === 0) {
+      <div class="empty">还没有投过瓶子 🫙</div>
+    } @else {
+      @for (b of myBottles(); track b.id) {
+        <a [routerLink]="['/bottle', b.id]" class="card card-link">
+          <div class="meta">
+            <span class="name">{{ b.authorName || '匿名' }}</span>
+            <span class="time">{{ b.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+          </div>
+          @if (b.imagePath) {
+            <img [src]="'/' + b.imagePath" alt="my bottle" />
+          }
+          <p>{{ b.content }}</p>
+          <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>
+        </a>
+      }
+    }
+  } @else {
+    @if (myComments().length === 0) {
+      <div class="empty">还没有发表过评论 💭</div>
+    } @else {
+      @for (c of myComments(); track c.id) {
+        <a [routerLink]="['/bottle', c.bottleId]" class="comment-item comment-link">
+          <p class="comment-text">"{{ c.content }}"</p>
+          <p class="comment-ref">→ 回复: {{ c.bottleContent }}</p>
+          <span class="time">{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+        </a>
+      }
+    }
+  }
+</div>

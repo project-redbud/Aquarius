@@ -19,6 +19,12 @@ public class AddCommentRequest
 {
     [Required, MaxLength(300)]
     public string Content { get; set; } = string.Empty;
+
+    /// <summary>属于哪个顶级评论（cid）。不传=顶级评论。</summary>
+    public int? CommentId { get; set; }
+
+    /// <summary>回复的具体 rid，不传=直接回复评论。</summary>
+    public int? ParentReplyId { get; set; }
 }
 
 public class BottleDto
@@ -42,6 +48,21 @@ public class CommentDto
 
     /// <summary>仅管理员可见；普通用户返回 null。</summary>
     public string? UserToken { get; set; }
+
+    /// <summary>楼中楼：属于哪个顶级评论。</summary>
+    public int? CommentId { get; set; }
+
+    /// <summary>楼中楼：回复的具体 rid，null=直接回评论。</summary>
+    public int? ParentReplyId { get; set; }
+
+    /// <summary>子回复总数。</summary>
+    public int ReplyCount { get; set; }
+
+    /// <summary>前 3 条子回复。</summary>
+    public List<CommentDto> Replies { get; set; } = [];
+
+    /// <summary>被回复的内容（ParentReplyId≠null 时有值，截断 30 字）。</summary>
+    public string? ParentContent { get; set; }
 }
 
 public class DailyPushDto

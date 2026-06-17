@@ -8,6 +8,12 @@
   .empty { text-align: center; padding: 40px 0; color: #888; }
 }
 
+.card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
 .card {
   border-radius: 16px;
   padding: 20px;

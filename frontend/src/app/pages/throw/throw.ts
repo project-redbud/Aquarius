@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
+import { ImageService } from '../../services/image.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -15,15 +16,20 @@ export class ThrowPage {
   isAnonymous = signal(false);
   imageBase64 = signal<string | null>(null);
   sending = signal(false);
+  compressing = signal(false);
 
-  constructor(private api: ApiService, private router: Router) {}
+  constructor(private api: ApiService, private imageService: ImageService, private router: Router) {}
 
-  onFileChange(e: Event) {
+  async onFileChange(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => this.imageBase64.set(reader.result as string);
-    reader.readAsDataURL(file);
+    this.compressing.set(true);
+    try {
+      const compressed = await this.imageService.compress(file);
+      this.imageBase64.set(compressed);
+    } finally {
+      this.compressing.set(false);
+    }
   }
 
   removeImage() {
