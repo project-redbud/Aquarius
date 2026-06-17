@@ -1,0 +1,80 @@
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 16px;
+
+  h1 { margin-bottom: 20px; font-size: 1.5rem; }
+
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    resize: vertical;
+    box-sizing: border-box;
+  }
+
+  .image-area {
+    margin: 12px 0;
+    .upload-btn {
+      display: block;
+      padding: 12px;
+      border: 2px dashed #ccc;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      color: #666;
+    }
+    .preview {
+      position: relative;
+      img {
+        width: 100%;
+        border-radius: 12px;
+        max-height: 300px;
+        object-fit: cover;
+      }
+      .remove {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(0,0,0,.6);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .author-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+    input[type="text"] {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+  }
+
+  .primary {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    &:disabled {
+      background: #93c5fd;
+      cursor: not-allowed;
+    }
+  }
+}

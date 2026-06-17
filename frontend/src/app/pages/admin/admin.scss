@@ -1,0 +1,77 @@
+.page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 16px;
+
+  h1 { margin-bottom: 20px; font-size: 1.5rem; }
+}
+
+.login {
+  display: flex;
+  gap: 8px;
+  input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+  }
+  button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+  }
+}
+
+.refresh {
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.bottle-row {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+
+  .meta {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+    font-size: .85rem;
+    .author { color: #2563eb; font-weight: 600; }
+    .time { color: #999; }
+    .type { background: #e2e8f0; padding: 2px 8px; border-radius: 4px; }
+  }
+
+  .content { margin: 8px 0; line-height: 1.5; }
+  .stats { font-size: .85rem; color: #666; margin-bottom: 8px; }
+
+  .row-actions {
+    display: flex;
+    gap: 8px;
+    button {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 8px;
+      background: #e2e8f0;
+      cursor: pointer;
+      &.danger { background: #fee2e2; color: #dc2626; }
+    }
+  }
+
+  .admin-comment {
+    padding: 8px 0;
+    margin-top: 8px;
+    border-top: 1px solid #eee;
+    font-size: .9rem;
+    .token { color: #dc2626; font-weight: 600; margin-right: 6px; }
+    .time { color: #bbb; margin-left: 8px; font-size: .75rem; }
+  }
+}

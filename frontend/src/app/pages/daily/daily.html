@@ -1,0 +1,31 @@
+<div class="page">
+  <h1>📰 今日推送</h1>
+
+  @if (!daily()) {
+    <div class="empty">加载中...</div>
+  } @else {
+    @if (daily()!.story) {
+      <div class="card story">
+        <span class="badge">📖 每日故事</span>
+        @if (daily()!.story!.imagePath) {
+          <img [src]="'/' + daily()!.story!.imagePath" alt="story" />
+        }
+        <p>{{ daily()!.story!.content }}</p>
+      </div>
+    }
+
+    @if (daily()!.qa) {
+      <div class="card qa">
+        <span class="badge">❓ 每日问答</span>
+        @if (daily()!.qa!.imagePath) {
+          <img [src]="'/' + daily()!.qa!.imagePath" alt="qa" />
+        }
+        <p>{{ daily()!.qa!.content }}</p>
+      </div>
+    }
+
+    @if (!daily()!.story && !daily()!.qa) {
+      <div class="empty">今天还没有推送，晚点再来看看 👀</div>
+    }
+  }
+</div>

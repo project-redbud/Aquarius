@@ -1,0 +1,44 @@
+<div class="page">
+  <h1>🔑 管理面板</h1>
+
+  @if (!loggedIn()) {
+    <div class="login">
+      <input
+        type="password"
+        [(ngModel)]="adminKey"
+        placeholder="管理员密钥"
+        (keydown.enter)="login()"
+      />
+      <button (click)="login()">进入</button>
+    </div>
+  } @else {
+    <button class="refresh" (click)="loadBottles()">🔄 刷新</button>
+
+    @for (b of bottles(); track b.id) {
+      <div class="bottle-row">
+        <div class="meta">
+          <span class="author">{{ b.authorName || '匿名' }} ({{ b.userToken.slice(0, 8) }}...)</span>
+          <span class="time">{{ b.createdAt | date:'short' }}</span>
+          <span class="type">{{ b.type }}</span>
+        </div>
+        <p class="content">{{ b.content }}</p>
+        <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>
+        <div class="row-actions">
+          <button (click)="viewComments(b.id)">查看评论</button>
+          <button class="danger" (click)="deleteBottle(b.id)">删除</button>
+        </div>
+
+        <!-- inline comments -->
+        @for (c of selectedComments(); track c.id) {
+          @if (c.userToken) {
+            <div class="admin-comment">
+              <span class="token">[{{ c.userToken.slice(0, 8) }}...]</span>
+              {{ c.content }}
+              <span class="time">{{ c.createdAt | date:'short' }}</span>
+            </div>
+          }
+        }
+      </div>
+    }
+  }
+</div>

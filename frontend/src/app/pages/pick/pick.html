@@ -1,0 +1,56 @@
+<div class="page">
+  <h1>🌊 捞瓶</h1>
+
+  @if (loading()) {
+    <div class="loading">打捞中...</div>
+  } @else if (!bottle()) {
+    <div class="empty">
+      <p>海里还没有瓶子 🫙</p>
+      <button class="primary" (click)="pickBottle()">再捞一次</button>
+    </div>
+  } @else {
+    <div class="bottle-card">
+      <div class="header">
+        <span class="author">{{ bottle()!.authorName || '匿名' }}</span>
+        <span class="time">{{ bottle()!.createdAt | date:'short' }}</span>
+      </div>
+
+      @if (bottle()!.imagePath) {
+        <img [src]="'/' + bottle()!.imagePath" alt="bottle image" class="bottle-img" />
+      }
+
+      <p class="content">{{ bottle()!.content }}</p>
+
+      <div class="actions">
+        <button [class.liked]="bottle()!.likedByMe" (click)="toggleLike()">
+          {{ bottle()!.likedByMe ? '❤️' : '🤍' }} {{ bottle()!.likeCount }}
+        </button>
+        <span>💬 {{ bottle()!.commentCount }}</span>
+      </div>
+    </div>
+
+    <!-- comments -->
+    <div class="comments">
+      <h3>评论</h3>
+      <div class="comment-input">
+        <input
+          type="text"
+          [(ngModel)]="commentText"
+          placeholder="说点什么（匿名）..."
+          maxlength="300"
+          (keydown.enter)="addComment()"
+        />
+        <button (click)="addComment()" [disabled]="!commentText().trim()">发送</button>
+      </div>
+
+      @for (c of comments(); track c.id) {
+        <div class="comment">
+          <p>{{ c.content }}</p>
+          <span class="time">{{ c.createdAt | date:'short' }}</span>
+        </div>
+      }
+    </div>
+
+    <button class="primary outline" (click)="pickBottle()">🔄 捞下一只</button>
+  }
+</div>

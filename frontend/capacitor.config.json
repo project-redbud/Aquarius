@@ -1,0 +1,5 @@
+{
+  "appId": "com.aquarius.app",
+  "appName": "Aquarius",
+  "webDir": "dist/frontend/browser"
+}

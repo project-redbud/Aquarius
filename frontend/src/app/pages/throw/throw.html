@@ -1,0 +1,45 @@
+<div class="page">
+  <h1>🫧 投一只瓶</h1>
+
+  <textarea
+    [(ngModel)]="content"
+    placeholder="写下你想说的话（最多500字）..."
+    maxlength="500"
+    rows="5"
+  ></textarea>
+
+  <!-- image -->
+  <div class="image-area">
+    @if (!imageBase64()) {
+      <label class="upload-btn">
+        📷 添加图片（可选，仅一张）
+        <input type="file" accept="image/*" (change)="onFileChange($event)" hidden />
+      </label>
+    } @else {
+      <div class="preview">
+        <img [src]="imageBase64()!" alt="preview" />
+        <button class="remove" (click)="removeImage()">✕ 移除</button>
+      </div>
+    }
+  </div>
+
+  <!-- author -->
+  <div class="author-row">
+    <label>
+      <input type="checkbox" [(ngModel)]="isAnonymous" />
+      匿名发布
+    </label>
+    @if (!isAnonymous()) {
+      <input
+        type="text"
+        [(ngModel)]="authorName"
+        placeholder="留个名字（选填）"
+        maxlength="50"
+      />
+    }
+  </div>
+
+  <button class="primary" [disabled]="!content().trim() || sending()" (click)="throwBottle()">
+    {{ sending() ? '投掷中...' : '🫧 投出去' }}
+  </button>
+</div>

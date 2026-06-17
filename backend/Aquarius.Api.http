@@ -1,0 +1,6 @@
+@Aquarius.Api_HostAddress = http://localhost:5185
+
+GET {{Aquarius.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
