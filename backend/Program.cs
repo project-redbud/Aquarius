@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Aquarius.Api.Data;
 using Aquarius.Api.Models;
@@ -13,7 +15,12 @@ builder.Services.AddDbContext<AquariusDbContext>(opts =>
         ?? "Data Source=Aquarius.db"));
 
 // ── Controllers ───────────────────────────────────────────
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        // Force all DateTime to serialize as UTC (fixes SQLite timezone loss)
+        opts.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+    });
 
 // ── CORS (dev: allow Angular dev server from any local addr) ──
 builder.Services.AddCors(opts =>
@@ -57,3 +64,19 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+// ────────────────────────────────────────────────────────────
+/// <summary>Ensure DateTime values always serialize with Z suffix,
+/// so Angular date pipe correctly converts UTC to local time.</summary>
+public class UtcDateTimeConverter : JsonConverter<DateTime>
+{
+    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        => reader.GetDateTime().ToUniversalTime();
+
+    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(value, DateTimeKind.Utc)
+            : value.ToUniversalTime());
+    }
+}
