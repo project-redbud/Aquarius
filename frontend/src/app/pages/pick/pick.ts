@@ -23,6 +23,24 @@ export class PickPage implements OnInit {
   // expanded replies: Map<commentId, Comment[]>
   expandedReplies = signal<Record<number, Comment[]>>({});
 
+  // sort: true = oldest first (#1 = first comment), false = newest first
+  sortAsc = signal(false);
+
+  sortedComments(): Comment[] {
+    const list = [...this.comments()];
+    if (this.sortAsc()) {
+      list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }
+    return list;
+  }
+
+  floorNum(i: number): number {
+    // When newest-first (desc): first item should be highest floor number
+    return this.sortAsc() ? i + 1 : this.comments().length - i;
+  }
+
+  toggleSort() { this.sortAsc.update(v => !v); }
+
   constructor(private api: ApiService) {}
 
   ngOnInit() { this.pickBottle(); }

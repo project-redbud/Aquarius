@@ -18,6 +18,15 @@ export class BottleDetailPage implements OnInit {
   replyTo = signal<Comment | null>(null);
   replyText = signal('');
   expandedReplies = signal<Record<number, Comment[]>>({});
+  sortAsc = signal(false);
+
+  sortedComments(): Comment[] {
+    const list = [...this.comments()];
+    if (this.sortAsc()) list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    return list;
+  }
+  floorNum(i: number): number { return this.sortAsc() ? i + 1 : this.comments().length - i; }
+  toggleSort() { this.sortAsc.update(v => !v); }
 
   constructor(private route: ActivatedRoute, private api: ApiService) {}
 

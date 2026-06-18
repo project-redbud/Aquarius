@@ -34,7 +34,10 @@
     </div>
 
     <div class="comments">
-      <h3>评论</h3>
+      <div class="comments-header">
+        <h3>评论</h3>
+        <button class="sort-btn" (click)="toggleSort()">{{ sortAsc() ? '🔼 最早' : '🔽 最新' }}</button>
+      </div>
       @if (!replyTo()) {
         <div class="comment-input">
           <input type="text" [(ngModel)]="commentText" placeholder="说点什么（匿名）..." maxlength="300" (keydown.enter)="addComment()" />
@@ -42,7 +45,7 @@
         </div>
       }
 
-      @for (c of comments(); track c.id; let i = $index) {
+      @for (c of sortedComments(); track c.id; let i = $index) {
         <div class="comment">
           @if (replyTo()?.id === c.id) {
             <div class="reply-bar">
@@ -52,7 +55,7 @@
               <button class="cancel" (click)="cancelReply()">取消</button>
             </div>
           }
-          <p><span class="floor">#{{ i + 1 }}</span> {{ c.content }}</p>
+          <p><span class="floor">#{{ floorNum(i) }}</span> {{ c.content }}</p>
           <div class="comment-meta"><span class="time">{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span><button class="reply-btn" (click)="startReply(c)">回复</button></div>
 
           @if (c.replyCount! > 0) {
