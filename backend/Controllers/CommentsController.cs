@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Aquarius.Api.Data;
@@ -13,6 +15,12 @@ public class CommentsController : ControllerBase
     private readonly AquariusDbContext _db;
 
     public CommentsController(AquariusDbContext db) => _db = db;
+
+    private int? GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return claim != null && int.TryParse(claim, out var id) ? id : null;
+    }
 
     /// <summary>获取瓶子的顶级评论列表（含前3条子回复）</summary>
     [HttpGet]
@@ -56,13 +64,14 @@ public class CommentsController : ControllerBase
         var token = !string.IsNullOrWhiteSpace(userToken) ? userToken.Trim()
             : Guid.NewGuid().ToString("N");
 
+        var userId = GetUserId();
+
         // 如果是回复，确定 commentId
         int? commentId = req.CommentId;
         int? parentReplyId = req.ParentReplyId;
 
         if (commentId == null && parentReplyId != null)
         {
-            // 回复某条回复，从该回复找到 commentId
             var parentReply = await _db.Comments.FindAsync(parentReplyId.Value);
             if (parentReply == null) return BadRequest("目标回复不存在");
             commentId = parentReply.CommentId ?? parentReply.Id;
@@ -73,6 +82,7 @@ public class CommentsController : ControllerBase
             BottleId = bottleId,
             Content = req.Content,
             UserToken = token,
+            UserId = userId,
             CommentId = commentId,
             ParentReplyId = parentReplyId,
             CreatedAt = DateTime.UtcNow
@@ -88,16 +98,49 @@ public class CommentsController : ControllerBase
         return CreatedAtAction(nameof(List), new { bottleId }, ToDto(comment, includeReplies: false));
     }
 
+    /// <summary>编辑自己的评论</summary>
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<ActionResult<CommentDto>> Edit(int bottleId, int id, [FromBody] EditCommentRequest req)
+    {
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var comment = await _db.Comments
+            .Include(c => c.ParentReply)
+            .FirstOrDefaultAsync(c => c.Id == id && c.BottleId == bottleId);
+        if (comment == null) return NotFound();
+        if (comment.UserId != userId.Value) return Forbid();
+
+        comment.Content = req.Content;
+        comment.EditedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+
+        return Ok(ToDto(comment, includeReplies: false));
+    }
+
     /// <summary>删除自己的评论</summary>
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int bottleId, int id,
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
+        var userId = GetUserId();
+        var token = userToken ?? "";
+
         var comment = await _db.Comments
             .Include(c => c.Replies)
             .FirstOrDefaultAsync(c => c.Id == id && c.BottleId == bottleId);
         if (comment == null) return NotFound();
-        if (comment.UserToken != (userToken ?? "").Trim()) return Forbid();
+
+        // 登录用户按 UserId 验证，匿名用户按 UserToken 验证
+        if (userId != null)
+        {
+            if (comment.UserId != userId.Value) return Forbid();
+        }
+        else
+        {
+            if (comment.UserToken != token.Trim()) return Forbid();
+        }
 
         _db.Comments.RemoveRange(comment.Replies);
         _db.Comments.Remove(comment);
@@ -109,7 +152,6 @@ public class CommentsController : ControllerBase
 
     private static CommentDto ToDto(Comment c, bool includeReplies)
     {
-        // ParentContent: 只有回复楼中楼（ParentReplyId≠null）才有引用，格式 #ID: 内容
         string? parentContent = null;
         if (c.ParentReply != null)
         {
@@ -126,6 +168,8 @@ public class CommentsController : ControllerBase
             CommentId = c.CommentId,
             ParentReplyId = c.ParentReplyId,
             CreatedAt = c.CreatedAt,
+            EditedAt = c.EditedAt,
+            UserId = c.UserId,
             ReplyCount = c.Replies.Count,
             ParentContent = parentContent
         };
@@ -152,22 +196,36 @@ public class MyCommentsController : ControllerBase
 
     public MyCommentsController(AquariusDbContext db) => _db = db;
 
+    private int? GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return claim != null && int.TryParse(claim, out var id) ? id : null;
+    }
+
     [HttpGet("mine")]
     public async Task<ActionResult> Mine(
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
+        var userId = GetUserId();
         var token = (userToken ?? "").Trim();
-        if (string.IsNullOrEmpty(token)) return Ok(new List<object>());
 
-        var comments = await _db.Comments
-            .Include(c => c.Bottle)
-            .Where(c => c.UserToken == token)
+        var query = _db.Comments.Include(c => c.Bottle).AsQueryable();
+
+        if (userId != null)
+            query = query.Where(c => c.UserId == userId.Value);
+        else if (!string.IsNullOrEmpty(token))
+            query = query.Where(c => c.UserToken == token);
+        else
+            return Ok(new List<object>());
+
+        var comments = await query
             .OrderByDescending(c => c.CreatedAt)
             .Select(c => new
             {
                 c.Id,
                 c.Content,
                 c.CreatedAt,
+                c.EditedAt,
                 c.CommentId,
                 c.ParentReplyId,
                 BottleId = c.BottleId,

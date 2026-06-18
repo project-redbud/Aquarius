@@ -2,8 +2,18 @@
   <a routerLink="/pick" routerLinkActive="active">🌊 捞瓶</a>
   <a routerLink="/throw" routerLinkActive="active">🫧 投瓶</a>
   <a routerLink="/daily" routerLinkActive="active">📰 推送</a>
-  <a routerLink="/my" routerLinkActive="active">👤 我的</a>
-  <a routerLink="/admin" routerLinkActive="active">⚙️</a>
+  @if (auth.isLoggedIn()) {
+    <a routerLink="/my" routerLinkActive="active">👤 我的</a>
+  }
+  @if (auth.isAdmin()) {
+    <a routerLink="/admin" routerLinkActive="active">⚙️</a>
+  }
+  @if (auth.isLoggedIn()) {
+    <a class="user-info" routerLink="/my">{{ auth.user()?.username }}</a>
+    <a class="logout" (click)="auth.logout()" routerLink="/pick" style="cursor:pointer">退出</a>
+  } @else {
+    <a routerLink="/login" routerLinkActive="active">登录</a>
+  }
 </nav>
 
 <main>

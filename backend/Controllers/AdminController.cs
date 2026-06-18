@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Aquarius.Api.Data;
@@ -7,18 +9,30 @@ namespace Aquarius.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AdminController : ControllerBase
 {
     private readonly AquariusDbContext _db;
 
     public AdminController(AquariusDbContext db) => _db = db;
 
+    private bool IsAdmin()
+    {
+        var claim = User.FindFirst("isAdmin")?.Value;
+        return claim == "true";
+    }
+
+    private IActionResult RequireAdmin()
+    {
+        if (!IsAdmin()) return Forbid();
+        return null!; // will be returned by caller
+    }
+
     /// <summary>查看某个瓶的评论（含 UserToken + 楼中楼）</summary>
     [HttpGet("bottles/{bottleId}/comments")]
-    public async Task<ActionResult<List<CommentDto>>> GetComments(int bottleId,
-        [FromHeader(Name = "X-Admin-Key")] string? adminKey)
+    public async Task<ActionResult<List<CommentDto>>> GetComments(int bottleId)
     {
-        if (adminKey != "aquarius-admin-2025") return Unauthorized();
+        if (!IsAdmin()) return Forbid();
 
         var comments = await _db.Comments
             .Include(c => c.Replies).ThenInclude(r => r.Replies)
@@ -34,6 +48,8 @@ public class AdminController : ControllerBase
             CommentId = c.CommentId,
             ParentReplyId = c.ParentReplyId,
             CreatedAt = c.CreatedAt,
+            EditedAt = c.EditedAt,
+            UserId = c.UserId,
             ReplyCount = c.Replies.Count,
             Replies = c.Replies.OrderBy(r => r.CreatedAt).Select(r => new CommentDto
             {
@@ -42,7 +58,9 @@ public class AdminController : ControllerBase
                 UserToken = r.UserToken,
                 CommentId = r.CommentId,
                 ParentReplyId = r.ParentReplyId,
-                CreatedAt = r.CreatedAt
+                CreatedAt = r.CreatedAt,
+                EditedAt = r.EditedAt,
+                UserId = r.UserId
             }).ToList()
         }).ToList();
 
@@ -53,10 +71,9 @@ public class AdminController : ControllerBase
     [HttpGet("daily/check")]
     public async Task<ActionResult> CheckDaily(
         [FromQuery] string type,
-        [FromQuery] DateTime date,
-        [FromHeader(Name = "X-Admin-Key")] string? adminKey)
+        [FromQuery] DateTime date)
     {
-        if (adminKey != "aquarius-admin-2025") return Unauthorized();
+        if (!IsAdmin()) return Forbid();
 
         var existing = await _db.DailyPushes
             .Where(d => d.Date == date.Date && d.Type == type)
@@ -69,10 +86,9 @@ public class AdminController : ControllerBase
 
     /// <summary>创建/更新每日推送瓶（同类型+日期已存在则更新）</summary>
     [HttpPost("daily")]
-    public async Task<ActionResult> CreateDaily([FromBody] CreateDailyRequest req,
-        [FromHeader(Name = "X-Admin-Key")] string? adminKey)
+    public async Task<ActionResult> CreateDaily([FromBody] CreateDailyRequest req)
     {
-        if (adminKey != "aquarius-admin-2025") return Unauthorized();
+        if (!IsAdmin()) return Forbid();
 
         var date = req.Date.Date;
         var existing = await _db.DailyPushes
@@ -81,7 +97,6 @@ public class AdminController : ControllerBase
 
         if (existing != null)
         {
-            // Update existing push + linked bottle
             existing.Content = req.Content;
             existing.ImagePath = req.ImagePath;
             if (existing.Bottle != null)
@@ -93,7 +108,6 @@ public class AdminController : ControllerBase
             return Ok(new { existing.Id, existing.Type, existing.Content, existing.ImagePath, existing.Date, existing.BottleId, updated = true });
         }
 
-        // Create new Bottle entity so users can comment on it
         var bottle = new Models.Bottle
         {
             Content = req.Content,
@@ -104,7 +118,7 @@ public class AdminController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
         _db.Bottles.Add(bottle);
-        await _db.SaveChangesAsync(); // flush to get bottle.Id
+        await _db.SaveChangesAsync();
 
         var push = new Models.DailyPush
         {
@@ -124,10 +138,9 @@ public class AdminController : ControllerBase
 
     /// <summary>列出所有瓶子（管理）</summary>
     [HttpGet("bottles")]
-    public async Task<ActionResult> ListBottles(
-        [FromHeader(Name = "X-Admin-Key")] string? adminKey)
+    public async Task<ActionResult> ListBottles()
     {
-        if (adminKey != "aquarius-admin-2025") return Unauthorized();
+        if (!IsAdmin()) return Forbid();
 
         var bottles = await _db.Bottles
             .OrderByDescending(b => b.CreatedAt)
@@ -136,7 +149,9 @@ public class AdminController : ControllerBase
                 b.Id, b.Content, b.ImagePath, b.AuthorName,
                 b.UserToken, b.Type, b.LikeCount,
                 CommentCount = b.Comments.Count,
-                b.CreatedAt
+                b.CreatedAt,
+                b.EditedAt,
+                b.UserId
             })
             .ToListAsync();
 
@@ -145,10 +160,9 @@ public class AdminController : ControllerBase
 
     /// <summary>删除瓶子（管理）</summary>
     [HttpDelete("bottles/{id}")]
-    public async Task<ActionResult> DeleteBottle(int id,
-        [FromHeader(Name = "X-Admin-Key")] string? adminKey)
+    public async Task<ActionResult> DeleteBottle(int id)
     {
-        if (adminKey != "aquarius-admin-2025") return Unauthorized();
+        if (!IsAdmin()) return Forbid();
 
         var bottle = await _db.Bottles.FindAsync(id);
         if (bottle == null) return NotFound();
@@ -161,7 +175,7 @@ public class AdminController : ControllerBase
 
 public class CreateDailyRequest
 {
-    public string Type { get; set; } = "story"; // "story" or "qa"
+    public string Type { get; set; } = "story";
     public string Content { get; set; } = string.Empty;
     public string? ImagePath { get; set; }
     public DateTime Date { get; set; } = DateTime.UtcNow;

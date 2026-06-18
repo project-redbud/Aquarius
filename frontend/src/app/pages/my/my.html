@@ -1,6 +1,8 @@
 <div class="page">
   <h1>👤 我的</h1>
 
+  <p class="user-greeting">你好，{{ auth.user()?.username }}@if (auth.isAdmin()) { <span class="admin-badge">管理员</span> }</p>
+
   <div class="tabs">
     <button [class.active]="tab() === 'bottles'" (click)="switchTab('bottles')">
       🫧 我的瓶子 ({{ myBottles().length }})
@@ -17,17 +19,43 @@
       <div class="empty">还没有投过瓶子 🫙</div>
     } @else {
       @for (b of myBottles(); track b.id) {
-        <a [routerLink]="['/bottle', b.id]" class="card card-link">
+        <div class="card">
           <div class="meta">
             <span class="name">{{ b.authorName || '匿名' }}</span>
             <span class="time">{{ b.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
           </div>
+          @if (b.editedAt) {
+            <p class="edited-hint">编辑于 {{ b.editedAt | date:'yyyy-MM-dd HH:mm' }}</p>
+          }
           @if (b.imagePath) {
             <img [src]="'/' + b.imagePath" alt="my bottle" />
           }
-          <p>{{ b.content }}</p>
+          @if (editingBottleId() === b.id) {
+            <textarea [(ngModel)]="editBottleContent" rows="3" maxlength="500"></textarea>
+            <input type="text" [(ngModel)]="editBottleAuthor" placeholder="留个名字（选填）" maxlength="50" />
+            <div class="edit-actions">
+              <button class="save" (click)="saveEditBottle(b.id)">保存</button>
+              <button class="cancel" (click)="cancelEditBottle()">取消</button>
+            </div>
+          } @else {
+            <p class="content-text">{{ b.content }}</p>
+          }
           <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>
-        </a>
+
+          @if (deletingId() === b.id) {
+            <div class="confirm-delete">
+              <span>确定删除？</span>
+              <button class="danger" (click)="deleteBottle(b.id)">确认</button>
+              <button class="cancel" (click)="cancelDelete()">取消</button>
+            </div>
+          } @else {
+            <div class="row-actions">
+              <a [routerLink]="['/bottle', b.id]" class="view-link">查看详情</a>
+              <button (click)="startEditBottle(b)">编辑</button>
+              <button class="danger" (click)="confirmDeleteBottle(b.id)">删除</button>
+            </div>
+          }
+        </div>
       }
     }
   } @else {
@@ -35,11 +63,36 @@
       <div class="empty">还没有发表过评论 💭</div>
     } @else {
       @for (c of myComments(); track c.id) {
-        <a [routerLink]="['/bottle', c.bottleId]" class="comment-item comment-link">
-          <p class="comment-text">"{{ c.content }}"</p>
+        <div class="comment-item">
+          @if (c.editedAt) {
+            <p class="edited-hint">编辑于 {{ c.editedAt | date:'yyyy-MM-dd HH:mm' }}</p>
+          }
+          @if (editingCommentId() === c.id) {
+            <textarea [(ngModel)]="editCommentContent" rows="3" maxlength="300"></textarea>
+            <div class="edit-actions">
+              <button class="save" (click)="saveEditComment(c.id)">保存</button>
+              <button class="cancel" (click)="cancelEditComment()">取消</button>
+            </div>
+          } @else {
+            <p class="comment-text">"{{ c.content }}"</p>
+          }
           <p class="comment-ref">→ 回复: {{ c.bottleContent }}</p>
           <span class="time">{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
-        </a>
+
+          @if (deletingId() === c.id) {
+            <div class="confirm-delete">
+              <span>确定删除？</span>
+              <button class="danger" (click)="deleteComment(c.id)">确认</button>
+              <button class="cancel" (click)="cancelDelete()">取消</button>
+            </div>
+          } @else {
+            <div class="row-actions">
+              <a [routerLink]="['/bottle', c.bottleId]" class="view-link">查看</a>
+              <button (click)="startEditComment(c)">编辑</button>
+              <button class="danger" (click)="confirmDeleteComment(c.id)">删除</button>
+            </div>
+          }
+        </div>
       }
     }
   }

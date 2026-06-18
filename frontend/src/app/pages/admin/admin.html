@@ -1,23 +1,12 @@
 <div class="page">
   <h1>🔑 管理面板</h1>
 
-  @if (!loggedIn()) {
-    <div class="login">
-      <input
-        type="password"
-        [(ngModel)]="adminKey"
-        placeholder="管理员密钥"
-        (keydown.enter)="login()"
-      />
-      <button (click)="login()" [disabled]="loggingIn() || !adminKey().trim()">
-        {{ loggingIn() ? '验证中...' : '进入' }}
-      </button>
+  @if (!isAdmin()) {
+    <div class="no-permission">
+      <p>⚠️ 你没有管理员权限</p>
+      <a routerLink="/pick" class="back-btn">← 返回首页</a>
     </div>
-    @if (loginError()) {
-      <div class="login-error">{{ loginError() }}</div>
-    }
   } @else {
-    <!-- Daily push section -->
     <details class="daily-push-section">
       <summary>📰 创建每日推送</summary>
       <div class="push-form">
@@ -51,11 +40,20 @@
     @for (b of bottles(); track b.id) {
       <div class="bottle-row">
         <div class="meta">
-          <span class="author">{{ b.authorName || '匿名' }} ({{ b.userToken.slice(0, 8) }}...)</span>
+          <span class="author">{{ b.authorName || '匿名' }}
+            @if (b.userId) {
+              <span class="uid">[UID:{{ b.userId }}]</span>
+            } @else {
+              <span class="token">({{ b.userToken.slice(0, 8) }}...)</span>
+            }
+          </span>
           <span class="time">{{ b.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
           <span class="type">{{ b.type }}</span>
         </div>
         <p class="content">{{ b.content }}</p>
+        @if (b.editedAt) {
+          <p class="edited-info">编辑于 {{ b.editedAt | date:'yyyy-MM-dd HH:mm' }}</p>
+        }
         <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>
         <div class="row-actions">
           <button (click)="toggleComments(b.id)">
@@ -65,18 +63,22 @@
           <button class="danger" (click)="deleteBottle(b.id)">删除</button>
         </div>
 
-        <!-- inline comments for THIS bottle only -->
         @if (commentsCache()[b.id]; as bottleComments) {
           @for (c of bottleComments; track c.id) {
             <div class="admin-comment">
               @if (c.userToken) {
                 <span class="token">[{{ c.userToken.slice(0, 8) }}...]</span>
               }
+              @if (c.userId) {
+                <span class="uid">[UID:{{ c.userId }}]</span>
+              }
               @if (c.commentId) { <span class="reply-tag">回复</span> }
               {{ c.content }}
               <span class="time">{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+              @if (c.editedAt) {
+                <span class="edited">(已编辑)</span>
+              }
 
-              <!-- nested replies -->
               @if (c.replies && c.replies.length > 0) {
                 <div class="admin-replies">
                   @for (r of c.replies; track r.id) {
@@ -84,8 +86,14 @@
                       @if (r.userToken) {
                         <span class="token">[{{ r.userToken.slice(0, 8) }}...]</span>
                       }
+                      @if (r.userId) {
+                        <span class="uid">[UID:{{ r.userId }}]</span>
+                      }
                       {{ r.content }}
                       <span class="time">{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                      @if (r.editedAt) {
+                        <span class="edited">(已编辑)</span>
+                      }
                     </div>
                   }
                 </div>

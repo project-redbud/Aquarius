@@ -1,12 +1,14 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 import { ImageService } from '../../services/image.service';
 import { Router } from '@angular/router';
 
 @Component({
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './throw.html',
   styleUrls: ['./throw.scss']
 })
@@ -17,6 +19,9 @@ export class ThrowPage {
   imageBase64 = signal<string | null>(null);
   sending = signal(false);
   compressing = signal(false);
+
+  auth = inject(AuthService);
+  isLoggedIn = this.auth.isLoggedIn;
 
   constructor(private api: ApiService, private imageService: ImageService, private router: Router) {}
 

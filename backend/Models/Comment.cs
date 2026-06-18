@@ -20,6 +20,12 @@ public class Comment
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    /// <summary>编辑时间，null 表示未编辑过。</summary>
+    public DateTime? EditedAt { get; set; }
+
+    // ── FK to User ─────────────────────────────────────────
+    public int? UserId { get; set; }
+
     /// <summary>属于哪个顶级评论（cid）。null = 自己是顶级评论。</summary>
     public int? CommentId { get; set; }
 
@@ -27,6 +33,7 @@ public class Comment
     public int? ParentReplyId { get; set; }
 
     // ── Navigation ────────────────────────────────────────
+    public User? User { get; set; }
     public Bottle? Bottle { get; set; }
     public Comment? ParentComment { get; set; }
     public Comment? ParentReply { get; set; }

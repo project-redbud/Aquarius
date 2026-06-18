@@ -7,6 +7,7 @@ public class AquariusDbContext : DbContext
 {
     public AquariusDbContext(DbContextOptions<AquariusDbContext> opts) : base(opts) { }
 
+    public DbSet<User> Users => Set<User>();
     public DbSet<Bottle> Bottles => Set<Bottle>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Like> Likes => Set<Like>();
@@ -14,6 +15,29 @@ public class AquariusDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder model)
     {
+        // User unique indexes
+        model.Entity<User>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
+
+        model.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
+        // User → Bottles
+        model.Entity<Bottle>()
+            .HasOne(b => b.User)
+            .WithMany(u => u.Bottles)
+            .HasForeignKey(b => b.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // User → Comments
+        model.Entity<Comment>()
+            .HasOne(c => c.User)
+            .WithMany(u => u.Comments)
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Bottle ← Comment
         model.Entity<Comment>()
             .HasOne(c => c.Bottle)

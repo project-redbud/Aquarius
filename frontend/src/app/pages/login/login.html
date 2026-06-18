@@ -1,0 +1,32 @@
+<div class="page">
+  <h1>🔑 登录</h1>
+
+  <div class="form">
+    <input
+      type="text"
+      [(ngModel)]="loginField"
+      placeholder="用户名或电子邮件"
+      (keydown.enter)="onSubmit()"
+      autocomplete="username"
+    />
+    <input
+      type="password"
+      [(ngModel)]="password"
+      placeholder="密码"
+      (keydown.enter)="onSubmit()"
+      autocomplete="current-password"
+    />
+
+    @if (error()) {
+      <div class="error">{{ error() }}</div>
+    }
+
+    <button class="primary" [disabled]="loading()" (click)="onSubmit()">
+      {{ loading() ? '登录中...' : '登录' }}
+    </button>
+
+    <p class="switch">
+      还没有账号？<a routerLink="/register">注册</a>
+    </p>
+  </div>
+</div>

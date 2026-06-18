@@ -12,12 +12,16 @@ export interface Bottle {
   commentCount: number;
   likedByMe: boolean;
   createdAt: string;
+  editedAt?: string | null;
+  userId?: number | null;
 }
 
 export interface Comment {
   id: number;
   content: string;
   createdAt: string;
+  editedAt?: string | null;
+  userId?: number | null;
   userToken?: string | null; // only admin
   commentId?: number | null;
   parentReplyId?: number | null;
@@ -51,11 +55,9 @@ export class ApiService {
   }
 
   private generateUUID(): string {
-    // crypto.randomUUID not available in older mobile browsers
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       return crypto.randomUUID().replace(/-/g, '');
     }
-    // fallback
     return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, c => {
       const r = Math.random() * 16 | 0;
       return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
@@ -94,6 +96,18 @@ export class ApiService {
     });
   }
 
+  editBottle(id: number, content: string, imageBase64?: string, authorName?: string): Observable<Bottle> {
+    return this.http.put<Bottle>(`${this.base}/bottles/${id}`, {
+      content,
+      imageBase64,
+      authorName: authorName || null
+    });
+  }
+
+  deleteBottle(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/bottles/${id}`);
+  }
+
   toggleLike(bottleId: number): Observable<{ liked: boolean; likeCount: number }> {
     return this.http.post<{ liked: boolean; likeCount: number }>(
       `${this.base}/bottles/${bottleId}/like`, null, { headers: this.headers() }
@@ -115,6 +129,16 @@ export class ApiService {
     );
   }
 
+  editComment(bottleId: number, commentId: number, content: string): Observable<Comment> {
+    return this.http.put<Comment>(`${this.base}/bottles/${bottleId}/comments/${commentId}`, { content });
+  }
+
+  deleteComment(bottleId: number, commentId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/bottles/${bottleId}/comments/${commentId}`, {
+      headers: this.headers()
+    });
+  }
+
   getReplies(bottleId: number, commentId: number): Observable<Comment[]> {
     return this.http.get<Comment[]>(`${this.base}/bottles/${bottleId}/comments/${commentId}/replies`, {
       headers: this.headers()
@@ -129,37 +153,29 @@ export class ApiService {
     });
   }
 
-  // ── admin ──────────────────────────────────────────────
+  // ── admin (JWT via interceptor) ────────────────────────
 
-  adminGetComments(bottleId: number, adminKey: string): Observable<Comment[]> {
-    return this.http.get<Comment[]>(`${this.base}/admin/bottles/${bottleId}/comments`, {
-      headers: new HttpHeaders().set('X-Admin-Key', adminKey)
-    });
+  adminGetComments(bottleId: number): Observable<Comment[]> {
+    return this.http.get<Comment[]>(`${this.base}/admin/bottles/${bottleId}/comments`);
   }
 
-  adminListBottles(adminKey: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/admin/bottles`, {
-      headers: new HttpHeaders().set('X-Admin-Key', adminKey)
-    });
+  adminListBottles(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/admin/bottles`);
   }
 
-  adminDeleteBottle(id: number, adminKey: string): Observable<void> {
-    return this.http.delete<void>(`${this.base}/admin/bottles/${id}`, {
-      headers: new HttpHeaders().set('X-Admin-Key', adminKey)
-    });
+  adminDeleteBottle(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/admin/bottles/${id}`);
   }
 
-  adminCreateDaily(type: string, content: string, date: string, imagePath: string | null, adminKey: string): Observable<any> {
+  adminCreateDaily(type: string, content: string, date: string, imagePath: string | null): Observable<any> {
     return this.http.post<any>(`${this.base}/admin/daily`,
-      { type, content, date, imagePath },
-      { headers: new HttpHeaders().set('X-Admin-Key', adminKey) }
+      { type, content, date, imagePath }
     );
   }
 
-  adminCheckDaily(type: string, date: string, adminKey: string): Observable<{ id: number; content: string; date: string; bottleId: number }> {
+  adminCheckDaily(type: string, date: string): Observable<{ id: number; content: string; date: string; bottleId: number }> {
     return this.http.get<{ id: number; content: string; date: string; bottleId: number }>(
-      `${this.base}/admin/daily/check?type=${type}&date=${date}`,
-      { headers: new HttpHeaders().set('X-Admin-Key', adminKey) }
+      `${this.base}/admin/daily/check?type=${type}&date=${date}`
     );
   }
 
@@ -171,7 +187,7 @@ export class ApiService {
     });
   }
 
-  getMyComments(): Observable<{ id: number; content: string; createdAt: string; bottleId: number; bottleContent: string }[]> {
+  getMyComments(): Observable<{ id: number; content: string; createdAt: string; editedAt?: string | null; bottleId: number; bottleContent: string }[]> {
     return this.http.get<any[]>(`${this.base}/comments/mine`, {
       headers: this.headers()
     });

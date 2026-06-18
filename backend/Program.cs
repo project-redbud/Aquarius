@@ -1,13 +1,13 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Aquarius.Api.Data;
 using Aquarius.Api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Listen on all interfaces for mobile testing (port 4200 already firewall-allowed)
-builder.WebHost.UseUrls("http://0.0.0.0:4200");
 
 // ── Database ──────────────────────────────────────────────
 builder.Services.AddDbContext<AquariusDbContext>(opts =>
@@ -32,6 +32,24 @@ builder.Services.AddCors(opts =>
          .AllowCredentials());
 });
 
+// ── JWT Authentication ───────────────────────────────────
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "AquariusSecretKey_ChangeInProduction_2026!";
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opts =>
+    {
+        opts.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "Aquarius",
+            ValidAudience = "AquariusApp",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+builder.Services.AddAuthorization();
+
 // ── Swagger / OpenAPI ─────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -53,6 +71,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+
+// Auth middleware
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Serve Angular static files from wwwroot (production mode)
 app.UseDefaultFiles();

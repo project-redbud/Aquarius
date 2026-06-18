@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Aquarius.Api.Data;
@@ -19,12 +21,19 @@ public class BottlesController : ControllerBase
         _env = env;
     }
 
+    private int? GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return claim != null && int.TryParse(claim, out var id) ? id : null;
+    }
+
     /// <summary>投瓶</summary>
     [HttpPost]
     public async Task<ActionResult<BottleDto>> Throw([FromBody] ThrowBottleRequest req,
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
         var token = ResolveToken(userToken);
+        var userId = GetUserId();
 
         string? imagePath = null;
         if (!string.IsNullOrWhiteSpace(req.ImageBase64))
@@ -36,6 +45,7 @@ public class BottlesController : ControllerBase
             ImagePath = imagePath,
             AuthorName = string.IsNullOrWhiteSpace(req.AuthorName) ? null : req.AuthorName.Trim(),
             UserToken = token,
+            UserId = userId,
             Type = "normal",
             CreatedAt = DateTime.UtcNow
         };
@@ -80,23 +90,74 @@ public class BottlesController : ControllerBase
         return Ok(await ToDto(bottle, token));
     }
 
-    /// <summary>我投的瓶子</summary>
+    /// <summary>我投的瓶子（登录用户 + 匿名用户）</summary>
     [HttpGet("mine")]
     public async Task<ActionResult<List<BottleDto>>> Mine(
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
         var token = ResolveToken(userToken);
-        var bottles = await _db.Bottles
-            .Include(b => b.Comments)
-            .Where(b => b.UserToken == token)
-            .OrderByDescending(b => b.CreatedAt)
-            .ToListAsync();
+        var userId = GetUserId();
+
+        var query = _db.Bottles.Include(b => b.Comments).AsQueryable();
+
+        if (userId != null)
+            // 登录用户：按 UserId 查
+            query = query.Where(b => b.UserId == userId.Value);
+        else
+            // 匿名用户：按 UserToken 查
+            query = query.Where(b => b.UserToken == token);
+
+        var bottles = await query.OrderByDescending(b => b.CreatedAt).ToListAsync();
 
         var result = new List<BottleDto>();
         foreach (var b in bottles)
             result.Add(await ToDto(b, token));
 
         return Ok(result);
+    }
+
+    /// <summary>编辑自己的瓶子</summary>
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<ActionResult<BottleDto>> Edit(int id, [FromBody] EditBottleRequest req)
+    {
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var bottle = await _db.Bottles.FindAsync(id);
+        if (bottle == null) return NotFound();
+        if (bottle.UserId != userId.Value) return Forbid();
+
+        string? imagePath = bottle.ImagePath;
+        if (!string.IsNullOrWhiteSpace(req.ImageBase64))
+            imagePath = await SaveImage(req.ImageBase64);
+
+        bottle.Content = req.Content;
+        bottle.ImagePath = imagePath;
+        bottle.AuthorName = string.IsNullOrWhiteSpace(req.AuthorName) ? bottle.AuthorName : req.AuthorName.Trim();
+        bottle.EditedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+
+        return Ok(await ToDto(bottle, ResolveToken(null)));
+    }
+
+    /// <summary>删除自己的瓶子</summary>
+    [Authorize]
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(int id)
+    {
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var bottle = await _db.Bottles.FindAsync(id);
+        if (bottle == null) return NotFound();
+        if (bottle.UserId != userId.Value) return Forbid();
+
+        _db.Bottles.Remove(bottle);
+        await _db.SaveChangesAsync();
+
+        return NoContent();
     }
 
     /// <summary>点赞/取消赞（toggle）</summary>
@@ -147,7 +208,9 @@ public class BottlesController : ControllerBase
             LikeCount = b.LikeCount,
             CommentCount = b.Comments.Count,
             LikedByMe = liked,
-            CreatedAt = b.CreatedAt
+            CreatedAt = b.CreatedAt,
+            EditedAt = b.EditedAt,
+            UserId = b.UserId
         };
     }
 

@@ -27,6 +27,24 @@ public class AddCommentRequest
     public int? ParentReplyId { get; set; }
 }
 
+public class EditBottleRequest
+{
+    [Required, MaxLength(500)]
+    public string Content { get; set; } = string.Empty;
+
+    /// <summary>Base64 编码的图片数据（可选）。</summary>
+    public string? ImageBase64 { get; set; }
+
+    [MaxLength(50)]
+    public string? AuthorName { get; set; }
+}
+
+public class EditCommentRequest
+{
+    [Required, MaxLength(300)]
+    public string Content { get; set; } = string.Empty;
+}
+
 public class BottleDto
 {
     public int Id { get; set; }
@@ -38,6 +56,8 @@ public class BottleDto
     public int CommentCount { get; set; }
     public bool LikedByMe { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime? EditedAt { get; set; }
+    public int? UserId { get; set; }
 }
 
 public class CommentDto
@@ -45,6 +65,8 @@ public class CommentDto
     public int Id { get; set; }
     public string Content { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public DateTime? EditedAt { get; set; }
+    public int? UserId { get; set; }
 
     /// <summary>仅管理员可见；普通用户返回 null。</summary>
     public string? UserToken { get; set; }
