@@ -71,12 +71,14 @@ public class AdminController : ControllerBase
     [HttpGet("daily/check")]
     public async Task<ActionResult> CheckDaily(
         [FromQuery] string type,
-        [FromQuery] DateTime date)
+        [FromQuery] string date)
     {
         if (!IsAdmin()) return Forbid();
 
+        var day = DateTime.Parse(date);
+
         var existing = await _db.DailyPushes
-            .Where(d => d.Date == date.Date && d.Type == type)
+            .Where(d => d.Date == day && d.Type == type)
             .Select(d => new { d.Id, d.Content, d.Date, d.BottleId })
             .FirstOrDefaultAsync();
 
@@ -90,7 +92,7 @@ public class AdminController : ControllerBase
     {
         if (!IsAdmin()) return Forbid();
 
-        var date = req.Date.Date;
+        var date = DateTime.Parse(req.Date);
         var existing = await _db.DailyPushes
             .Include(d => d.Bottle)
             .FirstOrDefaultAsync(d => d.Date == date && d.Type == req.Type);
@@ -178,5 +180,5 @@ public class CreateDailyRequest
     public string Type { get; set; } = "story";
     public string Content { get; set; } = string.Empty;
     public string? ImagePath { get; set; }
-    public DateTime Date { get; set; } = DateTime.UtcNow;
+    public string Date { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd");
 }

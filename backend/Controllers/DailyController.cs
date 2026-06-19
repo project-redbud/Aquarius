@@ -23,16 +23,17 @@ public class DailyController : ControllerBase
     public async Task<ActionResult<DailyPushDto>> Today(
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
-        var today = DateTime.UtcNow.Date;
+        var today = DateTime.Today;
+        var tomorrow = today.AddDays(1);
         var token = userToken?.Trim() ?? "";
 
         var story = await _db.DailyPushes
-            .Where(d => d.Date == today && d.Type == "story")
+            .Where(d => d.Date >= today && d.Date < tomorrow && d.Type == "story")
             .OrderByDescending(d => d.CreatedAt)
             .FirstOrDefaultAsync();
 
         var qa = await _db.DailyPushes
-            .Where(d => d.Date == today && d.Type == "qa")
+            .Where(d => d.Date >= today && d.Date < tomorrow && d.Type == "qa")
             .OrderByDescending(d => d.CreatedAt)
             .FirstOrDefaultAsync();
 
