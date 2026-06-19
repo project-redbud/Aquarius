@@ -383,3 +383,7 @@ backend/wwwroot/uploads/*
 
 # Reasonix
 .reasonix/
+reasonix.toml
+
+# deploy
+deploy/
