@@ -94,6 +94,23 @@
     }
   }
 
+  .admin-badge-row {
+    margin: 0 0 16px;
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      input { width: auto; }
+      .hint {
+        font-size: 0.78rem;
+        color: #999;
+        font-weight: normal;
+      }
+    }
+  }
+
   .primary {
     width: 100%;
     padding: 14px;

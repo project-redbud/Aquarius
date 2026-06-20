@@ -3,7 +3,7 @@
 @else {
   <div class="bottle-card">
     <div class="header">
-      <span class="author">{{ bottle.authorName || '匿名' }}</span>
+      <span class="author">{{ bottle.authorName || '匿名' }}</span>@if (bottle.isAdminBadge) { <span class="admin-badge">🛡️</span> }
       <span class="right"><span class="bottle-num">#{{ bottle.id }}</span><span class="time">{{ bottle.type === 'normal' ? (bottle.createdAt | date:'yyyy-MM-dd HH:mm') : (bottle.createdAt | date:'yyyy-MM-dd') }}</span>
         <button class="more-btn" (click)="toggleMenu()">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
@@ -52,6 +52,12 @@
         <input type="text" [(ngModel)]="commentText" placeholder="说点什么（匿名）..." maxlength="300" (keydown.enter)="addComment()" />
         <button (click)="addComment()" [disabled]="!commentText().trim()">发送</button>
       </div>
+      @if (auth.isAdmin()) {
+        <label class="admin-badge-check">
+          <input type="checkbox" [(ngModel)]="commentAdminBadge" />
+          🛡️ 管理员标识
+        </label>
+      }
     }
 
     @if (commentsPrivateNote()) {
@@ -67,7 +73,7 @@
     @for (c of sortedComments(); track c.id; let i = $index) {
       <div class="comment">
         @if (replyTo()?.id === c.id) {
-          <div class="reply-bar"><span>回复 #{{ c.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
+          <div class="reply-bar"><span>回复 #{{ c.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button>@if (auth.isAdmin()) { <label class="badge-inline"><input type="checkbox" [(ngModel)]="commentAdminBadge" />🛡️</label> }</div>
         }
         @if (editingCommentId() === c.id) {
           <textarea [(ngModel)]="editCommentContent" rows="3" maxlength="300" class="edit-textarea"></textarea>
@@ -79,7 +85,7 @@
           <p><span class="floor">#{{ floorNum(i) }}</span> {{ c.content }}</p>
         }
         @if (c.editedAt) { <span class="edited-tag">(已编辑)</span> }
-        <div class="comment-meta"><span class="time">{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+        <div class="comment-meta">@if (c.isAdminBadge) { <span class="admin-badge">🛡️</span> }<span class="time">{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
           <div class="meta-actions">
             @if (isMine(c.userId)) {
               <button class="reply-btn" (click)="startEditComment(c)">✏️</button>
@@ -97,7 +103,7 @@
             @if (expandedReplies()[c.id]) {
               @for (r of expandedReplies()[c.id]; track r.id) {
                 <div class="reply-item">
-                  @if (replyTo()?.id === r.id) { <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div> }
+                  @if (replyTo()?.id === r.id) { <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button>@if (auth.isAdmin()) { <label class="badge-inline"><input type="checkbox" [(ngModel)]="commentAdminBadge" />🛡️</label> }</div> }
                   @if (editingCommentId() === r.id) {
                     <textarea [(ngModel)]="editCommentContent" rows="3" maxlength="300" class="edit-textarea"></textarea>
                     <div class="edit-actions">
@@ -109,7 +115,7 @@
                   }
                   @if (r.editedAt) { <span class="edited-tag">(已编辑)</span> }
                   @if (r.parentContent) { <blockquote>{{ r.parentContent }}</blockquote> }
-                  <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                  <div class="reply-meta"><span class="rid">#{{ r.id }}</span>@if (r.isAdminBadge) { <span class="admin-badge">🛡️</span> }<span class="time">{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                     <div class="meta-actions">
                       @if (isMine(r.userId)) {
                         <button class="reply-btn" (click)="startEditComment(r)">✏️</button>
@@ -125,7 +131,7 @@
                   @if (expandedReplies()[r.id]) {
                     <div class="replies">@for (sr of expandedReplies()[r.id]; track sr.id) {
                       <div class="reply-item">
-                        @if (replyTo()?.id === sr.id) { <div class="reply-bar sub"><span>回复 #{{ sr.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div> }
+                        @if (replyTo()?.id === sr.id) { <div class="reply-bar sub"><span>回复 #{{ sr.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button>@if (auth.isAdmin()) { <label class="badge-inline"><input type="checkbox" [(ngModel)]="commentAdminBadge" />🛡️</label> }</div> }
                         @if (editingCommentId() === sr.id) {
                           <textarea [(ngModel)]="editCommentContent" rows="3" maxlength="300" class="edit-textarea"></textarea>
                           <div class="edit-actions">
@@ -137,7 +143,7 @@
                         }
                         @if (sr.editedAt) { <span class="edited-tag">(已编辑)</span> }
                         @if (sr.parentContent) { <blockquote>{{ sr.parentContent }}</blockquote> }
-                        <div class="reply-meta"><span class="rid">#{{ sr.id }}</span><span class="time">{{ sr.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                        <div class="reply-meta"><span class="rid">#{{ sr.id }}</span>@if (sr.isAdminBadge) { <span class="admin-badge">🛡️</span> }<span class="time">{{ sr.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                           <div class="meta-actions">
                             @if (isMine(sr.userId)) {
                               <button class="reply-btn" (click)="startEditComment(sr)">✏️</button>
@@ -159,7 +165,7 @@
               @if (c.replies && c.replies.length > 0) {
                 @for (r of c.replies; track r.id) {
                   <div class="reply-item">
-                    @if (replyTo()?.id === r.id) { <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div> }
+                    @if (replyTo()?.id === r.id) { <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button>@if (auth.isAdmin()) { <label class="badge-inline"><input type="checkbox" [(ngModel)]="commentAdminBadge" />🛡️</label> }</div> }
                     @if (editingCommentId() === r.id) {
                       <textarea [(ngModel)]="editCommentContent" rows="3" maxlength="300" class="edit-textarea"></textarea>
                       <div class="edit-actions">
@@ -171,7 +177,7 @@
                     }
                     @if (r.editedAt) { <span class="edited-tag">(已编辑)</span> }
                     @if (r.parentContent) { <blockquote>{{ r.parentContent }}</blockquote> }
-                    <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                    <div class="reply-meta"><span class="rid">#{{ r.id }}</span>@if (r.isAdminBadge) { <span class="admin-badge">🛡️</span> }<span class="time">{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                       <div class="meta-actions">
                         @if (isMine(r.userId)) {
                           <button class="reply-btn" (click)="startEditComment(r)">✏️</button>

@@ -19,6 +19,7 @@ export interface Bottle {
   expiresAt: string;
   reThrowCount: number;
   lastReThrowAt?: string | null;
+  isAdminBadge: boolean;
 }
 
 export interface Comment {
@@ -33,6 +34,7 @@ export interface Comment {
   parentContent?: string | null;
   replyCount?: number;
   replies?: Comment[];
+  isAdminBadge: boolean;
 }
 
 export interface DailyPush {
@@ -88,13 +90,14 @@ export class ApiService {
 
   // ── bottles ────────────────────────────────────────────
 
-  throwBottle(content: string, imageBase64?: string, authorName?: string, requireLogin?: boolean, commentsPrivate?: boolean): Observable<Bottle> {
+  throwBottle(content: string, imageBase64?: string, authorName?: string, requireLogin?: boolean, commentsPrivate?: boolean, isAdminBadge?: boolean): Observable<Bottle> {
     return this.http.post<Bottle>(`${this.base}/bottles`, {
       content,
       imageBase64,
       authorName: authorName || null,
       requireLogin: requireLogin ?? false,
-      commentsPrivate: commentsPrivate ?? false
+      commentsPrivate: commentsPrivate ?? false,
+      isAdminBadge: isAdminBadge ?? false
     }, { headers: this.headers() });
   }
 
@@ -140,9 +143,9 @@ export class ApiService {
     });
   }
 
-  addComment(bottleId: number, content: string, commentId?: number, parentReplyId?: number): Observable<Comment> {
+  addComment(bottleId: number, content: string, commentId?: number, parentReplyId?: number, isAdminBadge?: boolean): Observable<Comment> {
     return this.http.post<Comment>(`${this.base}/bottles/${bottleId}/comments`,
-      { content, commentId: commentId || null, parentReplyId: parentReplyId || null },
+      { content, commentId: commentId || null, parentReplyId: parentReplyId || null, isAdminBadge: isAdminBadge ?? false },
       { headers: this.headers() }
     );
   }

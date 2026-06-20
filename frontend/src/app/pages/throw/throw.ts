@@ -18,6 +18,7 @@ export class ThrowPage {
   isAnonymous = signal(false);
   requireLogin = signal(false);
   commentsPrivate = signal(false);
+  showAdminBadge = signal(false);
   imageBase64 = signal<string | null>(null);
   sending = signal(false);
   compressing = signal(false);
@@ -52,7 +53,8 @@ export class ThrowPage {
         this.imageBase64() ?? undefined,
         this.isAnonymous() ? undefined : (this.authorName().trim() || undefined),
         this.requireLogin(),
-        this.commentsPrivate()
+        this.commentsPrivate(),
+        this.showAdminBadge()
       ).toPromise();
       this.router.navigate(['/pick']);
     } finally {

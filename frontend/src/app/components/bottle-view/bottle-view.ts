@@ -37,6 +37,9 @@ export class BottleViewComponent implements OnChanges {
   /** 评论私密提示：null=正常, 'hidden'=隐藏, 'admin'=管理员可见 */
   commentsPrivateNote = signal<string | null>(null);
 
+  /** 评论时是否带管理员标识 */
+  commentAdminBadge = signal(false);
+
   sortedComments(): Comment[] {
     const list = [...this.comments()];
     if (this.sortAsc()) list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -57,6 +60,7 @@ export class BottleViewComponent implements OnChanges {
       this.editingCommentId.set(null);
       this.deletingCommentId.set(null);
       this.commentsPrivateNote.set(null);
+      this.commentAdminBadge.set(false);
 
       // 评论仅作者可见检查
       if (this.bottle.commentsPrivate) {
@@ -161,9 +165,10 @@ export class BottleViewComponent implements OnChanges {
     if (!text) return;
     const commentId = parent ? this.rootCommentId(parent) : undefined;
     const parentReplyId = parent?.commentId != null ? parent.id : undefined;
-    this.api.addComment(b.id, text, commentId, parentReplyId).subscribe(() => {
+    this.api.addComment(b.id, text, commentId, parentReplyId, this.commentAdminBadge()).subscribe(() => {
       if (parent) { this.loadReplies(this.rootCommentId(parent)); this.cancelReply(); }
       else { this.commentText.set(''); }
+      this.commentAdminBadge.set(false);
       this.loadComments();
     });
   }

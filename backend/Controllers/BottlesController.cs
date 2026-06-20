@@ -50,7 +50,8 @@ public class BottlesController : ControllerBase
             RequireLogin = req.RequireLogin,
             CommentsPrivate = req.CommentsPrivate,
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            IsAdminBadge = req.IsAdminBadge && User.FindFirst("isAdmin")?.Value == "true"
         };
 
         _db.Bottles.Add(bottle);
@@ -293,7 +294,8 @@ public class BottlesController : ControllerBase
             CommentsPrivate = b.CommentsPrivate,
             ExpiresAt = b.ExpiresAt,
             ReThrowCount = b.ReThrowCount,
-            LastReThrowAt = b.LastReThrowAt
+            LastReThrowAt = b.LastReThrowAt,
+            IsAdminBadge = b.IsAdminBadge
         };
     }
 

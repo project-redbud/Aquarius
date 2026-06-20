@@ -19,6 +19,9 @@ public class ThrowBottleRequest
 
     /// <summary>评论仅作者可见。</summary>
     public bool CommentsPrivate { get; set; }
+
+    /// <summary>管理员标识。</summary>
+    public bool IsAdminBadge { get; set; }
 }
 
 public class AddCommentRequest
@@ -31,6 +34,9 @@ public class AddCommentRequest
 
     /// <summary>回复的具体 rid，不传=直接回复评论。</summary>
     public int? ParentReplyId { get; set; }
+
+    /// <summary>管理员标识。</summary>
+    public bool IsAdminBadge { get; set; }
 }
 
 public class EditBottleRequest
@@ -69,6 +75,7 @@ public class BottleDto
     public DateTime ExpiresAt { get; set; }
     public int ReThrowCount { get; set; }
     public DateTime? LastReThrowAt { get; set; }
+    public bool IsAdminBadge { get; set; }
 }
 
 public class CommentDto
@@ -96,6 +103,9 @@ public class CommentDto
 
     /// <summary>被回复的内容（ParentReplyId≠null 时有值，截断 30 字）。</summary>
     public string? ParentContent { get; set; }
+
+    /// <summary>管理员标识。</summary>
+    public bool IsAdminBadge { get; set; }
 }
 
 public class DailyPushDto

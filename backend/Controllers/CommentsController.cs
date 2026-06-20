@@ -149,7 +149,8 @@ public class CommentsController : ControllerBase
             UserId = userId,
             CommentId = commentId,
             ParentReplyId = parentReplyId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            IsAdminBadge = req.IsAdminBadge && User.FindFirst("isAdmin")?.Value == "true"
         };
 
         _db.Comments.Add(comment);
@@ -235,7 +236,8 @@ public class CommentsController : ControllerBase
             EditedAt = c.EditedAt,
             UserId = c.UserId,
             ReplyCount = c.Replies.Count,
-            ParentContent = parentContent
+            ParentContent = parentContent,
+            IsAdminBadge = c.IsAdminBadge
         };
 
         if (includeReplies)

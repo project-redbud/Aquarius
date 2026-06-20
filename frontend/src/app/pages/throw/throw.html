@@ -61,6 +61,15 @@
     </label>
   </div>
 
+  @if (auth.isAdmin()) {
+    <div class="admin-badge-row">
+      <label>
+        <input type="checkbox" [(ngModel)]="showAdminBadge" />
+        🛡️ 管理员标识 <span class="hint">作者名旁显示管理员图标</span>
+      </label>
+    </div>
+  }
+
   <button class="primary" [disabled]="!content().trim() || sending()" (click)="throwBottle()">
     {{ sending() ? '投掷中...' : '🫧 投出去' }}
   </button>

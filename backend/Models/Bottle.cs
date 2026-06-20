@@ -34,6 +34,9 @@ public class Bottle
     /// <summary>评论仅作者可见：非作者/管理员看不到评论。</summary>
     public bool CommentsPrivate { get; set; }
 
+    /// <summary>管理员标识：显示管理员徽章。</summary>
+    public bool IsAdminBadge { get; set; }
+
     public int LikeCount { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

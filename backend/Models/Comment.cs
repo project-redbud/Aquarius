@@ -32,6 +32,9 @@ public class Comment
     /// <summary>回复的是哪条具体回复（rid）。null = 直接回复评论。</summary>
     public int? ParentReplyId { get; set; }
 
+    /// <summary>管理员标识：显示管理员徽章。</summary>
+    public bool IsAdminBadge { get; set; }
+
     // ── Navigation ────────────────────────────────────────
     public User? User { get; set; }
     public Bottle? Bottle { get; set; }
