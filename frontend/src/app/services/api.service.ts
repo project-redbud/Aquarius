@@ -37,6 +37,13 @@ export interface DailyPush {
   qa: Bottle | null;
 }
 
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 const STORAGE_KEY = 'aquarius_user_token';
 
 @Injectable({ providedIn: 'root' })
@@ -187,6 +194,12 @@ export class ApiService {
 
   getMyBottles(): Observable<Bottle[]> {
     return this.http.get<Bottle[]>(`${this.base}/bottles/mine`, {
+      headers: this.headers()
+    });
+  }
+
+  getMyLikedBottles(page = 1, pageSize = 15): Observable<PaginatedResult<Bottle>> {
+    return this.http.get<PaginatedResult<Bottle>>(`${this.base}/bottles/liked?page=${page}&pageSize=${pageSize}`, {
       headers: this.headers()
     });
   }

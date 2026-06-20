@@ -10,6 +10,9 @@
     <button [class.active]="tab() === 'comments'" (click)="switchTab('comments')">
       💬 我的评论 ({{ myComments().length }})
     </button>
+    <button [class.active]="tab() === 'likes'" (click)="switchTab('likes')">
+      ❤️ 我的点赞 ({{ likesTotal() }})
+    </button>
   </div>
 
   @if (loading()) {
@@ -58,7 +61,7 @@
         </div>
       }
     }
-  } @else {
+  } @else if (tab() === 'comments') {
     @if (myComments().length === 0) {
       <div class="empty">还没有发表过评论 💭</div>
     } @else {
@@ -94,6 +97,33 @@
           }
         </div>
       }
+    }
+  } @else {
+    @if (likedBottles().length === 0) {
+      <div class="empty">还没有点赞过瓶子 💔</div>
+    } @else {
+      @for (b of likedBottles(); track b.id) {
+        <div class="card">
+          <div class="meta">
+            <span class="name">{{ b.authorName || '匿名' }}</span>
+            <span class="time">{{ b.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+          </div>
+          @if (b.imagePath) {
+            <img [src]="'/' + b.imagePath" alt="bottle image" />
+          }
+          <p class="content-text">{{ b.content }}</p>
+          <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>
+          <div class="row-actions">
+            <a [routerLink]="['/bottle', b.id]" class="view-link">查看详情</a>
+          </div>
+        </div>
+      }
+      <!-- pagination -->
+      <div class="pagination">
+        <button [disabled]="likesPage() <= 1" (click)="goToLikesPage(likesPage() - 1)">← 上一页</button>
+        <span>{{ likesPage() }} / {{ likesTotalPages() }}</span>
+        <button [disabled]="likesPage() >= likesTotalPages()" (click)="goToLikesPage(likesPage() + 1)">下一页 →</button>
+      </div>
     }
   }
 </div>

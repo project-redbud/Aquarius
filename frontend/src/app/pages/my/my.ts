@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -23,10 +23,17 @@ interface MyComment {
 export class MyPage implements OnInit {
   auth = inject(AuthService);
 
-  tab = signal<'bottles' | 'comments'>('bottles');
+  tab = signal<'bottles' | 'comments' | 'likes'>('bottles');
   myBottles = signal<Bottle[]>([]);
   myComments = signal<MyComment[]>([]);
+  likedBottles = signal<Bottle[]>([]);
   loading = signal(false);
+
+  // Likes pagination
+  likesPage = signal(1);
+  likesTotal = signal(0);
+  readonly likesPageSize = 15;
+  likesTotalPages = computed(() => Math.max(1, Math.ceil(this.likesTotal() / this.likesPageSize)));
 
   // Edit state
   editingBottleId = signal<number | null>(null);
@@ -58,8 +65,26 @@ export class MyPage implements OnInit {
     });
   }
 
-  switchTab(t: 'bottles' | 'comments') {
+  switchTab(t: 'bottles' | 'comments' | 'likes') {
     this.tab.set(t);
+    if (t === 'likes' && this.likedBottles().length === 0) {
+      this.loadLikedPage(1);
+    }
+  }
+
+  loadLikedPage(page: number) {
+    this.loading.set(true);
+    this.api.getMyLikedBottles(page, this.likesPageSize).subscribe(res => {
+      this.likedBottles.set(res.items);
+      this.likesTotal.set(res.total);
+      this.likesPage.set(res.page);
+      this.loading.set(false);
+    });
+  }
+
+  goToLikesPage(page: number) {
+    if (page < 1 || page > this.likesTotalPages()) return;
+    this.loadLikedPage(page);
   }
 
   // ── Bottle edit ─────────────────────────────────────────

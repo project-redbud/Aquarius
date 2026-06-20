@@ -85,7 +85,7 @@ public class BottlesController : ControllerBase
     }
 
     /// <summary>查看单个瓶</summary>
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<BottleDto>> GetOne(int id,
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
@@ -100,6 +100,44 @@ public class BottlesController : ControllerBase
             return NotFound();
 
         return Ok(await ToDto(bottle, token));
+    }
+
+    /// <summary>我点赞的瓶子（分页，每页 15 条）</summary>
+    [HttpGet("liked")]
+    public async Task<ActionResult> Liked(
+        [FromHeader(Name = "X-User-Token")] string? userToken,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 15)
+    {
+        var token = ResolveToken(userToken);
+
+        var likeQuery = _db.Likes
+            .Where(l => l.UserToken == token)
+            .OrderByDescending(l => l.CreatedAt);
+
+        var total = await likeQuery.CountAsync();
+
+        var likedBottleIds = await likeQuery
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(l => l.BottleId)
+            .ToListAsync();
+
+        var bottles = await _db.Bottles
+            .Include(b => b.Comments)
+            .Where(b => likedBottleIds.Contains(b.Id))
+            .ToListAsync();
+
+        // 按点赞顺序排列
+        var items = new List<BottleDto>();
+        foreach (var id in likedBottleIds)
+        {
+            var bottle = bottles.FirstOrDefault(b => b.Id == id);
+            if (bottle != null)
+                items.Add(await ToDto(bottle, token));
+        }
+
+        return Ok(new { items, total, page, pageSize });
     }
 
     /// <summary>我投的瓶子（登录用户 + 匿名用户）</summary>
