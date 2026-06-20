@@ -100,6 +100,10 @@ public class BottlesController : ControllerBase
         if (bottle.RequireLogin && GetUserId() == null)
             return NotFound();
 
+        // 过期保护：已过期的瓶子返回 404
+        if (bottle.ExpiresAt <= DateTime.UtcNow)
+            return NotFound();
+
         return Ok(await ToDto(bottle, token));
     }
 

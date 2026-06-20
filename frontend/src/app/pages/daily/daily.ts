@@ -18,10 +18,12 @@ export class DailyPage implements OnInit {
   readonly maxDate: Date;
 
   constructor(private api: ApiService) {
-    this.maxDate = new Date();
-    this.maxDate.setHours(0, 0, 0, 0);
-    this.minDate = new Date(this.maxDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    this.maxDate = today;
+    this.minDate = new Date(today);
     this.minDate.setDate(this.minDate.getDate() - 6);
+    this.currentDate.set(new Date(today));
   }
 
   ngOnInit() {
