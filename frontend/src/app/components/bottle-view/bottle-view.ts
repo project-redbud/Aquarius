@@ -83,7 +83,8 @@ export class BottleViewComponent implements OnChanges {
     const b = this.bottle;
     if (!b) return;
     this.api.toggleLike(b.id).subscribe(res => {
-      this.bottle = { ...b, likedByMe: res.liked, likeCount: res.likeCount };
+      b.likedByMe = res.liked;
+      b.likeCount = res.likeCount;
     });
   }
 
@@ -111,7 +112,7 @@ export class BottleViewComponent implements OnChanges {
     const content = this.editBottleContent().trim();
     if (!b || !content) return;
     this.api.editBottle(b.id, content, b.imagePath ?? undefined, b.authorName ?? undefined).subscribe(updated => {
-      this.bottle = updated;
+      Object.assign(b, updated);
       this.editingBottle.set(false);
     });
   }
