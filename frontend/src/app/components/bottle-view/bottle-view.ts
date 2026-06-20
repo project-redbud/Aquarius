@@ -1,4 +1,4 @@
-import { Component, Input, signal, inject, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, signal, inject, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -45,7 +45,7 @@ export class BottleViewComponent implements OnChanges {
   floorNum(i: number): number { return this.sortAsc() ? i + 1 : this.comments().length - i; }
   toggleSort() { this.sortAsc.update(v => !v); }
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['bottle'] && this.bottle) {
@@ -85,6 +85,7 @@ export class BottleViewComponent implements OnChanges {
     this.api.toggleLike(b.id).subscribe(res => {
       b.likedByMe = res.liked;
       b.likeCount = res.likeCount;
+      this.cdr.detectChanges();
     });
   }
 
@@ -114,6 +115,7 @@ export class BottleViewComponent implements OnChanges {
     this.api.editBottle(b.id, content, b.imagePath ?? undefined, b.authorName ?? undefined).subscribe(updated => {
       Object.assign(b, updated);
       this.editingBottle.set(false);
+      this.cdr.detectChanges();
     });
   }
 
