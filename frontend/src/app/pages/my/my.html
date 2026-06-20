@@ -55,6 +55,7 @@
             <div class="row-actions">
               <a [routerLink]="['/bottle', b.id]" class="view-link">查看详情</a>
               <button (click)="startEditBottle(b)">编辑</button>
+              <button (click)="rethrowBottle(b)">🔄 重新投出</button>
               <button class="danger" (click)="confirmDeleteBottle(b.id)">删除</button>
             </div>
           }

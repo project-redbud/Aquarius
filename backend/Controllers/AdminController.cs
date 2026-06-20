@@ -117,7 +117,8 @@ public class AdminController : ControllerBase
             AuthorName = req.Type == "story" ? "📖 每日故事" : "❓ 每日问答",
             UserToken = "system",
             Type = req.Type,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
         };
         _db.Bottles.Add(bottle);
         await _db.SaveChangesAsync();

@@ -66,6 +66,9 @@ public class BottleDto
     public int? UserId { get; set; }
     public bool RequireLogin { get; set; }
     public bool CommentsPrivate { get; set; }
+    public DateTime ExpiresAt { get; set; }
+    public int ReThrowCount { get; set; }
+    public DateTime? LastReThrowAt { get; set; }
 }
 
 public class CommentDto

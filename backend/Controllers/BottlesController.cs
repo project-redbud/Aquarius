@@ -49,7 +49,8 @@ public class BottlesController : ControllerBase
             Type = "normal",
             RequireLogin = req.RequireLogin,
             CommentsPrivate = req.CommentsPrivate,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
         };
 
         _db.Bottles.Add(bottle);
@@ -66,7 +67,7 @@ public class BottlesController : ControllerBase
         var token = ResolveToken(userToken);
         var userId = GetUserId();
 
-        var query = _db.Bottles.Where(b => b.Type == "normal");
+        var query = _db.Bottles.Where(b => b.Type == "normal" && b.ExpiresAt > DateTime.UtcNow);
 
         // 登录可见：未登录用户不捞到标记了 RequireLogin 的瓶子
         if (userId == null)
@@ -237,6 +238,29 @@ public class BottlesController : ControllerBase
         return Ok(new { liked = existing == null, bottle.LikeCount });
     }
 
+    /// <summary>重新投出瓶子（续期 7 天）</summary>
+    [HttpPost("{id}/rethrow")]
+    public async Task<ActionResult<BottleDto>> Rethrow(int id,
+        [FromHeader(Name = "X-User-Token")] string? userToken)
+    {
+        var token = ResolveToken(userToken);
+        var userId = GetUserId();
+        var bottle = await _db.Bottles.FindAsync(id);
+        if (bottle == null) return NotFound();
+
+        // 验证作者身份
+        bool isAuthor = (bottle.UserId != null && bottle.UserId == userId)
+            || (bottle.UserId == null && bottle.UserToken == token);
+        if (!isAuthor) return Forbid();
+
+        bottle.ReThrowCount++;
+        bottle.LastReThrowAt = DateTime.UtcNow;
+        bottle.ExpiresAt = DateTime.UtcNow.AddDays(7);
+        await _db.SaveChangesAsync();
+
+        return Ok(await ToDto(bottle, token));
+    }
+
     // ── helpers ────────────────────────────────────────────
 
     private string ResolveToken(string? headerToken)
@@ -262,7 +286,10 @@ public class BottlesController : ControllerBase
             EditedAt = b.EditedAt,
             UserId = b.UserId,
             RequireLogin = b.RequireLogin,
-            CommentsPrivate = b.CommentsPrivate
+            CommentsPrivate = b.CommentsPrivate,
+            ExpiresAt = b.ExpiresAt,
+            ReThrowCount = b.ReThrowCount,
+            LastReThrowAt = b.LastReThrowAt
         };
     }
 

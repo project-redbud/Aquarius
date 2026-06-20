@@ -1,11 +1,13 @@
 <div class="page">
-  <h1>📰 今日推送</h1>
+  <h1>📰 推送 · {{ currentDate() | date:'MM月dd日' }}</h1>
 
-  @if (!daily()) {
+  @if (loading()) {
+    <div class="empty">加载中...</div>
+  } @else if (!daily()) {
     <div class="empty">加载中...</div>
   } @else {
     @if (daily()!.story) {
-      <a [routerLink]="['/bottle', daily()!.story!.id]" class="card story card-link">
+      <a [routerLink]="['/bottle', daily()!.story!.id]" target="_blank" rel="noopener" class="card story card-link">
         <span class="badge">📖 每日故事</span>
         @if (daily()!.story!.imagePath) {
           <img [src]="'/' + daily()!.story!.imagePath" alt="story" />
@@ -15,7 +17,7 @@
     }
 
     @if (daily()!.qa) {
-      <a [routerLink]="['/bottle', daily()!.qa!.id]" class="card qa card-link">
+      <a [routerLink]="['/bottle', daily()!.qa!.id]" target="_blank" rel="noopener" class="card qa card-link">
         <span class="badge">❓ 每日问答</span>
         @if (daily()!.qa!.imagePath) {
           <img [src]="'/' + daily()!.qa!.imagePath" alt="qa" />
@@ -25,7 +27,14 @@
     }
 
     @if (!daily()!.story && !daily()!.qa) {
-      <div class="empty">今天还没有推送，晚点再来看看 👀</div>
+      <div class="empty">{{ currentDate() | date:'yyyy-MM-dd' }} 没有推送 👀</div>
     }
   }
+
+  <!-- date navigation -->
+  <div class="date-nav">
+    <button [disabled]="!canGoPrev()" (click)="goToPrevDay()">← 前一天</button>
+    <span>{{ currentDate() | date:'yyyy-MM-dd' }}</span>
+    <button [disabled]="!canGoNext()" (click)="goToNextDay()">后一天 →</button>
+  </div>
 </div>

@@ -125,6 +125,12 @@ export class MyPage implements OnInit {
     });
   }
 
+  rethrowBottle(b: Bottle) {
+    this.api.rethrowBottle(b.id).subscribe(updated => {
+      Object.assign(b, updated);
+    });
+  }
+
   // ── Comment edit ────────────────────────────────────────
 
   startEditComment(c: MyComment) {

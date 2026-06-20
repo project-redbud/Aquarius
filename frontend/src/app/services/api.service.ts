@@ -16,6 +16,9 @@ export interface Bottle {
   userId?: number | null;
   requireLogin: boolean;
   commentsPrivate: boolean;
+  expiresAt: string;
+  reThrowCount: number;
+  lastReThrowAt?: string | null;
 }
 
 export interface Comment {
@@ -125,6 +128,10 @@ export class ApiService {
     );
   }
 
+  rethrowBottle(id: number): Observable<Bottle> {
+    return this.http.post<Bottle>(`${this.base}/bottles/${id}/rethrow`, null, { headers: this.headers() });
+  }
+
   // ── comments ───────────────────────────────────────────
 
   getComments(bottleId: number): Observable<Comment[]> {
@@ -158,8 +165,10 @@ export class ApiService {
 
   // ── daily ──────────────────────────────────────────────
 
-  getDaily(): Observable<DailyPush> {
-    return this.http.get<DailyPush>(`${this.base}/daily`, {
+  getDaily(date?: string): Observable<DailyPush> {
+    let url = `${this.base}/daily`;
+    if (date) url += `?date=${date}`;
+    return this.http.get<DailyPush>(url, {
       headers: this.headers()
     });
   }

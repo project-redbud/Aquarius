@@ -18,22 +18,40 @@ public class DailyController : ControllerBase
         _env = env;
     }
 
-    /// <summary>获取今日推送（故事瓶 + 问答瓶）</summary>
+    /// <summary>获取指定日期的推送（默认今日），仅允许查看最近 7 天。</summary>
     [HttpGet]
     public async Task<ActionResult<DailyPushDto>> Today(
+        [FromQuery] string? date,
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
-        var today = DateTime.Today;
-        var tomorrow = today.AddDays(1);
+        DateTime targetDay;
+
+        if (!string.IsNullOrWhiteSpace(date))
+        {
+            if (!DateTime.TryParse(date, out targetDay))
+                return BadRequest("日期格式无效，请使用 yyyy-MM-dd");
+
+            // 只允许查看最近 7 天（今日 - 前 6 天）
+            var minDate = DateTime.Today.AddDays(-6);
+            if (targetDay < minDate || targetDay > DateTime.Today)
+                return BadRequest($"只能查看从 {minDate:yyyy-MM-dd} 到 {DateTime.Today:yyyy-MM-dd} 的推送");
+        }
+        else
+        {
+            targetDay = DateTime.Today;
+        }
+
+        var dayStart = targetDay.Date;
+        var dayEnd = dayStart.AddDays(1);
         var token = userToken?.Trim() ?? "";
 
         var story = await _db.DailyPushes
-            .Where(d => d.Date >= today && d.Date < tomorrow && d.Type == "story")
+            .Where(d => d.Date >= dayStart && d.Date < dayEnd && d.Type == "story")
             .OrderByDescending(d => d.CreatedAt)
             .FirstOrDefaultAsync();
 
         var qa = await _db.DailyPushes
-            .Where(d => d.Date >= today && d.Date < tomorrow && d.Type == "qa")
+            .Where(d => d.Date >= dayStart && d.Date < dayEnd && d.Type == "qa")
             .OrderByDescending(d => d.CreatedAt)
             .FirstOrDefaultAsync();
 
@@ -47,7 +65,8 @@ public class DailyController : ControllerBase
                 ImagePath = push.ImagePath,
                 AuthorName = push.Type == "story" ? "📖 每日故事" : "❓ 每日问答",
                 Type = push.Type,
-                CreatedAt = push.CreatedAt
+                CreatedAt = push.CreatedAt,
+                ExpiresAt = push.CreatedAt.AddDays(7)
             };
         }
 

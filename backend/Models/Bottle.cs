@@ -41,6 +41,15 @@ public class Bottle
     /// <summary>编辑时间，null 表示未编辑过。</summary>
     public DateTime? EditedAt { get; set; }
 
+    /// <summary>到期时间（创建时 = CreatedAt + 7天，重投时更新）。</summary>
+    public DateTime ExpiresAt { get; set; }
+
+    /// <summary>重投次数。</summary>
+    public int ReThrowCount { get; set; }
+
+    /// <summary>最后一次重投时间，null 表示从未重投。</summary>
+    public DateTime? LastReThrowAt { get; set; }
+
     // ── FK to User ─────────────────────────────────────────
     public int? UserId { get; set; }
 

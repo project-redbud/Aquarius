@@ -37,6 +37,9 @@
     @if (bottle.editedAt) {
       <p class="edited-hint">编辑于 {{ bottle.editedAt | date:'yyyy-MM-dd HH:mm' }}</p>
     }
+    @if (bottle.reThrowCount > 0) {
+      <p class="rethrow-hint">重投于 {{ bottle.lastReThrowAt | date:'yyyy-MM-dd HH:mm' }}，已重投 {{ bottle.reThrowCount }} 次</p>
+    }
   </div>
 
   <div class="comments">
