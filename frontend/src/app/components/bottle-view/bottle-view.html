@@ -1,5 +1,5 @@
 @if (loading) { <div class="loading">加载中...</div> }
-@else if (!bottle) { <div class="empty">瓶子不存在或已被删除 🫙</div> }
+@else if (!bottle) { <div class="empty">瓶子不存在或已被删除 🫙<br><a routerLink="/pick" class="back-btn">← 返回首页</a></div> }
 @else {
   <div class="bottle-card">
     <div class="header">

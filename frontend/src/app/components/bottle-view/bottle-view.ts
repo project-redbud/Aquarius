@@ -1,13 +1,14 @@
 import { Component, Input, signal, inject, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { ApiService, Bottle, Comment } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   standalone: true,
   selector: 'app-bottle-view',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, RouterLink],
   templateUrl: './bottle-view.html',
   styleUrls: ['./bottle-view.scss']
 })

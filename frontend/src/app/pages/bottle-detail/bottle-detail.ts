@@ -17,6 +17,9 @@ export class BottleDetailPage implements OnInit {
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (id) this.api.getBottle(id).subscribe(b => { this.bottle.set(b); this.loading.set(false); });
+    if (id) this.api.getBottle(id).subscribe({
+      next: b => { this.bottle.set(b); this.loading.set(false); },
+      error: () => { this.bottle.set(null); this.loading.set(false); }
+    });
   }
 }
