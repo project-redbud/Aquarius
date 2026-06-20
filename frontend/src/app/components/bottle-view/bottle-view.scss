@@ -117,6 +117,19 @@
     }
   }
 
+  .comments-private-banner {
+    background: #fff9e6;
+    border: 1px solid #fcd34d;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 0.88rem;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .comment-input {
     display: flex;
     gap: 8px;

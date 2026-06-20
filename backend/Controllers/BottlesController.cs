@@ -47,6 +47,8 @@ public class BottlesController : ControllerBase
             UserToken = token,
             UserId = userId,
             Type = "normal",
+            RequireLogin = req.RequireLogin,
+            CommentsPrivate = req.CommentsPrivate,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -62,14 +64,20 @@ public class BottlesController : ControllerBase
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
         var token = ResolveToken(userToken);
+        var userId = GetUserId();
 
-        var count = await _db.Bottles.CountAsync(b => b.Type == "normal");
+        var query = _db.Bottles.Where(b => b.Type == "normal");
+
+        // 登录可见：未登录用户不捞到标记了 RequireLogin 的瓶子
+        if (userId == null)
+            query = query.Where(b => !b.RequireLogin);
+
+        var count = await query.CountAsync();
         if (count == 0) return Ok(null as BottleDto);
 
         var skip = System.Random.Shared.Next(count);
-        var bottle = await _db.Bottles
+        var bottle = await query
             .Include(b => b.Comments)
-            .Where(b => b.Type == "normal")
             .Skip(skip)
             .FirstAsync();
 
@@ -86,6 +94,10 @@ public class BottlesController : ControllerBase
             .Include(b => b.Comments)
             .FirstOrDefaultAsync(b => b.Id == id);
         if (bottle == null) return NotFound();
+
+        // 登录可见保护：未登录用户不能直接查看
+        if (bottle.RequireLogin && GetUserId() == null)
+            return NotFound();
 
         return Ok(await ToDto(bottle, token));
     }
@@ -210,7 +222,9 @@ public class BottlesController : ControllerBase
             LikedByMe = liked,
             CreatedAt = b.CreatedAt,
             EditedAt = b.EditedAt,
-            UserId = b.UserId
+            UserId = b.UserId,
+            RequireLogin = b.RequireLogin,
+            CommentsPrivate = b.CommentsPrivate
         };
     }
 

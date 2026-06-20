@@ -28,6 +28,12 @@ public class Bottle
     [MaxLength(20)]
     public string Type { get; set; } = "normal";
 
+    /// <summary>登录可见：未登录用户无法捞到此瓶。</summary>
+    public bool RequireLogin { get; set; }
+
+    /// <summary>评论仅作者可见：非作者/管理员看不到评论。</summary>
+    public bool CommentsPrivate { get; set; }
+
     public int LikeCount { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

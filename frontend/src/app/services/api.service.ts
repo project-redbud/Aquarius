@@ -14,6 +14,8 @@ export interface Bottle {
   createdAt: string;
   editedAt?: string | null;
   userId?: number | null;
+  requireLogin: boolean;
+  commentsPrivate: boolean;
 }
 
 export interface Comment {
@@ -76,11 +78,13 @@ export class ApiService {
 
   // ── bottles ────────────────────────────────────────────
 
-  throwBottle(content: string, imageBase64?: string, authorName?: string): Observable<Bottle> {
+  throwBottle(content: string, imageBase64?: string, authorName?: string, requireLogin?: boolean, commentsPrivate?: boolean): Observable<Bottle> {
     return this.http.post<Bottle>(`${this.base}/bottles`, {
       content,
       imageBase64,
-      authorName: authorName || null
+      authorName: authorName || null,
+      requireLogin: requireLogin ?? false,
+      commentsPrivate: commentsPrivate ?? false
     }, { headers: this.headers() });
   }
 

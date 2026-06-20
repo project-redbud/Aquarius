@@ -34,6 +34,9 @@ export class BottleViewComponent implements OnChanges {
 
   menuOpen = signal(false);
 
+  /** 评论私密提示：null=正常, 'hidden'=隐藏, 'admin'=管理员可见 */
+  commentsPrivateNote = signal<string | null>(null);
+
   sortedComments(): Comment[] {
     const list = [...this.comments()];
     if (this.sortAsc()) list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -53,7 +56,24 @@ export class BottleViewComponent implements OnChanges {
       this.editingBottle.set(false);
       this.editingCommentId.set(null);
       this.deletingCommentId.set(null);
-      this.loadComments();
+      this.commentsPrivateNote.set(null);
+
+      // 评论仅作者可见检查
+      if (this.bottle.commentsPrivate) {
+        const isAuthor = this.isMine(this.bottle.userId);
+        const isAdmin = this.auth.isAdmin();
+        if (isAdmin) {
+          this.commentsPrivateNote.set('admin');
+        } else if (isAuthor) {
+          this.commentsPrivateNote.set(null);
+        } else {
+          this.commentsPrivateNote.set('hidden');
+        }
+        this.loadComments(); // 后端会按权限过滤，评论者能看到自己的
+      } else {
+        this.commentsPrivateNote.set(null);
+        this.loadComments();
+      }
     }
   }
 

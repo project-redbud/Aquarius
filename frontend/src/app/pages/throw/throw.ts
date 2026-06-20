@@ -16,6 +16,8 @@ export class ThrowPage {
   content = signal('');
   authorName = signal('');
   isAnonymous = signal(false);
+  requireLogin = signal(false);
+  commentsPrivate = signal(false);
   imageBase64 = signal<string | null>(null);
   sending = signal(false);
   compressing = signal(false);
@@ -48,7 +50,9 @@ export class ThrowPage {
       await this.api.throwBottle(
         this.content().trim(),
         this.imageBase64() ?? undefined,
-        this.isAnonymous() ? undefined : (this.authorName().trim() || undefined)
+        this.isAnonymous() ? undefined : (this.authorName().trim() || undefined),
+        this.requireLogin(),
+        this.commentsPrivate()
       ).toPromise();
       this.router.navigate(['/pick']);
     } finally {

@@ -13,6 +13,12 @@ public class ThrowBottleRequest
     /// <summary>发布者留下的名字；null = 匿名发布。</summary>
     [MaxLength(50)]
     public string? AuthorName { get; set; }
+
+    /// <summary>登录可见。</summary>
+    public bool RequireLogin { get; set; }
+
+    /// <summary>评论仅作者可见。</summary>
+    public bool CommentsPrivate { get; set; }
 }
 
 public class AddCommentRequest
@@ -58,6 +64,8 @@ public class BottleDto
     public DateTime CreatedAt { get; set; }
     public DateTime? EditedAt { get; set; }
     public int? UserId { get; set; }
+    public bool RequireLogin { get; set; }
+    public bool CommentsPrivate { get; set; }
 }
 
 public class CommentDto

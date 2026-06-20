@@ -24,10 +24,14 @@ public class CommentsController : ControllerBase
 
     /// <summary>获取瓶子的顶级评论列表（含前3条子回复）</summary>
     [HttpGet]
-    public async Task<ActionResult<List<CommentDto>>> List(int bottleId)
+    public async Task<ActionResult<List<CommentDto>>> List(int bottleId,
+        [FromHeader(Name = "X-User-Token")] string? userToken)
     {
         var exists = await _db.Bottles.AnyAsync(b => b.Id == bottleId);
         if (!exists) return NotFound();
+
+        var bottle = await _db.Bottles.FindAsync(bottleId);
+        if (bottle == null) return NotFound();
 
         var comments = await _db.Comments
             .Include(c => c.Replies).ThenInclude(r => r.Replies)
@@ -35,19 +39,79 @@ public class CommentsController : ControllerBase
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
 
+        // 评论仅作者可见保护
+        if (bottle.CommentsPrivate)
+        {
+            var userId = GetUserId();
+            var isAdmin = User.FindFirst("isAdmin")?.Value == "true";
+            var token = (userToken ?? "").Trim();
+            bool isAuthor = (bottle.UserId != null && bottle.UserId == userId)
+                || (bottle.UserId == null && bottle.UserToken == token);
+
+            if (isAdmin)
+            {
+                Response.Headers["X-Comments-Private"] = "admin";
+            }
+            else if (!isAuthor)
+            {
+                // 非瓶主、非管理员：只保留评论者自己的评论
+                comments = comments
+                    .Where(c => IsOwnComment(c, userId, token))
+                    .Select(c => FilterRepliesForUser(c, userId, token))
+                    .ToList();
+                Response.Headers["X-Comments-Private"] = "true";
+            }
+        }
+
         return Ok(comments.Select(c => ToDto(c, includeReplies: true)).ToList());
+    }
+
+    private static bool IsOwnComment(Comment c, int? userId, string token)
+    {
+        return (c.UserId != null && c.UserId == userId)
+            || (c.UserId == null && c.UserToken == token);
+    }
+
+    private static Comment FilterRepliesForUser(Comment c, int? userId, string token)
+    {
+        c.Replies = c.Replies
+            .Where(r => (r.UserId != null && r.UserId == userId)
+                     || (r.UserId == null && r.UserToken == token))
+            .ToList();
+        return c;
     }
 
     /// <summary>展开某条评论/回复的全部子回复</summary>
     [HttpGet("{id}/replies")]
-    public async Task<ActionResult<List<CommentDto>>> GetReplies(int bottleId, int id)
+    public async Task<ActionResult<List<CommentDto>>> GetReplies(int bottleId, int id,
+        [FromHeader(Name = "X-User-Token")] string? userToken)
     {
+        var bottle = await _db.Bottles.FindAsync(bottleId);
+        if (bottle == null) return NotFound();
+
         var replies = await _db.Comments
             .Include(c => c.Replies)
             .Include(c => c.ParentReply)
             .Where(c => c.CommentId == id)
             .OrderBy(c => c.CreatedAt)
             .ToListAsync();
+
+        // 评论仅作者可见保护
+        if (bottle.CommentsPrivate)
+        {
+            var userId = GetUserId();
+            var isAdmin = User.FindFirst("isAdmin")?.Value == "true";
+            var token = (userToken ?? "").Trim();
+            bool isAuthor = (bottle.UserId != null && bottle.UserId == userId)
+                || (bottle.UserId == null && bottle.UserToken == token);
+
+            if (!isAdmin && !isAuthor)
+            {
+                replies = replies
+                    .Where(r => IsOwnComment(r, userId, token))
+                    .ToList();
+            }
+        }
 
         return Ok(replies.Select(r => ToDto(r, includeReplies: false)).ToList());
     }

@@ -51,6 +51,16 @@
       </div>
     }
 
+    @if (commentsPrivateNote()) {
+      <div class="comments-private-banner">
+        @if (commentsPrivateNote() === 'admin') {
+          ⚠️ 评论开启了仅作者可见，但管理员可见。
+        } @else {
+          ⚠️ 评论仅作者可见
+        }
+      </div>
+    }
+
     @for (c of sortedComments(); track c.id; let i = $index) {
       <div class="comment">
         @if (replyTo()?.id === c.id) {

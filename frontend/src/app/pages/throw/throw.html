@@ -49,6 +49,18 @@
     }
   </div>
 
+  <!-- privacy options -->
+  <div class="privacy-row">
+    <label>
+      <input type="checkbox" [(ngModel)]="requireLogin" />
+      🔒 登录可见 <span class="hint">未登录用户捞不到此瓶</span>
+    </label>
+    <label>
+      <input type="checkbox" [(ngModel)]="commentsPrivate" />
+      🛡️ 评论仅作者可见 <span class="hint">非作者看不到评论</span>
+    </label>
+  </div>
+
   <button class="primary" [disabled]="!content().trim() || sending()" (click)="throwBottle()">
     {{ sending() ? '投掷中...' : '🫧 投出去' }}
   </button>
