@@ -73,7 +73,10 @@
     @for (c of sortedComments(); track c.id; let i = $index) {
       <div class="comment">
         @if (replyTo()?.id === c.id) {
-          <div class="reply-bar"><span>回复 #{{ c.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button>@if (auth.isAdmin()) { <label class="badge-inline"><input type="checkbox" [(ngModel)]="commentAdminBadge" />🛡️</label> }</div>
+          <div class="reply-bar"><span>回复 #{{ c.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
+          @if (auth.isAdmin()) {
+            <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+          }
         }
         @if (editingCommentId() === c.id) {
           <textarea [(ngModel)]="editCommentContent" rows="3" maxlength="300" class="edit-textarea"></textarea>
@@ -103,7 +106,12 @@
             @if (expandedReplies()[c.id]) {
               @for (r of expandedReplies()[c.id]; track r.id) {
                 <div class="reply-item">
-                  @if (replyTo()?.id === r.id) { <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button>@if (auth.isAdmin()) { <label class="badge-inline"><input type="checkbox" [(ngModel)]="commentAdminBadge" />🛡️</label> }</div> }
+                  @if (replyTo()?.id === r.id) {
+                  <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
+                  @if (auth.isAdmin()) {
+                    <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+                  }
+                }
                   @if (editingCommentId() === r.id) {
                     <textarea [(ngModel)]="editCommentContent" rows="3" maxlength="300" class="edit-textarea"></textarea>
                     <div class="edit-actions">
@@ -131,7 +139,12 @@
                   @if (expandedReplies()[r.id]) {
                     <div class="replies">@for (sr of expandedReplies()[r.id]; track sr.id) {
                       <div class="reply-item">
-                        @if (replyTo()?.id === sr.id) { <div class="reply-bar sub"><span>回复 #{{ sr.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button>@if (auth.isAdmin()) { <label class="badge-inline"><input type="checkbox" [(ngModel)]="commentAdminBadge" />🛡️</label> }</div> }
+                        @if (replyTo()?.id === sr.id) {
+                        <div class="reply-bar sub"><span>回复 #{{ sr.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
+                        @if (auth.isAdmin()) {
+                          <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+                        }
+                      }
                         @if (editingCommentId() === sr.id) {
                           <textarea [(ngModel)]="editCommentContent" rows="3" maxlength="300" class="edit-textarea"></textarea>
                           <div class="edit-actions">
@@ -165,7 +178,12 @@
               @if (c.replies && c.replies.length > 0) {
                 @for (r of c.replies; track r.id) {
                   <div class="reply-item">
-                    @if (replyTo()?.id === r.id) { <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button>@if (auth.isAdmin()) { <label class="badge-inline"><input type="checkbox" [(ngModel)]="commentAdminBadge" />🛡️</label> }</div> }
+                    @if (replyTo()?.id === r.id) {
+                  <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
+                  @if (auth.isAdmin()) {
+                    <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+                  }
+                }
                     @if (editingCommentId() === r.id) {
                       <textarea [(ngModel)]="editCommentContent" rows="3" maxlength="300" class="edit-textarea"></textarea>
                       <div class="edit-actions">
