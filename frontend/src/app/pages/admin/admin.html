@@ -8,6 +8,21 @@
     </div>
   } @else {
     <details class="daily-push-section">
+      <summary>⚙️ 站点设置</summary>
+      <div class="push-form">
+        <label>
+          站点名称
+          <input type="text" [(ngModel)]="settingSiteName" placeholder="Aquarius" maxlength="50" />
+        </label>
+        <label>
+          版权信息（支持 HTML）
+          <textarea [(ngModel)]="settingCopyright" placeholder="© 2026 <a href=&quot;/&quot;>Aquarius</a>" maxlength="500" rows="2"></textarea>
+        </label>
+        <button (click)="saveSettings()">💾 保存设置</button>
+      </div>
+    </details>
+
+    <details class="daily-push-section">
       <summary>📰 创建每日推送</summary>
       <div class="push-form">
         <div class="row">
@@ -35,7 +50,55 @@
       </div>
     </details>
 
-    <button class="refresh" (click)="loadBottles()">🔄 刷新瓶子列表</button>
+    <details class="daily-push-section">
+      <summary>📋 推送管理 ({{ pushTotal() }})</summary>
+      @if (dailyPushes().length === 0) {
+        <p class="empty-hint">暂无推送记录</p>
+      } @else {
+        <div class="push-list">
+          @for (p of dailyPushes(); track p.id) {
+            <div class="push-row">
+              <div class="push-info">
+                <span class="push-type">{{ p.type === 'story' ? '📖 每日故事' : '❓ 每日问答' }}</span>
+                <span class="push-date">{{ p.date | date:'yyyy-MM-dd' }}</span>
+              </div>
+              @if (editingPushId() === p.id) {
+                <div class="push-edit">
+                  <textarea [(ngModel)]="editPushContent" rows="2" maxlength="500"></textarea>
+                  <div class="edit-actions">
+                    <button class="save" (click)="saveEditPush(p.id)">保存</button>
+                    <button class="cancel" (click)="cancelEditPush()">取消</button>
+                  </div>
+                </div>
+              } @else {
+                <p class="push-content">{{ p.content }}</p>
+              }
+              @if (republishPushId() === p.id) {
+                <div class="republish-form">
+                  <label>重新推送到：<input type="date" [(ngModel)]="republishDate" /></label>
+                  <button class="save" (click)="confirmRepublish()">确认</button>
+                  <button class="cancel" (click)="cancelRepublish()">取消</button>
+                </div>
+              }
+              <div class="push-actions">
+                <button (click)="startEditPush(p)">✏️ 编辑</button>
+                <button (click)="startRepublish(p.id)">🔄 重新推送</button>
+                <button class="danger" (click)="deletePush(p.id)">🗑️ 删除</button>
+              </div>
+            </div>
+          }
+        </div>
+        @if (pushTotalPages() > 1) {
+          <div class="pagination">
+            <button [disabled]="pushPage() <= 1" (click)="goToPushPage(pushPage() - 1)">← 上一页</button>
+            <span>{{ pushPage() }} / {{ pushTotalPages() }}</span>
+            <button [disabled]="pushPage() >= pushTotalPages()" (click)="goToPushPage(pushPage() + 1)">下一页 →</button>
+          </div>
+        }
+      }
+    </details>
+
+    <button class="refresh" (click)="refreshBottles()">🔄 刷新瓶子列表 ({{ bottleTotal() }})</button>
 
     @for (b of bottles(); track b.id) {
       <div class="bottle-row">
@@ -56,6 +119,7 @@
         }
         <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>
         <div class="row-actions">
+          <a [routerLink]="['/bottle', b.id]" class="view-link">查看详情</a>
           <button (click)="toggleComments(b.id)">
             {{ commentsCache()[b.id] ? '隐藏评论' : '查看评论' }}
             @if (loadingComments()[b.id]) { ... }
@@ -104,6 +168,13 @@
             <div class="admin-comment empty">暂无评论</div>
           }
         }
+      </div>
+    }
+    @if (bottleTotalPages() > 1) {
+      <div class="pagination">
+        <button [disabled]="bottlePage() <= 1" (click)="goToBottlePage(bottlePage() - 1)">← 上一页</button>
+        <span>{{ bottlePage() }} / {{ bottleTotalPages() }}</span>
+        <button [disabled]="bottlePage() >= bottleTotalPages()" (click)="goToBottlePage(bottlePage() + 1)">下一页 →</button>
       </div>
     }
   }

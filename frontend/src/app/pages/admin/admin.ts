@@ -1,9 +1,10 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService, Comment } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
+import { SiteSettingsService } from '../../services/site-settings.service';
 import { LinkifyPipe } from '../../pipes/linkify.pipe';
 
 @Component({
@@ -17,6 +18,10 @@ export class AdminPage implements OnInit {
   isAdmin = this.auth.isAdmin;
 
   bottles = signal<any[]>([]);
+  bottlePage = signal(1);
+  bottleTotal = signal(0);
+  readonly bottlePageSize = 10;
+  bottleTotalPages = computed(() => Math.max(1, Math.ceil(this.bottleTotal() / this.bottlePageSize)));
   commentsCache = signal<Record<number, Comment[]>>({});
   loadingComments = signal<Record<number, boolean>>({});
 
@@ -24,16 +29,135 @@ export class AdminPage implements OnInit {
   pushContent = signal('');
   pushDate = signal(new Date().toISOString().slice(0, 10));
 
-  constructor(private api: ApiService) {}
+  // ── Push management ─────────────────────────────────
+  dailyPushes = signal<any[]>([]);
+  pushPage = signal(1);
+  pushTotal = signal(0);
+  readonly pushPageSize = 10;
+  pushTotalPages = computed(() => Math.max(1, Math.ceil(this.pushTotal() / this.pushPageSize)));
+  editingPushId = signal<number | null>(null);
+  editPushContent = signal('');
+  republishPushId = signal<number | null>(null);
+  republishDate = signal(new Date().toISOString().slice(0, 10));
+
+  constructor(private api: ApiService, private siteSettings: SiteSettingsService) {}
+
+  // ── Site settings ────────────────────────────────────
+  settingSiteName = signal('');
+  settingCopyright = signal('');
 
   ngOnInit() {
     if (this.auth.isAdmin()) {
-      this.loadBottles();
+      this.refreshBottles();
+      this.loadDailyPushes();
+      this.loadSettings();
     }
   }
 
+  loadSettings() {
+    this.api.adminGetSettings().subscribe(s => {
+      this.settingSiteName.set(s.siteName);
+      this.settingCopyright.set(s.copyright);
+    });
+  }
+
+  saveSettings() {
+    this.api.adminUpdateSettings(
+      this.settingSiteName().trim() || undefined,
+      this.settingCopyright().trim() || undefined
+    ).subscribe(s => {
+      this.siteSettings.siteName.set(s.siteName);
+      this.siteSettings.copyright.set(s.copyright);
+      alert('设置已保存');
+    });
+  }
+
+  loadDailyPushes() {
+    this.api.adminListDaily(this.pushPage(), this.pushPageSize).subscribe(res => {
+      this.dailyPushes.set(res.items);
+      this.pushTotal.set(res.total);
+    });
+  }
+
+  goToPushPage(page: number) {
+    if (page < 1 || page > this.pushTotalPages()) return;
+    this.pushPage.set(page);
+    this.loadDailyPushes();
+  }
+
+  startEditPush(p: any) {
+    this.editingPushId.set(p.id);
+    this.editPushContent.set(p.content);
+  }
+
+  cancelEditPush() {
+    this.editingPushId.set(null);
+    this.editPushContent.set('');
+  }
+
+  saveEditPush(id: number) {
+    const content = this.editPushContent().trim();
+    if (!content) return;
+    this.api.adminEditDaily(id, content).subscribe(() => {
+      this.dailyPushes.update(list => list.map(p => p.id === id ? { ...p, content } : p));
+      this.cancelEditPush();
+    });
+  }
+
+  deletePush(id: number) {
+    if (!confirm('确定删除此推送？关联的瓶子也会被删除。')) return;
+    this.api.adminDeleteDaily(id).subscribe(() => {
+      this.dailyPushes.update(list => list.filter(p => p.id !== id));
+    });
+  }
+
+  startRepublish(pushId: number) {
+    this.republishPushId.set(pushId);
+    this.republishDate.set(new Date().toISOString().slice(0, 10));
+  }
+
+  cancelRepublish() {
+    this.republishPushId.set(null);
+  }
+
+  confirmRepublish(force = false) {
+    const id = this.republishPushId();
+    const date = this.republishDate();
+    if (!id || !date) return;
+    this.api.adminRepublishDaily(id, date, force).subscribe({
+      next: () => {
+        alert('重新推送成功！');
+        this.cancelRepublish();
+        this.loadDailyPushes();
+      },
+      error: (err) => {
+        if (err.status === 409 && !force) {
+          if (confirm(`${err.error}\n\n是否覆盖？`)) {
+            this.confirmRepublish(true);
+          }
+        } else {
+          alert(err.error || '重新推送失败');
+        }
+      }
+    });
+  }
+
+  refreshBottles() {
+    this.bottlePage.set(1);
+    this.loadBottles();
+  }
+
   loadBottles() {
-    this.api.adminListBottles().subscribe(b => this.bottles.set(b));
+    this.api.adminListBottles(this.bottlePage(), this.bottlePageSize).subscribe(res => {
+      this.bottles.set(res.items);
+      this.bottleTotal.set(res.total);
+    });
+  }
+
+  goToBottlePage(page: number) {
+    if (page < 1 || page > this.bottleTotalPages()) return;
+    this.bottlePage.set(page);
+    this.loadBottles();
   }
 
   toggleComments(bottleId: number) {
@@ -86,6 +210,7 @@ export class AdminPage implements OnInit {
     this.api.adminCreateDaily(type, content, date, null).subscribe((res: any) => {
       this.pushContent.set('');
       alert(res.updated ? '推送已更新！' : '推送创建成功！');
+      this.loadDailyPushes();
     });
   }
 }

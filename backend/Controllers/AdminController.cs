@@ -139,14 +139,141 @@ public class AdminController : ControllerBase
         return Created($"/api/admin/daily/{push.Id}", new { push.Id, push.Type, push.Content, push.ImagePath, push.Date, push.BottleId });
     }
 
-    /// <summary>列出所有瓶子（管理）</summary>
-    [HttpGet("bottles")]
-    public async Task<ActionResult> ListBottles()
+    // ── Daily push management ──────────────────────────
+
+    /// <summary>列出所有每日推送（分页，每页 10 条）</summary>
+    [HttpGet("daily")]
+    public async Task<ActionResult> ListDaily(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         if (!IsAdmin()) return Forbid();
 
-        var bottles = await _db.Bottles
-            .OrderByDescending(b => b.CreatedAt)
+        var query = _db.DailyPushes
+            .OrderByDescending(d => d.Date)
+            .ThenBy(d => d.Type);
+
+        var total = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(d => new
+            {
+                d.Id, d.Type, d.Content, d.ImagePath,
+                d.Date, d.BottleId, d.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(new { items, total, page, pageSize });
+    }
+
+    /// <summary>编辑每日推送内容</summary>
+    [HttpPut("daily/{id}")]
+    public async Task<ActionResult> EditDaily(int id, [FromBody] EditDailyRequest req)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var push = await _db.DailyPushes.Include(d => d.Bottle).FirstOrDefaultAsync(d => d.Id == id);
+        if (push == null) return NotFound();
+
+        push.Content = req.Content;
+        push.ImagePath = req.ImagePath;
+        if (push.Bottle != null)
+        {
+            push.Bottle.Content = req.Content;
+            push.Bottle.ImagePath = req.ImagePath;
+        }
+        await _db.SaveChangesAsync();
+
+        return Ok(new { push.Id, push.Type, push.Content, push.ImagePath, push.Date, push.BottleId });
+    }
+
+    /// <summary>删除每日推送（级联删除关联瓶子）</summary>
+    [HttpDelete("daily/{id}")]
+    public async Task<ActionResult> DeleteDaily(int id)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var push = await _db.DailyPushes.Include(d => d.Bottle).FirstOrDefaultAsync(d => d.Id == id);
+        if (push == null) return NotFound();
+
+        if (push.Bottle != null) _db.Bottles.Remove(push.Bottle);
+        _db.DailyPushes.Remove(push);
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    /// <summary>重新推送到新日期（克隆内容 + 瓶子）</summary>
+    [HttpPost("daily/{id}/republish")]
+    public async Task<ActionResult> RepublishDaily(int id, [FromBody] RepublishDailyRequest req)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var source = await _db.DailyPushes.FindAsync(id);
+        if (source == null) return NotFound();
+
+        var newDate = DateTime.Parse(req.Date);
+
+        // 检查目标日期+类型是否已有推送
+        var existing = await _db.DailyPushes
+            .Include(d => d.Bottle)
+            .FirstOrDefaultAsync(d => d.Date == newDate && d.Type == source.Type);
+        if (existing != null)
+        {
+            if (!req.Force)
+                return Conflict($"该日期已有「{source.Type}」推送");
+            // 强制覆盖：删除旧推送
+            if (existing.Bottle != null) _db.Bottles.Remove(existing.Bottle);
+            _db.DailyPushes.Remove(existing);
+            await _db.SaveChangesAsync();
+        }
+
+        var bottle = new Models.Bottle
+        {
+            Content = source.Content,
+            ImagePath = source.ImagePath,
+            AuthorName = source.Type == "story" ? "📖 每日故事" : "❓ 每日问答",
+            UserToken = "system",
+            Type = source.Type,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
+        };
+        _db.Bottles.Add(bottle);
+        await _db.SaveChangesAsync();
+
+        var push = new Models.DailyPush
+        {
+            Type = source.Type,
+            Content = source.Content,
+            ImagePath = source.ImagePath,
+            Date = newDate,
+            BottleId = bottle.Id,
+            CreatedAt = DateTime.UtcNow
+        };
+        _db.DailyPushes.Add(push);
+        await _db.SaveChangesAsync();
+
+        return Created($"/api/admin/daily/{push.Id}", new { push.Id, push.Type, push.Content, push.ImagePath, push.Date, push.BottleId });
+    }
+
+    /// <summary>列出所有瓶子（管理，分页每页 10 条）</summary>
+    [HttpGet("bottles")]
+    public async Task<ActionResult> ListBottles(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var query = _db.Bottles
+            .OrderByDescending(b => b.CreatedAt);
+
+        var total = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(b => new
             {
                 b.Id, b.Content, b.ImagePath, b.AuthorName,
@@ -158,7 +285,7 @@ public class AdminController : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(bottles);
+        return Ok(new { items, total, page, pageSize });
     }
 
     /// <summary>删除瓶子（管理）</summary>
@@ -174,6 +301,35 @@ public class AdminController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    // ── Site settings ────────────────────────────────────
+
+    [HttpGet("settings")]
+    public async Task<ActionResult> GetSettings()
+    {
+        if (!IsAdmin()) return Forbid();
+        var s = await _db.SiteSettings.FirstOrDefaultAsync();
+        if (s == null) return NotFound();
+        return Ok(new { s.SiteName, s.Copyright });
+    }
+
+    [HttpPut("settings")]
+    public async Task<ActionResult> UpdateSettings([FromBody] UpdateSettingsRequest req)
+    {
+        if (!IsAdmin()) return Forbid();
+        var s = await _db.SiteSettings.FirstOrDefaultAsync();
+        if (s == null) return NotFound();
+        s.SiteName = req.SiteName ?? s.SiteName;
+        s.Copyright = req.Copyright ?? s.Copyright;
+        await _db.SaveChangesAsync();
+        return Ok(new { s.SiteName, s.Copyright });
+    }
+}
+
+public class UpdateSettingsRequest
+{
+    public string? SiteName { get; set; }
+    public string? Copyright { get; set; }
 }
 
 public class CreateDailyRequest
@@ -182,4 +338,16 @@ public class CreateDailyRequest
     public string Content { get; set; } = string.Empty;
     public string? ImagePath { get; set; }
     public string Date { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd");
+}
+
+public class EditDailyRequest
+{
+    public string Content { get; set; } = string.Empty;
+    public string? ImagePath { get; set; }
+}
+
+public class RepublishDailyRequest
+{
+    public string Date { get; set; } = string.Empty;
+    public bool Force { get; set; }
 }

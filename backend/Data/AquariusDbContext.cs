@@ -12,6 +12,7 @@ public class AquariusDbContext : DbContext
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Like> Likes => Set<Like>();
     public DbSet<DailyPush> DailyPushes => Set<DailyPush>();
+    public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
 
     protected override void OnModelCreating(ModelBuilder model)
     {

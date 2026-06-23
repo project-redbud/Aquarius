@@ -73,6 +73,21 @@
 
   .push-form {
     padding: 0 16px 16px;
+    label {
+      display: block;
+      font-size: .85rem;
+      color: #555;
+      margin-bottom: 12px;
+      input, textarea, select {
+        display: block;
+        width: 100%;
+        margin-top: 4px;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        box-sizing: border-box;
+      }
+    }
     .row {
       display: flex;
       gap: 12px;
@@ -113,6 +128,120 @@
   }
 }
 
+.push-list {
+  padding: 0 16px 16px;
+}
+
+.push-row {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e5e7eb;
+
+  .push-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 6px;
+    .push-type { font-weight: 600; font-size: .85rem; color: #166534; }
+    .push-date { font-size: .8rem; color: #9ca3af; }
+  }
+
+  .push-content {
+    margin: 0 0 8px;
+    font-size: .9rem;
+    line-height: 1.5;
+    color: #374151;
+    white-space: pre-wrap;
+  }
+
+  .push-edit {
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      resize: vertical;
+      box-sizing: border-box;
+      margin-bottom: 6px;
+    }
+  }
+
+  .republish-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 8px;
+    background: #fef3c7;
+    border-radius: 8px;
+    label { font-size: .85rem; color: #92400e; }
+    input { padding: 4px 8px; border-radius: 6px; border: 1px solid #ddd; }
+    button {
+      padding: 4px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: .85rem;
+      cursor: pointer;
+      &.save { background: #16a34a; color: #fff; }
+      &.cancel { background: #e5e7eb; color: #374151; }
+    }
+  }
+
+  .push-actions {
+    display: flex;
+    gap: 8px;
+    button {
+      padding: 4px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: .8rem;
+      background: #e2e8f0;
+      cursor: pointer;
+      &.danger { background: #fee2e2; color: #dc2626; }
+    }
+  }
+
+  .edit-actions {
+    display: flex;
+    gap: 8px;
+    button {
+      padding: 4px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: .85rem;
+      cursor: pointer;
+      &.save { background: #16a34a; color: #fff; }
+      &.cancel { background: #e5e7eb; color: #374151; }
+    }
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px 16px;
+  button {
+    padding: 4px 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: .85rem;
+    &:disabled { opacity: .4; cursor: not-allowed; }
+  }
+  span { font-size: .85rem; color: #666; }
+}
+
+.empty-hint {
+  padding: 16px;
+  color: #9ca3af;
+  font-size: .9rem;
+}
+
 .refresh {
   margin-bottom: 16px;
   padding: 8px 16px;
@@ -144,6 +273,14 @@
   .row-actions {
     display: flex;
     gap: 8px;
+    .view-link {
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: #dbeafe;
+      color: #2563eb;
+      text-decoration: none;
+      font-size: .85rem;
+    }
     button {
       padding: 6px 14px;
       border: none;

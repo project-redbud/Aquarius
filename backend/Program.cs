@@ -61,6 +61,16 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AquariusDbContext>();
     db.Database.EnsureCreated();
+
+    if (!db.SiteSettings.Any())
+    {
+        db.SiteSettings.Add(new SiteSettings
+        {
+            SiteName = "Aquarius",
+            Copyright = ""
+        });
+        db.SaveChanges();
+    }
 }
 
 // ── Middleware pipeline ───────────────────────────────────

@@ -183,8 +183,8 @@ export class ApiService {
     return this.http.get<Comment[]>(`${this.base}/admin/bottles/${bottleId}/comments`);
   }
 
-  adminListBottles(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/admin/bottles`);
+  adminListBottles(page = 1, pageSize = 10): Observable<{ items: any[]; total: number; page: number; pageSize: number }> {
+    return this.http.get<any>(`${this.base}/admin/bottles?page=${page}&pageSize=${pageSize}`);
   }
 
   adminDeleteBottle(id: number): Observable<void> {
@@ -201,6 +201,30 @@ export class ApiService {
     return this.http.get<{ id: number; content: string; date: string; bottleId: number }>(
       `${this.base}/admin/daily/check?type=${type}&date=${date}`
     );
+  }
+
+  adminListDaily(page = 1, pageSize = 10): Observable<{ items: any[]; total: number; page: number; pageSize: number }> {
+    return this.http.get<any>(`${this.base}/admin/daily?page=${page}&pageSize=${pageSize}`);
+  }
+
+  adminEditDaily(id: number, content: string, imagePath?: string | null): Observable<any> {
+    return this.http.put<any>(`${this.base}/admin/daily/${id}`, { content, imagePath });
+  }
+
+  adminDeleteDaily(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/admin/daily/${id}`);
+  }
+
+  adminRepublishDaily(id: number, date: string, force = false): Observable<any> {
+    return this.http.post<any>(`${this.base}/admin/daily/${id}/republish`, { date, force });
+  }
+
+  adminGetSettings(): Observable<{ siteName: string; copyright: string }> {
+    return this.http.get<{ siteName: string; copyright: string }>(`${this.base}/admin/settings`);
+  }
+
+  adminUpdateSettings(siteName?: string, copyright?: string): Observable<{ siteName: string; copyright: string }> {
+    return this.http.put<{ siteName: string; copyright: string }>(`${this.base}/admin/settings`, { siteName, copyright });
   }
 
   // ── my ─────────────────────────────────────────────────

@@ -19,3 +19,7 @@
 <main>
   <router-outlet />
 </main>
+
+@if (settings.copyright()) {
+  <footer [innerHTML]="settings.copyright()"></footer>
+}
