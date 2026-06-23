@@ -37,6 +37,9 @@ public class AddCommentRequest
 
     /// <summary>管理员标识。</summary>
     public bool IsAdminBadge { get; set; }
+
+    /// <summary>瓶主标识。</summary>
+    public bool IsBottleOwnerBadge { get; set; }
 }
 
 public class EditBottleRequest
@@ -106,6 +109,9 @@ public class CommentDto
 
     /// <summary>管理员标识。</summary>
     public bool IsAdminBadge { get; set; }
+
+    /// <summary>瓶主标识。</summary>
+    public bool IsBottleOwnerBadge { get; set; }
 }
 
 public class DailyPushDto

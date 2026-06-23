@@ -41,6 +41,9 @@ export class BottleViewComponent implements OnChanges {
   /** 评论时是否带管理员标识 */
   commentAdminBadge = signal(false);
 
+  /** 评论时是否带瓶主标识 */
+  commentBottleOwnerBadge = signal(false);
+
   sortedComments(): Comment[] {
     const list = [...this.comments()];
     if (this.sortAsc()) list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -66,6 +69,7 @@ export class BottleViewComponent implements OnChanges {
       this.deletingCommentId.set(null);
       this.commentsPrivateNote.set(null);
       this.commentAdminBadge.set(false);
+      this.commentBottleOwnerBadge.set(false);
 
       // 评论仅作者可见检查
       if (this.bottle.commentsPrivate) {
@@ -189,10 +193,11 @@ export class BottleViewComponent implements OnChanges {
     if (!text) return;
     const commentId = parent ? this.rootCommentId(parent) : undefined;
     const parentReplyId = parent?.commentId != null ? parent.id : undefined;
-    this.api.addComment(b.id, text, commentId, parentReplyId, this.commentAdminBadge()).subscribe(() => {
+    this.api.addComment(b.id, text, commentId, parentReplyId, this.commentAdminBadge(), this.commentBottleOwnerBadge()).subscribe(() => {
       if (parent) { this.loadReplies(this.rootCommentId(parent)); this.cancelReply(); }
       else { this.commentText.set(''); }
       this.commentAdminBadge.set(false);
+      this.commentBottleOwnerBadge.set(false);
       this.loadComments();
     });
   }

@@ -52,11 +52,21 @@
         <input type="text" [(ngModel)]="commentText" placeholder="说点什么（匿名）..." maxlength="300" (keydown.enter)="addComment()" />
         <button (click)="addComment()" [disabled]="!commentText().trim()">发送</button>
       </div>
-      @if (auth.isAdmin()) {
-        <label class="admin-badge-check">
-          <input type="checkbox" [(ngModel)]="commentAdminBadge" />
-          🛡️ 管理员标识
-        </label>
+      @if (auth.isAdmin() || isMine(bottle.userId)) {
+        <div class="badge-options">
+          @if (auth.isAdmin()) {
+            <label class="admin-badge-check">
+              <input type="checkbox" [(ngModel)]="commentAdminBadge" />
+              🛡️ 管理员标识
+            </label>
+          }
+          @if (isMine(bottle.userId)) {
+            <label class="admin-badge-check">
+              <input type="checkbox" [(ngModel)]="commentBottleOwnerBadge" />
+              🧴 瓶主标识
+            </label>
+          }
+        </div>
       }
     }
 
@@ -74,8 +84,15 @@
       <div class="comment">
         @if (replyTo()?.id === c.id) {
           <div class="reply-bar"><span>回复 #{{ c.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-          @if (auth.isAdmin()) {
-            <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+          @if (auth.isAdmin() || isMine(bottle.userId)) {
+            <div class="badge-options">
+              @if (auth.isAdmin()) {
+                <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+              }
+              @if (isMine(bottle.userId)) {
+                <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentBottleOwnerBadge" /> 🧴 瓶主标识</label>
+              }
+            </div>
           }
         }
         @if (editingCommentId() === c.id) {
@@ -88,7 +105,7 @@
           <p><span class="floor">{{ floorLabel(i) }}</span> <span [innerHTML]="c.content | linkify"></span></p>
         }
         @if (c.editedAt) { <span class="edited-tag">(已编辑)</span> }
-        <div class="comment-meta"><span class="meta-left"><span class="rid">#{{ c.id }}</span><span class="time">@if (c.isAdminBadge) {🛡️}{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span></span>
+        <div class="comment-meta"><span class="meta-left"><span class="rid">#{{ c.id }}</span><span class="time">@if (c.isAdminBadge) {🛡️}@if (c.isBottleOwnerBadge) {🧴}{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span></span>
           <div class="meta-actions">
             @if (isMine(c.userId)) {
               <button class="reply-btn" (click)="startEditComment(c)">✏️</button>
@@ -108,8 +125,15 @@
                 <div class="reply-item">
                   @if (replyTo()?.id === r.id) {
                   <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-                  @if (auth.isAdmin()) {
-                    <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+                  @if (auth.isAdmin() || isMine(bottle.userId)) {
+                    <div class="badge-options">
+                      @if (auth.isAdmin()) {
+                        <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+                      }
+                      @if (isMine(bottle.userId)) {
+                        <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentBottleOwnerBadge" /> 🧴 瓶主标识</label>
+                      }
+                    </div>
                   }
                 }
                   @if (editingCommentId() === r.id) {
@@ -123,7 +147,7 @@
                   }
                   @if (r.editedAt) { <span class="edited-tag">(已编辑)</span> }
                   @if (r.parentContent) { <blockquote [innerHTML]="r.parentContent | linkify"></blockquote> }
-                  <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">@if (r.isAdminBadge) {🛡️}{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                  <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">@if (r.isAdminBadge) {🛡️}@if (r.isBottleOwnerBadge) {🧴}{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                     <div class="meta-actions">
                       @if (isMine(r.userId)) {
                         <button class="reply-btn" (click)="startEditComment(r)">✏️</button>
@@ -141,8 +165,15 @@
                       <div class="reply-item">
                         @if (replyTo()?.id === sr.id) {
                         <div class="reply-bar sub"><span>回复 #{{ sr.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-                        @if (auth.isAdmin()) {
-                          <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+                        @if (auth.isAdmin() || isMine(bottle.userId)) {
+                          <div class="badge-options">
+                            @if (auth.isAdmin()) {
+                              <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+                            }
+                            @if (isMine(bottle.userId)) {
+                              <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentBottleOwnerBadge" /> 🧴 瓶主标识</label>
+                            }
+                          </div>
                         }
                       }
                         @if (editingCommentId() === sr.id) {
@@ -156,7 +187,7 @@
                         }
                         @if (sr.editedAt) { <span class="edited-tag">(已编辑)</span> }
                         @if (sr.parentContent) { <blockquote [innerHTML]="sr.parentContent | linkify"></blockquote> }
-                        <div class="reply-meta"><span class="rid">#{{ sr.id }}</span><span class="time">@if (sr.isAdminBadge) {🛡️}{{ sr.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                        <div class="reply-meta"><span class="rid">#{{ sr.id }}</span><span class="time">@if (sr.isAdminBadge) {🛡️}@if (sr.isBottleOwnerBadge) {🧴}{{ sr.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                           <div class="meta-actions">
                             @if (isMine(sr.userId)) {
                               <button class="reply-btn" (click)="startEditComment(sr)">✏️</button>
@@ -180,8 +211,15 @@
                   <div class="reply-item">
                     @if (replyTo()?.id === r.id) {
                   <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-                  @if (auth.isAdmin()) {
-                    <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+                  @if (auth.isAdmin() || isMine(bottle.userId)) {
+                    <div class="badge-options">
+                      @if (auth.isAdmin()) {
+                        <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
+                      }
+                      @if (isMine(bottle.userId)) {
+                        <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentBottleOwnerBadge" /> 🧴 瓶主标识</label>
+                      }
+                    </div>
                   }
                 }
                     @if (editingCommentId() === r.id) {
@@ -195,7 +233,7 @@
                     }
                     @if (r.editedAt) { <span class="edited-tag">(已编辑)</span> }
                     @if (r.parentContent) { <blockquote [innerHTML]="r.parentContent | linkify"></blockquote> }
-                    <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">@if (r.isAdminBadge) {🛡️}{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                    <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">@if (r.isAdminBadge) {🛡️}@if (r.isBottleOwnerBadge) {🧴}{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                       <div class="meta-actions">
                         @if (isMine(r.userId)) {
                           <button class="reply-btn" (click)="startEditComment(r)">✏️</button>

@@ -35,6 +35,7 @@ export interface Comment {
   replyCount?: number;
   replies?: Comment[];
   isAdminBadge: boolean;
+  isBottleOwnerBadge: boolean;
 }
 
 export interface DailyPush {
@@ -143,9 +144,9 @@ export class ApiService {
     });
   }
 
-  addComment(bottleId: number, content: string, commentId?: number, parentReplyId?: number, isAdminBadge?: boolean): Observable<Comment> {
+  addComment(bottleId: number, content: string, commentId?: number, parentReplyId?: number, isAdminBadge?: boolean, isBottleOwnerBadge?: boolean): Observable<Comment> {
     return this.http.post<Comment>(`${this.base}/bottles/${bottleId}/comments`,
-      { content, commentId: commentId || null, parentReplyId: parentReplyId || null, isAdminBadge: isAdminBadge ?? false },
+      { content, commentId: commentId || null, parentReplyId: parentReplyId || null, isAdminBadge: isAdminBadge ?? false, isBottleOwnerBadge: isBottleOwnerBadge ?? false },
       { headers: this.headers() }
     );
   }

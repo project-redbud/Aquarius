@@ -35,6 +35,9 @@ public class Comment
     /// <summary>管理员标识：显示管理员徽章。</summary>
     public bool IsAdminBadge { get; set; }
 
+    /// <summary>瓶主标识：显示瓶主徽章。</summary>
+    public bool IsBottleOwnerBadge { get; set; }
+
     // ── Navigation ────────────────────────────────────────
     public User? User { get; set; }
     public Bottle? Bottle { get; set; }

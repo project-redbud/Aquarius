@@ -122,8 +122,8 @@ public class CommentsController : ControllerBase
         [FromBody] AddCommentRequest req,
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
-        var exists = await _db.Bottles.AnyAsync(b => b.Id == bottleId);
-        if (!exists) return NotFound();
+        var bottle = await _db.Bottles.FindAsync(bottleId);
+        if (bottle == null) return NotFound();
 
         var token = !string.IsNullOrWhiteSpace(userToken) ? userToken.Trim()
             : Guid.NewGuid().ToString("N");
@@ -150,7 +150,10 @@ public class CommentsController : ControllerBase
             CommentId = commentId,
             ParentReplyId = parentReplyId,
             CreatedAt = DateTime.UtcNow,
-            IsAdminBadge = req.IsAdminBadge && User.FindFirst("isAdmin")?.Value == "true"
+            IsAdminBadge = req.IsAdminBadge && User.FindFirst("isAdmin")?.Value == "true",
+            IsBottleOwnerBadge = req.IsBottleOwnerBadge
+                && ((bottle.UserId != null && bottle.UserId == userId)
+                 || (bottle.UserId == null && bottle.UserToken == token))
         };
 
         _db.Comments.Add(comment);
@@ -237,7 +240,8 @@ public class CommentsController : ControllerBase
             UserId = c.UserId,
             ReplyCount = c.Replies.Count,
             ParentContent = parentContent,
-            IsAdminBadge = c.IsAdminBadge
+            IsAdminBadge = c.IsAdminBadge,
+            IsBottleOwnerBadge = c.IsBottleOwnerBadge
         };
 
         if (includeReplies)
