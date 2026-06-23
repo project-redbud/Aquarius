@@ -91,6 +91,9 @@ static void Migrate(AquariusDbContext db)
     // 回填管理员角色
     db.Database.ExecuteSqlRaw("UPDATE Users SET Role = 'admin' WHERE IsAdmin = 1 AND Role = 'user'");
 
+    // 确保 SiteSettings 表存在（旧库没有此表）
+    db.Database.ExecuteSqlRaw("CREATE TABLE IF NOT EXISTS SiteSettings (Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, SiteName TEXT NOT NULL DEFAULT 'Aquarius', Copyright TEXT NOT NULL DEFAULT '')");
+
     // 种子 SiteSettings
     if (!db.SiteSettings.Any())
     {
