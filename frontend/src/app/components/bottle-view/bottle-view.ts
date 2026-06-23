@@ -1,14 +1,15 @@
-import { Component, Input, signal, inject, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, signal, inject, OnChanges, SimpleChanges, ChangeDetectorRef, ElementRef, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService, Bottle, Comment } from '../../services/api.service';
+import { LinkifyPipe } from '../../pipes/linkify.pipe';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   standalone: true,
   selector: 'app-bottle-view',
-  imports: [FormsModule, DatePipe, RouterLink],
+  imports: [FormsModule, DatePipe, RouterLink, LinkifyPipe],
   templateUrl: './bottle-view.html',
   styleUrls: ['./bottle-view.scss']
 })
@@ -46,9 +47,13 @@ export class BottleViewComponent implements OnChanges {
     return list;
   }
   floorNum(i: number): number { return this.sortAsc() ? i + 1 : this.comments().length - i; }
+  floorLabel(i: number): string {
+    const n = this.floorNum(i) + 1;
+    return n <= 4 ? `${n}🧴` : `${n}🌊`;
+  }
   toggleSort() { this.sortAsc.update(v => !v); }
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private el: ElementRef) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['bottle'] && this.bottle) {
@@ -96,6 +101,18 @@ export class BottleViewComponent implements OnChanges {
   // ── Menu ─────────────────────────────────────────────────
 
   toggleMenu() { this.menuOpen.update(v => !v); }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.menuOpen()) return;
+    const target = event.target as HTMLElement;
+    const host = this.el.nativeElement as HTMLElement;
+    const moreBtn = host.querySelector('.more-btn');
+    const dropdown = host.querySelector('.dropdown');
+    if (!moreBtn?.contains(target) && !dropdown?.contains(target)) {
+      this.menuOpen.set(false);
+      this.cdr.detectChanges();
+    }
+  }
   shareBottle() {
     const id = this.bottle?.id;
     if (id) {
@@ -155,7 +172,14 @@ export class BottleViewComponent implements OnChanges {
   // ── Reply ───────────────────────────────────────────────
 
   private rootCommentId(c: Comment): number { return c.commentId ?? c.id; }
-  startReply(target: Comment) { this.replyTo.set(target); this.replyText.set(''); }
+  startReply(target: Comment) {
+    this.replyTo.set(target);
+    this.replyText.set('');
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      (document.querySelector('.reply-bar input[type="text"]') as HTMLInputElement)?.focus();
+    });
+  }
   cancelReply() { this.replyTo.set(null); }
   addComment() {
     const b = this.bottle;

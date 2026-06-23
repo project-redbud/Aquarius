@@ -4,10 +4,11 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService, Comment } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
+import { LinkifyPipe } from '../../pipes/linkify.pipe';
 
 @Component({
   standalone: true,
-  imports: [FormsModule, DatePipe, RouterLink],
+  imports: [FormsModule, DatePipe, RouterLink, LinkifyPipe],
   templateUrl: './admin.html',
   styleUrls: ['./admin.scss']
 })

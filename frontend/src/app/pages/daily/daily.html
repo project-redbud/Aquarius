@@ -12,7 +12,7 @@
         @if (daily()!.story!.imagePath) {
           <img [src]="'/' + daily()!.story!.imagePath" alt="story" />
         }
-        <p>{{ daily()!.story!.content }}</p>
+        <p [innerHTML]="daily()!.story!.content | linkify"></p>
       </a>
     }
 
@@ -22,7 +22,7 @@
         @if (daily()!.qa!.imagePath) {
           <img [src]="'/' + daily()!.qa!.imagePath" alt="qa" />
         }
-        <p>{{ daily()!.qa!.content }}</p>
+        <p [innerHTML]="daily()!.qa!.content | linkify"></p>
       </a>
     }
 

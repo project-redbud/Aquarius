@@ -2,10 +2,11 @@ import { Component, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService, DailyPush } from '../../services/api.service';
+import { LinkifyPipe } from '../../pipes/linkify.pipe';
 
 @Component({
   standalone: true,
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, LinkifyPipe],
   templateUrl: './daily.html',
   styleUrls: ['./daily.scss']
 })

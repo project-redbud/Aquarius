@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService, Bottle } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
+import { LinkifyPipe } from '../../pipes/linkify.pipe';
 
 interface MyComment {
   id: number;
@@ -16,7 +17,7 @@ interface MyComment {
 
 @Component({
   standalone: true,
-  imports: [DatePipe, FormsModule, RouterLink],
+  imports: [DatePipe, FormsModule, RouterLink, LinkifyPipe],
   templateUrl: './my.html',
   styleUrls: ['./my.scss']
 })
@@ -63,6 +64,7 @@ export class MyPage implements OnInit {
       this.loadedComments = true;
       if (this.loadedBottles) this.loading.set(false);
     });
+    this.loadLikedPage(1);
   }
 
   switchTab(t: 'bottles' | 'comments' | 'likes') {
@@ -125,9 +127,14 @@ export class MyPage implements OnInit {
     });
   }
 
+  isExpired(b: Bottle): boolean {
+    return new Date(b.expiresAt) < new Date();
+  }
+
   rethrowBottle(b: Bottle) {
     this.api.rethrowBottle(b.id).subscribe(updated => {
       Object.assign(b, updated);
+      alert('重新投出成功！');
     });
   }
 

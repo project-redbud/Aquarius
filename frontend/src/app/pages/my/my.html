@@ -41,7 +41,7 @@
               <button class="cancel" (click)="cancelEditBottle()">取消</button>
             </div>
           } @else {
-            <p class="content-text">{{ b.content }}</p>
+            <p class="content-text" [innerHTML]="b.content | linkify"></p>
           }
           <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>
 
@@ -55,7 +55,9 @@
             <div class="row-actions">
               <a [routerLink]="['/bottle', b.id]" class="view-link">查看详情</a>
               <button (click)="startEditBottle(b)">编辑</button>
-              <button (click)="rethrowBottle(b)">🔄 重新投出</button>
+              @if (isExpired(b)) {
+                <button (click)="rethrowBottle(b)">🔄 重新投出</button>
+              }
               <button class="danger" (click)="confirmDeleteBottle(b.id)">删除</button>
             </div>
           }
@@ -78,9 +80,9 @@
               <button class="cancel" (click)="cancelEditComment()">取消</button>
             </div>
           } @else {
-            <p class="comment-text">"{{ c.content }}"</p>
+            <p class="comment-text">"<span [innerHTML]="c.content | linkify"></span>"</p>
           }
-          <p class="comment-ref">→ 回复: {{ c.bottleContent }}</p>
+          <p class="comment-ref">→ 回复: <span [innerHTML]="c.bottleContent | linkify"></span></p>
           <span class="time">{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
 
           @if (deletingId() === c.id) {
@@ -112,7 +114,7 @@
           @if (b.imagePath) {
             <img [src]="'/' + b.imagePath" alt="bottle image" />
           }
-          <p class="content-text">{{ b.content }}</p>
+          <p class="content-text" [innerHTML]="b.content | linkify"></p>
           <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>
           <div class="row-actions">
             <a [routerLink]="['/bottle', b.id]" class="view-link">查看详情</a>

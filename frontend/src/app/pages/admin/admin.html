@@ -50,7 +50,7 @@
           <span class="time">{{ b.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
           <span class="type">{{ b.type }}</span>
         </div>
-        <p class="content">{{ b.content }}</p>
+        <p class="content" [innerHTML]="b.content | linkify"></p>
         @if (b.editedAt) {
           <p class="edited-info">编辑于 {{ b.editedAt | date:'yyyy-MM-dd HH:mm' }}</p>
         }
@@ -73,7 +73,7 @@
                 <span class="uid">[UID:{{ c.userId }}]</span>
               }
               @if (c.commentId) { <span class="reply-tag">回复</span> }
-              {{ c.content }}
+              <span [innerHTML]="c.content | linkify"></span>
               <span class="time">{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
               @if (c.editedAt) {
                 <span class="edited">(已编辑)</span>
@@ -89,7 +89,7 @@
                       @if (r.userId) {
                         <span class="uid">[UID:{{ r.userId }}]</span>
                       }
-                      {{ r.content }}
+                      <span [innerHTML]="r.content | linkify"></span>
                       <span class="time">{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                       @if (r.editedAt) {
                         <span class="edited">(已编辑)</span>
