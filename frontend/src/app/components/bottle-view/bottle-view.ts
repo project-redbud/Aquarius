@@ -119,10 +119,27 @@ export class BottleViewComponent implements OnChanges {
   }
   shareBottle() {
     const id = this.bottle?.id;
-    if (id) {
-      navigator.clipboard.writeText(`${location.origin}/bottle/${id}`)
+    if (!id) return;
+    const url = `${location.origin}/bottle/${id}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url)
         .then(() => { this.menuOpen.set(false); alert('链接已复制到剪贴板'); })
         .catch(() => alert('复制失败'));
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        this.menuOpen.set(false);
+        alert('链接已复制到剪贴板');
+      } catch {
+        alert('复制失败');
+      }
+      document.body.removeChild(ta);
     }
   }
 
