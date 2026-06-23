@@ -313,6 +313,32 @@ public class AdminController : ControllerBase
         return Ok(new { s.SiteName, s.Copyright });
     }
 
+    // ── Suggestions ──────────────────────────────────────
+
+    [HttpGet("suggestions")]
+    public async Task<ActionResult> ListSuggestions(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var query = _db.Bottles
+            .Where(b => b.Type == "suggestion")
+            .OrderByDescending(b => b.CreatedAt);
+
+        var total = await query.CountAsync();
+        var items = await query.Skip((page - 1) * pageSize).Take(pageSize)
+            .Select(b => new
+            {
+                b.Id, b.Content, b.AuthorName, b.CreatedAt,
+                b.ReportedBottleId,
+                CommentCount = b.Comments.Count
+            })
+            .ToListAsync();
+
+        return Ok(new { items, total, page, pageSize });
+    }
+
     [HttpPut("settings")]
     public async Task<ActionResult> UpdateSettings([FromBody] UpdateSettingsRequest req)
     {

@@ -17,6 +17,17 @@ public class User
 
     public bool IsAdmin { get; set; }
 
+    /// <summary>角色：user / moderator / admin</summary>
+    [MaxLength(20)]
+    public string Role { get; set; } = "user";
+
+    public bool IsBanned { get; set; }
+
+    [MaxLength(500)]
+    public string? BanReason { get; set; }
+
+    public DateTime? BannedUntil { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // ── Navigation ────────────────────────────────────────

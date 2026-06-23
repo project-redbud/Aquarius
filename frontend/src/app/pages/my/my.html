@@ -24,7 +24,10 @@
       @for (b of myBottles(); track b.id) {
         <div class="card">
           <div class="meta">
-            <span class="name">{{ b.authorName || '匿名' }}</span>
+            <span class="meta-left">
+              <span class="name">{{ b.authorName || '匿名' }}</span>
+              @if (b.type === 'suggestion') { <span class="suggestion-tag">📬 意见@if (b.reportedBottleId) { <a [routerLink]="['/bottle', b.reportedBottleId]"> → #{{ b.reportedBottleId }}</a> }</span> }
+            </span>
             <span class="time">{{ b.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
           </div>
           @if (b.editedAt) {

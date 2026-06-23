@@ -12,4 +12,5 @@ export const routes: Routes = [
   { path: 'bottle/:id', loadComponent: () => import('./pages/bottle-detail/bottle-detail').then(m => m.BottleDetailPage) },
   { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.LoginPage), data: { title: '登录' } },
   { path: 'register', loadComponent: () => import('./pages/register/register').then(m => m.RegisterPage), data: { title: '注册' } },
+  { path: 'report', loadComponent: () => import('./pages/report/report').then(m => m.ReportPage), data: { title: '举报' } },
 ];

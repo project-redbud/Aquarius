@@ -98,6 +98,98 @@
       }
     </details>
 
+    <details class="daily-push-section">
+      <summary>👥 用户管理 ({{ userTotal() }})</summary>
+      <div class="push-form">
+        <div class="row">
+          <input type="text" [(ngModel)]="userSearch" placeholder="搜索用户名/邮箱..." (keydown.enter)="searchUsers()" />
+          <button (click)="searchUsers()">🔍 搜索</button>
+        </div>
+      </div>
+      @if (users().length === 0) {
+        <p class="empty-hint">暂无用户</p>
+      } @else {
+        <div class="push-list">
+          @for (u of users(); track u.id) {
+            <div class="push-row">
+              <div class="push-info">
+                <span class="push-type">{{ u.username }}</span>
+                <span class="push-date">{{ u.email }}</span>
+                <span class="push-date">{{ u.role }}</span>
+                @if (u.isBanned) { <span style="color:#dc2626">🚫 已封禁</span> }
+              </div>
+              <div class="push-actions">
+                <button (click)="toggleUserDetail(u.id)">📋 详情</button>
+                @if (u.isBanned) {
+                  <button (click)="unbanUser(u.id)">🔓 解封</button>
+                } @else {
+                  <button (click)="startBanUser(u.id)">🚫 封禁</button>
+                }
+                <select (change)="setUserRole(u.id, $any($event.target).value)" [value]="u.role" style="padding:4px 8px;border-radius:6px;border:1px solid #ddd">
+                  <option value="user">用户</option>
+                  <option value="admin">管理员</option>
+                </select>
+                <button class="danger" (click)="deleteUser(u.id)">🗑️</button>
+              </div>
+              @if (banUserId() === u.id) {
+                <div class="republish-form">
+                  <input type="text" [(ngModel)]="banReason" placeholder="封禁理由" />
+                  <input type="number" [(ngModel)]="banDays" min="1" max="365" style="width:60px" /> 天
+                  <button class="save" (click)="confirmBan()">确认</button>
+                  <button class="cancel" (click)="cancelBan()">取消</button>
+                </div>
+              }
+              @if (userDetail()?.id === u.id) {
+                <div style="margin-top:8px;padding:8px;background:#f9fafb;border-radius:8px;font-size:.85rem">
+                  <p>瓶子: {{ userDetail().bottles?.length || 0 }} | 评论: {{ userDetail().comments?.length || 0 }}</p>
+                  @for (b of userDetail().bottles || []; track b.id) {
+                    <p style="margin:2px 0">🫧 <a [routerLink]="['/bottle', b.id]">#{{ b.id }}</a> {{ b.content?.slice(0,40) }}...</p>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+        @if (userTotalPages() > 1) {
+          <div class="pagination">
+            <button [disabled]="userPage() <= 1" (click)="goToUserPage(userPage() - 1)">←</button>
+            <span>{{ userPage() }} / {{ userTotalPages() }}</span>
+            <button [disabled]="userPage() >= userTotalPages()" (click)="goToUserPage(userPage() + 1)">→</button>
+          </div>
+        }
+      }
+    </details>
+
+    <details class="daily-push-section">
+      <summary>📬 意见箱 ({{ sugTotal() }})</summary>
+      @if (suggestions().length === 0) {
+        <p class="empty-hint">暂无意见</p>
+      } @else {
+        <div class="push-list">
+          @for (s of suggestions(); track s.id) {
+            <div class="push-row">
+              <div class="push-info">
+                <span class="push-type">{{ s.authorName }}</span>
+                <span class="push-date">{{ s.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                @if (s.reportedBottleId) { <span>→ 举报瓶子 #{{ s.reportedBottleId }}</span> }
+              </div>
+              <p class="push-content">{{ s.content }}</p>
+              <div class="push-actions">
+                <a [routerLink]="['/bottle', s.id]" class="view-link">查看</a>
+              </div>
+            </div>
+          }
+        </div>
+        @if (sugTotalPages() > 1) {
+          <div class="pagination">
+            <button [disabled]="sugPage() <= 1" (click)="goToSugPage(sugPage() - 1)">←</button>
+            <span>{{ sugPage() }} / {{ sugTotalPages() }}</span>
+            <button [disabled]="sugPage() >= sugTotalPages()" (click)="goToSugPage(sugPage() + 1)">→</button>
+          </div>
+        }
+      }
+    </details>
+
     <button class="refresh" (click)="refreshBottles()">🔄 刷新瓶子列表 ({{ bottleTotal() }})</button>
 
     @for (b of bottles(); track b.id) {

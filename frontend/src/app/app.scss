@@ -1,3 +1,8 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
 nav {
   display: flex;
   justify-content: center;
@@ -35,7 +40,7 @@ nav {
 }
 
 main {
-  min-height: calc(100vh - 52px);
+  flex: 1;
 }
 
 footer {

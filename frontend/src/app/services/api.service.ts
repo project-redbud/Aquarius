@@ -20,6 +20,7 @@ export interface Bottle {
   reThrowCount: number;
   lastReThrowAt?: string | null;
   isAdminBadge: boolean;
+  reportedBottleId?: number | null;
 }
 
 export interface Comment {
@@ -225,6 +226,48 @@ export class ApiService {
 
   adminUpdateSettings(siteName?: string, copyright?: string): Observable<{ siteName: string; copyright: string }> {
     return this.http.put<{ siteName: string; copyright: string }>(`${this.base}/admin/settings`, { siteName, copyright });
+  }
+
+  // ── admin users ────────────────────────────────────────
+
+  adminListUsers(page = 1, pageSize = 10, q?: string): Observable<any> {
+    let url = `${this.base}/admin/users?page=${page}&pageSize=${pageSize}`;
+    if (q) url += `&q=${encodeURIComponent(q)}`;
+    return this.http.get<any>(url);
+  }
+
+  adminGetUser(id: number): Observable<any> {
+    return this.http.get<any>(`${this.base}/admin/users/${id}`);
+  }
+
+  adminDeleteUser(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/admin/users/${id}`);
+  }
+
+  adminBanUser(id: number, reason: string, days: number): Observable<any> {
+    return this.http.post<any>(`${this.base}/admin/users/${id}/ban`, { reason, days });
+  }
+
+  adminUnbanUser(id: number): Observable<any> {
+    return this.http.post<any>(`${this.base}/admin/users/${id}/unban`, {});
+  }
+
+  adminSetUserRole(id: number, role: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/admin/users/${id}/role`, { role });
+  }
+
+  adminSearch(q: string): Observable<{ users: any[]; bottles: any[] }> {
+    return this.http.get<any>(`${this.base}/admin/users/search?q=${encodeURIComponent(q)}`);
+  }
+
+  adminListSuggestions(page = 1, pageSize = 10): Observable<any> {
+    return this.http.get<any>(`${this.base}/admin/suggestions?page=${page}&pageSize=${pageSize}`);
+  }
+
+  // ── report ─────────────────────────────────────────────
+
+  reportBottle(bottleId: number, content: string, imageBase64?: string): Observable<Bottle> {
+    return this.http.post<Bottle>(`${this.base}/bottles/${bottleId}/report`, { content, imageBase64 });
   }
 
   // ── my ─────────────────────────────────────────────────

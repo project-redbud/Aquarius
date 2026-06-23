@@ -53,6 +53,9 @@ public class Bottle
     /// <summary>最后一次重投时间，null 表示从未重投。</summary>
     public DateTime? LastReThrowAt { get; set; }
 
+    /// <summary>举报目标瓶子 ID（意见瓶专用）。</summary>
+    public int? ReportedBottleId { get; set; }
+
     // ── FK to User ─────────────────────────────────────────
     public int? UserId { get; set; }
 

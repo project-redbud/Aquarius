@@ -52,6 +52,7 @@ public class AuthController : ControllerBase
             Email = req.Email.Trim(),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
             IsAdmin = isFirst,
+            Role = isFirst ? "admin" : "user",
             CreatedAt = DateTime.UtcNow
         };
 
@@ -63,7 +64,8 @@ public class AuthController : ControllerBase
         {
             Token = token,
             Username = user.Username,
-            IsAdmin = user.IsAdmin
+            IsAdmin = user.IsAdmin,
+            Role = user.Role
         });
     }
 
@@ -159,4 +161,5 @@ public class AuthResponse
     public string? Token { get; set; }
     public string Username { get; set; } = string.Empty;
     public bool IsAdmin { get; set; }
+    public string Role { get; set; } = "user";
 }

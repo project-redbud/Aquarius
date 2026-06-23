@@ -14,6 +14,9 @@
               <button (click)="menuOpen.set(false); startEditBottle()">✏️ 编辑</button>
             }
             <button (click)="shareBottle()">🔗 分享</button>
+            @if (auth.isLoggedIn() && bottle.type !== 'suggestion') {
+              <button (click)="openReport()">🚨 举报</button>
+            }
           </div>
         }
       </span>
@@ -52,7 +55,7 @@
         <input type="text" [(ngModel)]="commentText" placeholder="说点什么（匿名）..." maxlength="300" (keydown.enter)="addComment()" />
         <button (click)="addComment()" [disabled]="!commentText().trim()">发送</button>
       </div>
-      @if (auth.isAdmin() || isMine(bottle.userId)) {
+      @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
         <div class="badge-options">
           @if (auth.isAdmin()) {
             <label class="admin-badge-check">
@@ -73,9 +76,9 @@
     @if (commentsPrivateNote()) {
       <div class="comments-private-banner">
         @if (commentsPrivateNote() === 'admin') {
-          ⚠️ 评论开启了仅作者可见，但管理员可见。
+          ⚠️ 评论开启了仅瓶主可见，但管理员可见。
         } @else {
-          ⚠️ 评论仅作者可见
+          ⚠️ 评论仅瓶主可见
         }
       </div>
     }
@@ -84,7 +87,7 @@
       <div class="comment">
         @if (replyTo()?.id === c.id) {
           <div class="reply-bar"><span>回复 #{{ c.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-          @if (auth.isAdmin() || isMine(bottle.userId)) {
+          @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
             <div class="badge-options">
               @if (auth.isAdmin()) {
                 <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
@@ -115,6 +118,7 @@
                 <button class="reply-btn del" (click)="confirmDeleteComment(c)">🗑️</button>
               }
             }
+            @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
             <button class="reply-btn" (click)="startReply(c)">回复</button>
           </div></div>
 
@@ -125,7 +129,7 @@
                 <div class="reply-item">
                   @if (replyTo()?.id === r.id) {
                   <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-                  @if (auth.isAdmin() || isMine(bottle.userId)) {
+                  @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
                     <div class="badge-options">
                       @if (auth.isAdmin()) {
                         <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
@@ -157,6 +161,7 @@
                           <button class="reply-btn del" (click)="confirmDeleteComment(r)">🗑️</button>
                         }
                       }
+                      @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
                       <button class="reply-btn" (click)="startReply(r)">回复</button>
                     </div></div>
                   @if (r.replyCount! > 0) { <button class="expand-btn" (click)="toggleReplies(r)">{{ expandedReplies()[r.id] ? '收起' : '展开 ' + r.replyCount + ' 条回复' }}</button> }
@@ -165,7 +170,7 @@
                       <div class="reply-item">
                         @if (replyTo()?.id === sr.id) {
                         <div class="reply-bar sub"><span>回复 #{{ sr.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-                        @if (auth.isAdmin() || isMine(bottle.userId)) {
+                        @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
                           <div class="badge-options">
                             @if (auth.isAdmin()) {
                               <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
@@ -197,6 +202,7 @@
                                 <button class="reply-btn del" (click)="confirmDeleteComment(sr)">🗑️</button>
                               }
                             }
+                            @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
                             <button class="reply-btn" (click)="startReply(sr)">回复</button>
                           </div></div>
                       </div>
@@ -211,7 +217,7 @@
                   <div class="reply-item">
                     @if (replyTo()?.id === r.id) {
                   <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-                  @if (auth.isAdmin() || isMine(bottle.userId)) {
+                  @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
                     <div class="badge-options">
                       @if (auth.isAdmin()) {
                         <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
@@ -243,6 +249,7 @@
                             <button class="reply-btn del" (click)="confirmDeleteComment(r)">🗑️</button>
                           }
                         }
+                        @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
                         <button class="reply-btn" (click)="startReply(r)">回复</button>
                       </div></div>
                     @if (r.replyCount! > 0) { <button class="expand-btn" (click)="toggleReplies(r)">展开 {{ r.replyCount }} 条回复</button> }
@@ -255,5 +262,28 @@
         }
       </div>
     }
+  </div>
+}
+
+@if (reportOpen()) {
+  <div class="report-overlay" (click)="closeReport()">
+    <div class="report-modal" (click)="$event.stopPropagation()">
+      <h2>🚨 举报瓶子 #{{ bottle?.id }}</h2>
+      <p class="report-hint">将以 <strong>{{ auth.user()?.username }}</strong> 的身份提交，管理员可见。</p>
+      <textarea [(ngModel)]="reportContent" placeholder="请描述举报原因..." maxlength="500" rows="4"></textarea>
+      <label class="report-upload">
+        📷 上传截图（可选）
+        <input type="file" accept="image/*" (change)="onReportFileSelected($event)" />
+      </label>
+      @if (reportImage()) {
+        <img [src]="reportImage()" class="report-preview" />
+      }
+      <div class="report-actions">
+        <button (click)="submitReport()" [disabled]="!reportContent().trim() || reportSubmitting()">
+          {{ reportSubmitting() ? '提交中...' : '提交举报' }}
+        </button>
+        <button class="cancel" (click)="closeReport()">取消</button>
+      </div>
+    </div>
   </div>
 }

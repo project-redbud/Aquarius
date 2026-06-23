@@ -51,6 +51,8 @@ export class AdminPage implements OnInit {
       this.refreshBottles();
       this.loadDailyPushes();
       this.loadSettings();
+      this.loadUsers();
+      this.loadSuggestions();
     }
   }
 
@@ -212,5 +214,87 @@ export class AdminPage implements OnInit {
       alert(res.updated ? '推送已更新！' : '推送创建成功！');
       this.loadDailyPushes();
     });
+  }
+
+  // ── User management ───────────────────────────────────
+  users = signal<any[]>([]);
+  userPage = signal(1);
+  userTotal = signal(0);
+  readonly userPageSize = 10;
+  userTotalPages = computed(() => Math.max(1, Math.ceil(this.userTotal() / this.userPageSize)));
+  userSearch = signal('');
+  userDetail = signal<any | null>(null);
+  banUserId = signal<number | null>(null);
+  banReason = signal('');
+  banDays = signal(7);
+
+  loadUsers() {
+    this.api.adminListUsers(this.userPage(), this.userPageSize, this.userSearch() || undefined).subscribe(res => {
+      this.users.set(res.items);
+      this.userTotal.set(res.total);
+    });
+  }
+
+  goToUserPage(p: number) {
+    if (p < 1 || p > this.userTotalPages()) return;
+    this.userPage.set(p);
+    this.loadUsers();
+  }
+
+  searchUsers() { this.userPage.set(1); this.loadUsers(); }
+
+  toggleUserDetail(id: number) {
+    if (this.userDetail()?.id === id) { this.userDetail.set(null); return; }
+    this.api.adminGetUser(id).subscribe(u => this.userDetail.set(u));
+  }
+
+  startBanUser(id: number) { this.banUserId.set(id); this.banReason.set(''); this.banDays.set(7); }
+  cancelBan() { this.banUserId.set(null); }
+  confirmBan() {
+    const id = this.banUserId(); if (!id) return;
+    this.api.adminBanUser(id, this.banReason(), this.banDays()).subscribe(() => {
+      this.cancelBan();
+      this.loadUsers();
+      alert('已封禁');
+    });
+  }
+
+  unbanUser(id: number) {
+    this.api.adminUnbanUser(id).subscribe(() => this.loadUsers());
+  }
+
+  setUserRole(id: number, role: string) {
+    this.api.adminSetUserRole(id, role).subscribe(() => {
+      this.loadUsers();
+      this.userDetail.set(null);
+    });
+  }
+
+  deleteUser(id: number) {
+    if (!confirm('确定删除该用户？其瓶子和评论将保留（转为匿名）。')) return;
+    this.api.adminDeleteUser(id).subscribe(() => {
+      this.loadUsers();
+      this.userDetail.set(null);
+    });
+  }
+
+  // ── Suggestions ───────────────────────────────────────
+  suggestions = signal<any[]>([]);
+  sugPage = signal(1);
+  sugTotal = signal(0);
+  readonly sugPageSize = 10;
+  sugTotalPages = computed(() => Math.max(1, Math.ceil(this.sugTotal() / this.sugPageSize)));
+
+  loadSuggestions() {
+    this.api.adminListSuggestions(this.sugPage(), this.sugPageSize).subscribe(res => {
+      this.suggestions.set(res.items);
+      this.sugTotal.set(res.total);
+    });
+  }
+
+  goToSugPage(p: number) {
+    if (p < 1 || p > this.sugTotalPages()) return;
+    this.sugPage.set(p);
+    this.loadSuggestions();
   }
 }

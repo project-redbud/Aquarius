@@ -1,0 +1,23 @@
+<div class="page">
+  <h1>🚨 举报瓶子 #{{ bottleId() }}</h1>
+
+  @if (!auth.isLoggedIn()) {
+    <p class="login-hint">请先 <a routerLink="/login">登录</a> 后再举报。</p>
+  } @else {
+    <p class="info">将以 <strong>{{ auth.user()?.username }}</strong> 的身份提交，管理员可见。</p>
+
+    <textarea [(ngModel)]="content" placeholder="请描述举报原因..." maxlength="500" rows="4"></textarea>
+
+    <label class="upload-label">
+      📷 上传截图（可选）
+      <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+    </label>
+    @if (imageBase64()) {
+      <img [src]="imageBase64()" class="preview" />
+    }
+
+    <button (click)="submit()" [disabled]="!content().trim() || submitting()">
+      {{ submitting() ? '提交中...' : '提交举报' }}
+    </button>
+  }
+</div>

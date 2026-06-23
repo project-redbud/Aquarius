@@ -21,6 +21,15 @@
   }
 }
 
+.suggestion-tag {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: .8rem;
+  a { color: #b45309; text-decoration: none; }
+}
+
 .tabs {
   display: flex;
   gap: 0;
@@ -61,6 +70,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 4px;
+    .meta-left { display: flex; align-items: center; gap: 6px; }
     .name { font-weight: 600; color: #2563eb; }
     .time { font-size: .8rem; color: #999; }
   }

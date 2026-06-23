@@ -1,10 +1,11 @@
 import { Component, Input, signal, inject, OnChanges, SimpleChanges, ChangeDetectorRef, ElementRef, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ApiService, Bottle, Comment } from '../../services/api.service';
 import { LinkifyPipe } from '../../pipes/linkify.pipe';
 import { AuthService } from '../../services/auth.service';
+import { ImageService } from '../../services/image.service';
 
 @Component({
   standalone: true,
@@ -35,6 +36,12 @@ export class BottleViewComponent implements OnChanges {
 
   menuOpen = signal(false);
 
+  /** 举报弹窗 */
+  reportOpen = signal(false);
+  reportContent = signal('');
+  reportImage = signal<string | null>(null);
+  reportSubmitting = signal(false);
+
   /** 评论私密提示：null=正常, 'hidden'=隐藏, 'admin'=管理员可见 */
   commentsPrivateNote = signal<string | null>(null);
 
@@ -56,7 +63,7 @@ export class BottleViewComponent implements OnChanges {
   }
   toggleSort() { this.sortAsc.update(v => !v); }
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private el: ElementRef) {}
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private el: ElementRef, private router: Router, private image: ImageService) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['bottle'] && this.bottle) {
@@ -70,6 +77,11 @@ export class BottleViewComponent implements OnChanges {
       this.commentsPrivateNote.set(null);
       this.commentAdminBadge.set(false);
       this.commentBottleOwnerBadge.set(false);
+
+      // 意见瓶：管理员默认带标识
+      if (this.bottle.type === 'suggestion' && this.auth.isAdmin()) {
+        this.commentAdminBadge.set(true);
+      }
 
       // 评论仅作者可见检查
       if (this.bottle.commentsPrivate) {
@@ -105,6 +117,36 @@ export class BottleViewComponent implements OnChanges {
   // ── Menu ─────────────────────────────────────────────────
 
   toggleMenu() { this.menuOpen.update(v => !v); }
+  openReport() {
+    this.menuOpen.set(false);
+    this.reportContent.set('');
+    this.reportImage.set(null);
+    this.reportOpen.set(true);
+  }
+
+  closeReport() { this.reportOpen.set(false); }
+
+  async onReportFileSelected(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (file) this.reportImage.set(await this.image.compress(file));
+  }
+
+  submitReport() {
+    const text = this.reportContent().trim();
+    if (!text || !this.bottle) return;
+    this.reportSubmitting.set(true);
+    this.api.reportBottle(this.bottle.id, text, this.reportImage() ?? undefined).subscribe({
+      next: () => {
+        alert('举报已提交');
+        this.closeReport();
+        this.reportSubmitting.set(false);
+      },
+      error: () => {
+        alert('提交失败，请登录后再试');
+        this.reportSubmitting.set(false);
+      }
+    });
+  }
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (!this.menuOpen()) return;

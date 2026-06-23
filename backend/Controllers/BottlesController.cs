@@ -266,6 +266,45 @@ public class BottlesController : ControllerBase
         return Ok(await ToDto(bottle, token));
     }
 
+    /// <summary>举报瓶子 — 创建意见瓶</summary>
+    [Authorize]
+    [HttpPost("{id}/report")]
+    public async Task<ActionResult<BottleDto>> Report(int id,
+        [FromBody] ReportBottleRequest req)
+    {
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var target = await _db.Bottles.FindAsync(id);
+        if (target == null) return NotFound();
+
+        var user = await _db.Users.FindAsync(userId.Value);
+        if (user == null) return Unauthorized();
+
+        string? imagePath = null;
+        if (!string.IsNullOrWhiteSpace(req.ImageBase64))
+            imagePath = await SaveImage(req.ImageBase64);
+
+        var bottle = new Bottle
+        {
+            Content = req.Content,
+            ImagePath = imagePath,
+            AuthorName = user.Username,
+            UserToken = "system",
+            UserId = userId,
+            Type = "suggestion",
+            ReportedBottleId = id,
+            CommentsPrivate = true,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(365)
+        };
+
+        _db.Bottles.Add(bottle);
+        await _db.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetOne), new { id = bottle.Id }, await ToDto(bottle, "system"));
+    }
+
     // ── helpers ────────────────────────────────────────────
 
     private string ResolveToken(string? headerToken)
@@ -295,7 +334,8 @@ public class BottlesController : ControllerBase
             ExpiresAt = b.ExpiresAt,
             ReThrowCount = b.ReThrowCount,
             LastReThrowAt = b.LastReThrowAt,
-            IsAdminBadge = b.IsAdminBadge
+            IsAdminBadge = b.IsAdminBadge,
+            ReportedBottleId = b.ReportedBottleId
         };
     }
 
@@ -321,4 +361,10 @@ public class BottlesController : ControllerBase
             return null;
         }
     }
+}
+
+public class ReportBottleRequest
+{
+    public string Content { get; set; } = string.Empty;
+    public string? ImageBase64 { get; set; }
 }
