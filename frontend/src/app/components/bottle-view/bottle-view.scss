@@ -383,6 +383,20 @@
   &:focus { border-color: #2563eb; }
 }
 
+// ── Comments pagination ──────────────────────────────────
+
+.pagination {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; margin-top: 20px; padding: 12px 0;
+  button {
+    padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 10px;
+    background: #fff; color: #374151; font-size: .9rem; cursor: pointer;
+    &:disabled { opacity: .35; cursor: not-allowed; }
+    &:not(:disabled):hover { background: #f3f4f6; }
+  }
+  span { font-size: .9rem; color: #6b7280; }
+}
+
 // ── Report modal ──────────────────────────────────────────
 
 .report-overlay {

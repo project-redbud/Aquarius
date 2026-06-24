@@ -104,7 +104,7 @@
       </div>
     }
 
-    @for (c of sortedComments(); track c.id; let i = $index) {
+    @for (c of pagedComments(); track c.id; let i = $index) {
       <div class="comment">
         @if (replyTo()?.id === c.id) {
           <div class="reply-bar"><span>回复 #{{ c.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
@@ -284,6 +284,14 @@
       </div>
     }
   </div>
+
+  @if (commentTotalPages() > 1) {
+    <div class="pagination">
+      <button [disabled]="commentPage() <= 1" (click)="goCommentPage(commentPage() - 1)">← 上一页</button>
+      <span>{{ commentPage() }} / {{ commentTotalPages() }}</span>
+      <button [disabled]="commentPage() >= commentTotalPages()" (click)="goCommentPage(commentPage() + 1)">下一页 →</button>
+    </div>
+  }
 }
 
 @if (logOpen()) {

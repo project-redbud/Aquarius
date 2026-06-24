@@ -1,4 +1,4 @@
-import { Component, Input, signal, inject, OnChanges, SimpleChanges, ChangeDetectorRef, ElementRef, HostListener } from '@angular/core';
+import { Component, Input, signal, computed, inject, OnChanges, SimpleChanges, ChangeDetectorRef, ElementRef, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
@@ -56,12 +56,26 @@ export class BottleViewComponent implements OnChanges {
   /** 评论时是否带瓶主标识 */
   commentBottleOwnerBadge = signal(false);
 
-  sortedComments(): Comment[] {
+  /** 评论分页 */
+  readonly commentPageSize = 12;
+  commentPage = signal(1);
+  commentTotalPages = computed(() => Math.max(1, Math.ceil(this.comments().length / this.commentPageSize)));
+
+  pagedComments(): Comment[] {
     const list = [...this.comments()];
     if (this.sortAsc()) list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    return list;
+    const start = (this.commentPage() - 1) * this.commentPageSize;
+    return list.slice(start, start + this.commentPageSize);
   }
-  floorNum(i: number): number { return this.sortAsc() ? i + 1 : this.comments().length - i; }
+  goCommentPage(p: number) {
+    if (p < 1 || p > this.commentTotalPages()) return;
+    this.commentPage.set(p);
+  }
+
+  floorNum(i: number): number {
+    const offset = (this.commentPage() - 1) * this.commentPageSize;
+    return this.sortAsc() ? offset + i + 1 : this.comments().length - offset - i;
+  }
   floorLabel(i: number): string {
     const n = this.floorNum(i) + 1;
     return n <= 4 ? `${n}🧴` : `${n}🌊`;
@@ -76,6 +90,7 @@ export class BottleViewComponent implements OnChanges {
       this.commentText.set('');
       this.replyTo.set(null);
       this.expandedReplies.set({});
+      this.commentPage.set(1);
       this.editingBottle.set(false);
       this.editingCommentId.set(null);
       this.deletingCommentId.set(null);
