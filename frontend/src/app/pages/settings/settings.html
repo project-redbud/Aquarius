@@ -15,7 +15,12 @@
     <h2>📧 邮箱</h2>
     <p class="info">当前邮箱：{{ email() }} @if (emailVerified()) {✅ 已验证} @else {⚠️ 未验证 <a href="javascript:void(0)" (click)="resendVerification()">重发验证邮件</a>}</p>
     @if (pendingEmail()) {
-      <p class="info pending">⏳ 待验证邮箱：{{ pendingEmail() }}（请查收验证邮件）</p>
+      <p class="info pending">
+        ⏳ 待验证邮箱：{{ pendingEmail() }}
+        <a href="javascript:void(0)" (click)="resendPendingVerification()" [class.disabled]="resendCooldown() > 0">
+          {{ resendCooldown() > 0 ? '重发验证邮件 (' + resendCooldown() + 's)' : '重发验证邮件' }}
+        </a>
+      </p>
     }
     <input type="email" [(ngModel)]="newEmail" placeholder="新邮箱地址" />
     <button [disabled]="emailLoading()" (click)="changeEmail()">{{ emailLoading() ? '发送中...' : '修改邮箱' }}</button>

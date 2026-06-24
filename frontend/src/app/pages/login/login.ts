@@ -23,6 +23,7 @@ export class LoginPage implements OnInit {
   forgotEmail = signal('');
   forgotMessage = signal('');
   forgotLoading = signal(false);
+  forgotCooldown = signal(0);
 
   private auth = inject(AuthService);
   private api = inject(ApiService);
@@ -64,7 +65,7 @@ export class LoginPage implements OnInit {
 
   submitForgot() {
     const email = this.forgotEmail().trim();
-    if (!email) return;
+    if (!email || this.forgotCooldown() > 0) return;
 
     this.forgotLoading.set(true);
     this.forgotMessage.set('');
@@ -73,11 +74,22 @@ export class LoginPage implements OnInit {
       next: (res) => {
         this.forgotLoading.set(false);
         this.forgotMessage.set(res.message);
+        this.startForgotCooldown();
       },
       error: (err) => {
         this.forgotLoading.set(false);
         this.forgotMessage.set(err.error?.error || '发送失败');
       }
     });
+  }
+
+  private forgotTimer: any;
+  private startForgotCooldown() {
+    this.forgotCooldown.set(60);
+    this.forgotTimer = setInterval(() => {
+      const v = this.forgotCooldown() - 1;
+      this.forgotCooldown.set(v);
+      if (v <= 0) clearInterval(this.forgotTimer);
+    }, 1000);
   }
 }

@@ -25,6 +25,7 @@ export class SettingsPage implements OnInit {
   newEmail = signal('');
   emailMsg = signal('');
   emailLoading = signal(false);
+  resendCooldown = signal(0);
 
   // Preferences
   notifyPreference = signal('default');
@@ -68,6 +69,25 @@ export class SettingsPage implements OnInit {
 
   resendVerification() {
     this.api.resendUserVerification().subscribe(r => alert(r.message));
+  }
+
+  resendPendingVerification() {
+    if (this.resendCooldown() > 0) return;
+    this.emailLoading.set(true);
+    this.api.resendUserVerification().subscribe({
+      next: r => { alert(r.message); this.emailLoading.set(false); this.startCooldown(); },
+      error: e => { alert(e.error?.error || '发送失败'); this.emailLoading.set(false); }
+    });
+  }
+
+  private cooldownTimer: any;
+  private startCooldown() {
+    this.resendCooldown.set(60);
+    this.cooldownTimer = setInterval(() => {
+      const v = this.resendCooldown() - 1;
+      this.resendCooldown.set(v);
+      if (v <= 0) clearInterval(this.cooldownTimer);
+    }, 1000);
   }
 
   savePreferences() {

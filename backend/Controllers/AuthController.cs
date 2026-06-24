@@ -70,7 +70,7 @@ public class AuthController : ControllerBase
         // 发送验证邮件
         var settings = await _db.SiteSettings.FirstOrDefaultAsync();
         if (settings != null)
-            await _email.SendVerificationAsync(settings, user.Email, verifyToken);
+            _email.SendVerificationBackground(settings, user.Email, verifyToken);
 
         return Ok(new { message = "注册成功！请查收验证邮件并激活账号。" });
     }
@@ -158,7 +158,7 @@ public class AuthController : ControllerBase
 
         var settings = await _db.SiteSettings.FirstOrDefaultAsync();
         if (settings != null)
-            await _email.SendVerificationAsync(settings, user.Email, user.EmailVerifyToken);
+            _email.SendVerificationBackground(settings, user.Email, user.EmailVerifyToken);
 
         return Ok(new { message = "验证邮件已重新发送，请查收" });
     }
@@ -181,7 +181,7 @@ public class AuthController : ControllerBase
 
         var settings = await _db.SiteSettings.FirstOrDefaultAsync();
         if (settings != null)
-            await _email.SendPasswordResetAsync(settings, user.Email, user.ResetPasswordToken);
+            _email.SendPasswordResetBackground(settings, user.Email, user.ResetPasswordToken);
 
         return Ok(new { message = "重置密码链接已发送到注册邮箱" });
     }
@@ -206,6 +206,11 @@ public class AuthController : ControllerBase
         user.ResetPasswordToken = null;
         user.ResetPasswordExpires = null;
         await _db.SaveChangesAsync();
+
+        // 后台发送密码重置通知邮件
+        var settings = await _db.SiteSettings.FirstOrDefaultAsync();
+        if (settings != null)
+            _email.SendBackground(settings, user.Email, "你的 Aquarius 密码已重置", "<p>你的密码刚刚通过找回密码功能被重置。如果不是你本人操作，请立即联系管理员。</p>");
 
         return Ok(new { message = "密码已重置，请登录" });
     }

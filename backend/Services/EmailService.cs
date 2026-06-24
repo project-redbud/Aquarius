@@ -21,6 +21,7 @@ public class EmailService
         var client = new SmtpClient(s.SmtpHost, s.SmtpPort)
         {
             EnableSsl = s.SmtpEnableSsl,
+            UseDefaultCredentials = false,
             Credentials = string.IsNullOrWhiteSpace(s.SmtpUser)
                 ? null
                 : new NetworkCredential(s.SmtpUser, s.SmtpPassword)
@@ -28,28 +29,40 @@ public class EmailService
         return client;
     }
 
-    /// <summary>发送邮件。如 SMTP 未配置则静默跳过（开发环境）。</summary>
-    public async Task SendAsync(SiteSettings settings, string to, string subject, string body)
+    /// <summary>发送邮件（后台任务，不阻塞）。如 SMTP 未配置则静默跳过。</summary>
+    public void SendBackground(SiteSettings settings, string to, string subject, string body)
     {
-        using var client = BuildClient(settings);
-        if (client == null)
+        _ = Task.Run(async () =>
         {
-            // SMTP 未配置：记录日志但不报错（开发环境可接受）
-            Console.WriteLine($"[Email] SMTP not configured. Would send to {to}: {subject}");
-            return;
-        }
+            using var client = BuildClient(settings);
+            if (client == null)
+            {
+                Console.WriteLine($"[Email] SMTP not configured. Would send to {to}: {subject}");
+                return;
+            }
 
-        var from = string.IsNullOrWhiteSpace(settings.SmtpFrom) ? settings.SmtpUser : settings.SmtpFrom;
-        using var msg = new MailMessage(from, to, subject, body)
-        {
-            IsBodyHtml = true
-        };
+            var displayName = string.IsNullOrWhiteSpace(settings.SiteName) ? "Aquarius" : settings.SiteName;
+            var fromAddr = new MailAddress(settings.SmtpUser, displayName);
+            using var msg = new MailMessage(fromAddr, new MailAddress(to))
+            {
+                IsBodyHtml = true,
+                Sender = new MailAddress(settings.SmtpUser)
+            };
 
-        await client.SendMailAsync(msg);
+            try
+            {
+                await client.SendMailAsync(msg);
+                Console.WriteLine($"[Email] Sent to {to}: {subject}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Email] SMTP error (host={settings.SmtpHost}:{settings.SmtpPort}, ssl={settings.SmtpEnableSsl}, user={settings.SmtpUser}): {ex.Message}");
+            }
+        });
     }
 
-    /// <summary>发送邮箱验证邮件</summary>
-    public async Task SendVerificationAsync(SiteSettings settings, string to, string token)
+    /// <summary>发送邮箱验证邮件（后台）</summary>
+    public void SendVerificationBackground(SiteSettings settings, string to, string token)
     {
         var link = $"{settings.SiteBaseUrl.TrimEnd('/')}/verify-email?token={Uri.EscapeDataString(token)}";
         var body = $"""
@@ -63,11 +76,11 @@ public class EmailService
               <p style="color:#888;font-size:14px">链接 24 小时内有效。</p>
             </div>
             """;
-        await SendAsync(settings, to, "验证你的 Aquarius 邮箱", body);
+        SendBackground(settings, to, "验证你的 Aquarius 邮箱", body);
     }
 
-    /// <summary>发送密码重置邮件</summary>
-    public async Task SendPasswordResetAsync(SiteSettings settings, string to, string token)
+    /// <summary>发送密码重置邮件（后台）</summary>
+    public void SendPasswordResetBackground(SiteSettings settings, string to, string token)
     {
         var link = $"{settings.SiteBaseUrl.TrimEnd('/')}/reset-password?token={Uri.EscapeDataString(token)}";
         var body = $"""
@@ -81,6 +94,6 @@ public class EmailService
               <p style="color:#888;font-size:14px">链接 1 小时内有效。如果你没有请求重置密码，请忽略此邮件。</p>
             </div>
             """;
-        await SendAsync(settings, to, "重置你的 Aquarius 密码", body);
+        SendBackground(settings, to, "重置你的 Aquarius 密码", body);
     }
 }
