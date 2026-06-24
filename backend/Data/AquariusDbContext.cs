@@ -13,6 +13,7 @@ public class AquariusDbContext : DbContext
     public DbSet<Like> Likes => Set<Like>();
     public DbSet<DailyPush> DailyPushes => Set<DailyPush>();
     public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
+    public DbSet<BottleLog> BottleLogs => Set<BottleLog>();
 
     protected override void OnModelCreating(ModelBuilder model)
     {
@@ -69,5 +70,19 @@ public class AquariusDbContext : DbContext
         model.Entity<DailyPush>()
             .HasIndex(d => new { d.Date, d.Type })
             .IsUnique();
+
+        // BottleLog → Bottle
+        model.Entity<BottleLog>()
+            .HasOne(l => l.Bottle)
+            .WithMany()
+            .HasForeignKey(l => l.BottleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // BottleLog → OperatorUser
+        model.Entity<BottleLog>()
+            .HasOne(l => l.OperatorUser)
+            .WithMany()
+            .HasForeignKey(l => l.OperatorUserId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

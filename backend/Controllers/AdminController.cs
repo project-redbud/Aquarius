@@ -253,6 +253,20 @@ public class AdminController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
         _db.DailyPushes.Add(push);
+
+        // 记日志
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var user = await _db.Users.FindAsync(userId);
+        _db.BottleLogs.Add(new Models.BottleLog
+        {
+            BottleId = bottle.Id,
+            OperatorUserId = userId,
+            OperatorUsername = user?.Username ?? "未知",
+            Action = "republish_daily",
+            Detail = $"重新推送至 {newDate:yyyy-MM-dd}",
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _db.SaveChangesAsync();
 
         return Created($"/api/admin/daily/{push.Id}", new { push.Id, push.Type, push.Content, push.ImagePath, push.Date, push.BottleId });
@@ -302,6 +316,99 @@ public class AdminController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>管理员删除评论/回复（记日志）</summary>
+    [HttpDelete("comments/{id}")]
+    public async Task<ActionResult> DeleteComment(int id)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var comment = await _db.Comments.Include(c => c.Replies).FirstOrDefaultAsync(c => c.Id == id);
+        if (comment == null) return NotFound();
+
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var user = await _db.Users.FindAsync(userId);
+
+        var detail = comment.Content.Length > 50 ? comment.Content[..50] + "..." : comment.Content;
+
+        _db.Comments.RemoveRange(comment.Replies);
+        _db.Comments.Remove(comment);
+
+        _db.BottleLogs.Add(new Models.BottleLog
+        {
+            BottleId = comment.BottleId,
+            OperatorUserId = userId,
+            OperatorUsername = user?.Username ?? "未知",
+            Action = "delete_reply",
+            Detail = detail,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    /// <summary>关闭瓶子（不再捞取/评论，但仍可查看）</summary>
+    [HttpPost("bottles/{id}/close")]
+    public async Task<ActionResult> CloseBottle(int id)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var bottle = await _db.Bottles.FindAsync(id);
+        if (bottle == null) return NotFound();
+        if (bottle.IsClosed) return BadRequest(new { error = "瓶子已关闭" });
+
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var user = await _db.Users.FindAsync(userId);
+
+        bottle.IsClosed = true;
+        bottle.ClosedAt = DateTime.UtcNow;
+        bottle.ClosedByUserId = userId;
+
+        _db.BottleLogs.Add(new Models.BottleLog
+        {
+            BottleId = id,
+            OperatorUserId = userId,
+            OperatorUsername = user?.Username ?? "未知",
+            Action = "close",
+            Detail = null,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _db.SaveChangesAsync();
+        return Ok(new { message = "瓶子已关闭" });
+    }
+
+    /// <summary>打开瓶子（恢复捞取/评论）</summary>
+    [HttpPost("bottles/{id}/open")]
+    public async Task<ActionResult> OpenBottle(int id)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var bottle = await _db.Bottles.FindAsync(id);
+        if (bottle == null) return NotFound();
+        if (!bottle.IsClosed) return BadRequest(new { error = "瓶子未关闭" });
+
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var user = await _db.Users.FindAsync(userId);
+
+        bottle.IsClosed = false;
+        bottle.ClosedAt = null;
+        bottle.ClosedByUserId = null;
+
+        _db.BottleLogs.Add(new Models.BottleLog
+        {
+            BottleId = id,
+            OperatorUserId = userId,
+            OperatorUsername = user?.Username ?? "未知",
+            Action = "open",
+            Detail = null,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _db.SaveChangesAsync();
+        return Ok(new { message = "瓶子已打开" });
+    }
+
     // ── Site settings ────────────────────────────────────
 
     [HttpGet("settings")]
@@ -328,21 +435,23 @@ public class AdminController : ControllerBase
     {
         if (!IsAdmin()) return Forbid();
 
-        var query = _db.Bottles
-            .Where(b => b.Type == "suggestion")
-            .OrderByDescending(b => b.CreatedAt);
+        var baseQuery = _db.Bottles.Where(b => b.Type == "suggestion");
+        var pendingTotal = await baseQuery.CountAsync(b => !b.IsClosed);
+        var total = await baseQuery.CountAsync();
 
-        var total = await query.CountAsync();
-        var items = await query.Skip((page - 1) * pageSize).Take(pageSize)
+        var items = await baseQuery
+            .OrderByDescending(b => b.CreatedAt)
+            .Skip((page - 1) * pageSize).Take(pageSize)
             .Select(b => new
             {
                 b.Id, b.Content, b.AuthorName, b.CreatedAt,
                 b.ReportedBottleId,
+                b.IsClosed,
                 CommentCount = b.Comments.Count
             })
             .ToListAsync();
 
-        return Ok(new { items, total, page, pageSize });
+        return Ok(new { items, total, pendingTotal, page, pageSize });
     }
 
     [HttpPut("settings")]

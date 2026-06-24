@@ -17,10 +17,21 @@
             @if (auth.isLoggedIn() && bottle.type !== 'suggestion') {
               <button (click)="openReport()">🚨 举报</button>
             }
+            @if (auth.isAdmin()) {
+              @if (bottle.isClosed) {
+                <button (click)="adminOpenBottle()">🔓 打开</button>
+              } @else {
+                <button (click)="adminCloseBottle()">🔒 关闭</button>
+              }
+            }
+            <button (click)="openLog()">📋 日志</button>
           </div>
         }
       </span>
     </div>
+    @if (bottle.isClosed) {
+      <div class="closed-banner">🔒 此瓶子已被管理员关闭，不再接受评论和捞取</div>
+    }
     @if (bottle.imagePath) { <img [src]="'/' + bottle.imagePath" alt="bottle image" class="bottle-img" /> }
     <p class="content" [innerHTML]="bottle.content | linkify"></p>
     <div class="actions">
@@ -51,7 +62,11 @@
       <button class="sort-btn" (click)="toggleSort()">{{ sortAsc() ? '🔼 最早' : '🔽 最新' }}</button>
     </div>
     @if (!replyTo()) {
-      @if (auth.isLoggedIn()) {
+      @if (bottle.isClosed && !auth.isAdmin()) {
+        <div class="comment-input login-hint">
+          <span>🔒 瓶子已关闭，无法评论</span>
+        </div>
+      } @else if (auth.isLoggedIn()) {
         <div class="comment-input">
           <input type="text" [(ngModel)]="commentText" placeholder="说点什么（匿名）..." maxlength="300" (keydown.enter)="addComment()" />
           <button (click)="addComment()" [disabled]="!commentText().trim()">发送</button>
@@ -125,7 +140,7 @@
               }
             }
             @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
-            @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="startReply(c)">回复</button> }
+            @if (auth.isLoggedIn() && (!bottle.isClosed || auth.isAdmin())) { <button class="reply-btn" (click)="startReply(c)">回复</button> }
           </div></div>
 
         @if (c.replyCount! > 0) {
@@ -168,7 +183,7 @@
                         }
                       }
                       @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
-                      @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="startReply(r)">回复</button> }
+                      @if (auth.isLoggedIn() && (!bottle.isClosed || auth.isAdmin())) { <button class="reply-btn" (click)="startReply(r)">回复</button> }
                     </div></div>
                   @if (r.replyCount! > 0) { <button class="expand-btn" (click)="toggleReplies(r)">{{ expandedReplies()[r.id] ? '收起' : '展开 ' + r.replyCount + ' 条回复' }}</button> }
                   @if (expandedReplies()[r.id]) {
@@ -209,7 +224,7 @@
                               }
                             }
                             @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
-                            @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="startReply(sr)">回复</button> }
+                            @if (auth.isLoggedIn() && (!bottle.isClosed || auth.isAdmin())) { <button class="reply-btn" (click)="startReply(sr)">回复</button> }
                           </div></div>
                       </div>
                     }</div>
@@ -256,7 +271,7 @@
                           }
                         }
                         @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
-                        @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="startReply(r)">回复</button> }
+                        @if (auth.isLoggedIn() && (!bottle.isClosed || auth.isAdmin())) { <button class="reply-btn" (click)="startReply(r)">回复</button> }
                       </div></div>
                     @if (r.replyCount! > 0) { <button class="expand-btn" (click)="toggleReplies(r)">展开 {{ r.replyCount }} 条回复</button> }
                   </div>
@@ -268,6 +283,33 @@
         }
       </div>
     }
+  </div>
+}
+
+@if (logOpen()) {
+  <div class="report-overlay" (click)="closeLog()">
+    <div class="report-modal" (click)="$event.stopPropagation()">
+      <h2>📋 操作日志 — 瓶子 #{{ bottle?.id }}</h2>
+      @if (logsLoading()) {
+        <p class="report-hint">加载中...</p>
+      } @else if (logs().length === 0) {
+        <p class="report-hint">暂无操作记录</p>
+      } @else {
+        <div class="log-list">
+          @for (l of logs(); track l.id) {
+            <div class="log-item">
+              <span class="log-action">{{ actionLabel(l.action) }}</span>
+              <span class="log-user">{{ l.operatorUsername }}</span>
+              @if (l.detail) { <span class="log-detail">{{ l.detail }}</span> }
+              <span class="log-time">{{ l.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+            </div>
+          }
+        </div>
+      }
+      <div class="report-actions">
+        <button class="cancel" (click)="closeLog()">关闭</button>
+      </div>
+    </div>
   </div>
 }
 

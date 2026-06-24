@@ -42,6 +42,11 @@ export class BottleViewComponent implements OnChanges {
   reportImage = signal<string | null>(null);
   reportSubmitting = signal(false);
 
+  /** 操作日志弹窗 */
+  logOpen = signal(false);
+  logs = signal<{ id: number; operatorUsername: string; action: string; detail?: string | null; createdAt: string }[]>([]);
+  logsLoading = signal(false);
+
   /** 评论私密提示：null=正常, 'hidden'=隐藏, 'admin'=管理员可见 */
   commentsPrivateNote = signal<string | null>(null);
 
@@ -125,6 +130,47 @@ export class BottleViewComponent implements OnChanges {
   }
 
   closeReport() { this.reportOpen.set(false); }
+
+  openLog() {
+    this.menuOpen.set(false);
+    this.logs.set([]);
+    this.logsLoading.set(true);
+    this.logOpen.set(true);
+    this.api.getBottleLogs(this.bottle!.id).subscribe({
+      next: data => { this.logs.set(data); this.logsLoading.set(false); },
+      error: () => { this.logsLoading.set(false); }
+    });
+  }
+
+  closeLog() { this.logOpen.set(false); }
+
+  adminCloseBottle() {
+    if (!this.bottle || !confirm('确定关闭此瓶子？')) return;
+    this.menuOpen.set(false);
+    this.api.adminCloseBottle(this.bottle.id).subscribe(() => {
+      this.bottle!.isClosed = true;
+      this.cdr.detectChanges();
+    });
+  }
+
+  adminOpenBottle() {
+    if (!this.bottle || !confirm('确定重新打开此瓶子？')) return;
+    this.menuOpen.set(false);
+    this.api.adminOpenBottle(this.bottle.id).subscribe(() => {
+      this.bottle!.isClosed = false;
+      this.cdr.detectChanges();
+    });
+  }
+
+  actionLabel(action: string): string {
+    const map: Record<string, string> = {
+      close: '🔒 关闭瓶子',
+      open: '🔓 打开瓶子',
+      delete_reply: '🗑️ 删除回复',
+      republish_daily: '🔄 重新推送'
+    };
+    return map[action] || action;
+  }
 
   async onReportFileSelected(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];

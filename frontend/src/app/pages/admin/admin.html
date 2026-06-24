@@ -186,17 +186,18 @@
     </details>
 
     <details class="daily-push-section">
-      <summary>📬 意见箱 ({{ sugTotal() }})</summary>
+      <summary>📬 意见箱（待处理：{{ sugPendingTotal() }}）</summary>
       @if (suggestions().length === 0) {
         <p class="empty-hint">暂无意见</p>
       } @else {
         <div class="push-list">
           @for (s of suggestions(); track s.id) {
-            <div class="push-row">
+            <div class="push-row" [class.closed]="s.isClosed">
               <div class="push-info">
                 <span class="push-type">{{ s.authorName }}</span>
                 <span class="push-date">{{ s.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                 @if (s.reportedBottleId) { <span>→ 举报瓶子 #{{ s.reportedBottleId }}</span> }
+                @if (s.isClosed) { <span class="tag-done">✅ 已处理</span> }
               </div>
               <p class="push-content">{{ s.content }}</p>
               <div class="push-actions">
@@ -237,6 +238,11 @@
         <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>
         <div class="row-actions">
           <a [routerLink]="['/bottle', b.id]" class="view-link">查看详情</a>
+          @if (b.isClosed) {
+            <button (click)="openBottle(b.id)">🔓 打开</button>
+          } @else {
+            <button (click)="closeBottle(b.id)">🔒 关闭</button>
+          }
           <button (click)="toggleComments(b.id)">
             {{ commentsCache()[b.id] ? '隐藏评论' : '查看评论' }}
             @if (loadingComments()[b.id]) { ... }

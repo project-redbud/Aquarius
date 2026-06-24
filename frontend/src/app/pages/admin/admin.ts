@@ -304,6 +304,7 @@ export class AdminPage implements OnInit {
   suggestions = signal<any[]>([]);
   sugPage = signal(1);
   sugTotal = signal(0);
+  sugPendingTotal = signal(0);
   readonly sugPageSize = 10;
   sugTotalPages = computed(() => Math.max(1, Math.ceil(this.sugTotal() / this.sugPageSize)));
 
@@ -311,6 +312,7 @@ export class AdminPage implements OnInit {
     this.api.adminListSuggestions(this.sugPage(), this.sugPageSize).subscribe(res => {
       this.suggestions.set(res.items);
       this.sugTotal.set(res.total);
+      this.sugPendingTotal.set(res.pendingTotal ?? 0);
     });
   }
 
@@ -318,5 +320,21 @@ export class AdminPage implements OnInit {
     if (p < 1 || p > this.sugTotalPages()) return;
     this.sugPage.set(p);
     this.loadSuggestions();
+  }
+
+  closeBottle(id: number) {
+    if (!confirm('确定关闭此瓶子？关闭后不再被捞取，也无法评论。')) return;
+    this.api.adminCloseBottle(id).subscribe(() => {
+      this.loadBottles();
+      this.loadSuggestions();
+    });
+  }
+
+  openBottle(id: number) {
+    if (!confirm('确定重新打开此瓶子？')) return;
+    this.api.adminOpenBottle(id).subscribe(() => {
+      this.loadBottles();
+      this.loadSuggestions();
+    });
   }
 }

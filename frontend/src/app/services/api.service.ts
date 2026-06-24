@@ -21,6 +21,7 @@ export interface Bottle {
   lastReThrowAt?: string | null;
   isAdminBadge: boolean;
   reportedBottleId?: number | null;
+  isClosed: boolean;
 }
 
 export interface Comment {
@@ -298,6 +299,28 @@ export class ApiService {
     return this.http.get<any>(`${this.base}/comments/mine?page=${page}&pageSize=${pageSize}`, {
       headers: this.headers()
     });
+  }
+
+  // ── logs ───────────────────────────────────────────────
+
+  getBottleLogs(bottleId: number): Observable<{ id: number; operatorUsername: string; action: string; detail?: string | null; createdAt: string }[]> {
+    return this.http.get<any[]>(`${this.base}/bottles/${bottleId}/logs`, {
+      headers: this.headers()
+    });
+  }
+
+  // ── admin bottle actions ───────────────────────────────
+
+  adminCloseBottle(id: number): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/admin/bottles/${id}/close`, {});
+  }
+
+  adminOpenBottle(id: number): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/admin/bottles/${id}/open`, {});
+  }
+
+  adminDeleteComment(commentId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/admin/comments/${commentId}`);
   }
 
   // ── auth ───────────────────────────────────────────────

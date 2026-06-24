@@ -56,6 +56,15 @@ public class Bottle
     /// <summary>举报目标瓶子 ID（意见瓶专用）。</summary>
     public int? ReportedBottleId { get; set; }
 
+    /// <summary>瓶子是否已关闭。关闭后不可捞取、不可评论，但可查看。</summary>
+    public bool IsClosed { get; set; }
+
+    /// <summary>关闭时间。</summary>
+    public DateTime? ClosedAt { get; set; }
+
+    /// <summary>关闭操作人 ID。</summary>
+    public int? ClosedByUserId { get; set; }
+
     // ── FK to User ─────────────────────────────────────────
     public int? UserId { get; set; }
 

@@ -75,7 +75,7 @@ public class BottlesController : ControllerBase
         var token = ResolveToken(userToken);
         var userId = GetUserId();
 
-        var query = _db.Bottles.Where(b => b.Type == "normal" && b.ExpiresAt > DateTime.UtcNow);
+        var query = _db.Bottles.Where(b => b.Type == "normal" && b.ExpiresAt > DateTime.UtcNow && !b.IsClosed);
 
         // 登录可见：未登录用户不捞到标记了 RequireLogin 的瓶子
         if (userId == null)
@@ -111,6 +111,17 @@ public class BottlesController : ControllerBase
         // 过期保护：已过期的瓶子返回 404
         if (bottle.ExpiresAt <= DateTime.UtcNow)
             return NotFound();
+
+        // 意见瓶：仅瓶主和管理员可见
+        if (bottle.Type == "suggestion")
+        {
+            var isAdmin = User.FindFirst("isAdmin")?.Value == "true";
+            var userId = GetUserId();
+            bool isOwner = (bottle.UserId != null && bottle.UserId == userId)
+                || (bottle.UserId == null && bottle.UserToken == token);
+            if (!isAdmin && !isOwner)
+                return NotFound();
+        }
 
         return Ok(await ToDto(bottle, token));
     }
@@ -318,6 +329,29 @@ public class BottlesController : ControllerBase
         return CreatedAtAction(nameof(GetOne), new { id = bottle.Id }, await ToDto(bottle, "system"));
     }
 
+    /// <summary>获取瓶子操作日志（任何人可见，操作人不匿名）</summary>
+    [HttpGet("{id}/logs")]
+    public async Task<ActionResult<List<BottleLogDto>>> GetLogs(int id)
+    {
+        var exists = await _db.Bottles.AnyAsync(b => b.Id == id);
+        if (!exists) return NotFound();
+
+        var logs = await _db.BottleLogs
+            .Where(l => l.BottleId == id)
+            .OrderByDescending(l => l.CreatedAt)
+            .Select(l => new BottleLogDto
+            {
+                Id = l.Id,
+                OperatorUsername = l.OperatorUsername,
+                Action = l.Action,
+                Detail = l.Detail,
+                CreatedAt = l.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(logs);
+    }
+
     // ── helpers ────────────────────────────────────────────
 
     private string ResolveToken(string? headerToken)
@@ -348,7 +382,8 @@ public class BottlesController : ControllerBase
             ReThrowCount = b.ReThrowCount,
             LastReThrowAt = b.LastReThrowAt,
             IsAdminBadge = b.IsAdminBadge,
-            ReportedBottleId = b.ReportedBottleId
+            ReportedBottleId = b.ReportedBottleId,
+            IsClosed = b.IsClosed
         };
     }
 

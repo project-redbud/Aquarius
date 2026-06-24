@@ -24,6 +24,16 @@
   padding: 20px;
   margin-bottom: 20px;
 
+  .closed-banner {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: .85rem;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
   .header {
     display: flex;
     justify-content: space-between;
@@ -410,5 +420,26 @@
       &:disabled { background: #fca5a5; cursor: not-allowed; }
       &.cancel { background: #e5e7eb; color: #374151; }
     }
+  }
+
+  .log-list {
+    max-height: 320px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+  }
+
+  .log-item {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: .88rem;
+
+    .log-action { font-weight: 600; color: #374151; }
+    .log-user { color: #6366f1; }
+    .log-detail { color: #9ca3af; font-size: .8rem; }
+    .log-time { color: #9ca3af; font-size: .8rem; margin-left: auto; }
   }
 }

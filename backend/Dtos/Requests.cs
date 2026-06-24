@@ -80,6 +80,16 @@ public class BottleDto
     public DateTime? LastReThrowAt { get; set; }
     public bool IsAdminBadge { get; set; }
     public int? ReportedBottleId { get; set; }
+    public bool IsClosed { get; set; }
+}
+
+public class BottleLogDto
+{
+    public int Id { get; set; }
+    public string OperatorUsername { get; set; } = string.Empty;
+    public string Action { get; set; } = string.Empty;
+    public string? Detail { get; set; }
+    public DateTime CreatedAt { get; set; }
 }
 
 public class CommentDto

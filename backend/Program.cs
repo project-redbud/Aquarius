@@ -95,6 +95,11 @@ static void Migrate(AquariusDbContext db)
         "ALTER TABLE SiteSettings ADD COLUMN SmtpFrom TEXT NOT NULL DEFAULT ''",
         "ALTER TABLE SiteSettings ADD COLUMN SmtpEnableSsl INTEGER NOT NULL DEFAULT 1",
         "ALTER TABLE SiteSettings ADD COLUMN SiteBaseUrl TEXT NOT NULL DEFAULT ''",
+        // BottleLogs table + Bottle close state
+        "CREATE TABLE IF NOT EXISTS BottleLogs (Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, BottleId INTEGER NOT NULL, OperatorUserId INTEGER NULL, OperatorUsername TEXT NOT NULL DEFAULT '', Action TEXT NOT NULL DEFAULT '', Detail TEXT NULL, CreatedAt TEXT NOT NULL DEFAULT '0001-01-01 00:00:00', FOREIGN KEY (BottleId) REFERENCES Bottles(Id) ON DELETE CASCADE, FOREIGN KEY (OperatorUserId) REFERENCES Users(Id) ON DELETE SET NULL)",
+        "ALTER TABLE Bottles ADD COLUMN IsClosed INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE Bottles ADD COLUMN ClosedAt TEXT NULL",
+        "ALTER TABLE Bottles ADD COLUMN ClosedByUserId INTEGER NULL",
     };
 
     foreach (var sql in sqls)

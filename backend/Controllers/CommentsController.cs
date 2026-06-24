@@ -126,6 +126,10 @@ public class CommentsController : ControllerBase
         var bottle = await _db.Bottles.FindAsync(bottleId);
         if (bottle == null) return NotFound();
 
+        var isAdmin = User.FindFirst("isAdmin")?.Value == "true";
+        if (bottle.IsClosed && !isAdmin)
+            return BadRequest(new { error = "瓶子已关闭，无法评论" });
+
         var userId = GetUserId();
         if (userId == null) return Unauthorized();
 
