@@ -51,10 +51,16 @@
       <button class="sort-btn" (click)="toggleSort()">{{ sortAsc() ? '🔼 最早' : '🔽 最新' }}</button>
     </div>
     @if (!replyTo()) {
-      <div class="comment-input">
-        <input type="text" [(ngModel)]="commentText" placeholder="说点什么（匿名）..." maxlength="300" (keydown.enter)="addComment()" />
-        <button (click)="addComment()" [disabled]="!commentText().trim()">发送</button>
-      </div>
+      @if (auth.isLoggedIn()) {
+        <div class="comment-input">
+          <input type="text" [(ngModel)]="commentText" placeholder="说点什么（匿名）..." maxlength="300" (keydown.enter)="addComment()" />
+          <button (click)="addComment()" [disabled]="!commentText().trim()">发送</button>
+        </div>
+      } @else {
+        <div class="comment-input login-hint">
+          <span>🔒 <a [routerLink]="['/login']" [queryParams]="{returnUrl: '/bottle/' + bottle?.id}">登录</a>后评论</span>
+        </div>
+      }
       @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
         <div class="badge-options">
           @if (auth.isAdmin()) {
@@ -119,7 +125,7 @@
               }
             }
             @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
-            <button class="reply-btn" (click)="startReply(c)">回复</button>
+            @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="startReply(c)">回复</button> }
           </div></div>
 
         @if (c.replyCount! > 0) {
@@ -162,7 +168,7 @@
                         }
                       }
                       @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
-                      <button class="reply-btn" (click)="startReply(r)">回复</button>
+                      @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="startReply(r)">回复</button> }
                     </div></div>
                   @if (r.replyCount! > 0) { <button class="expand-btn" (click)="toggleReplies(r)">{{ expandedReplies()[r.id] ? '收起' : '展开 ' + r.replyCount + ' 条回复' }}</button> }
                   @if (expandedReplies()[r.id]) {
@@ -203,7 +209,7 @@
                               }
                             }
                             @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
-                            <button class="reply-btn" (click)="startReply(sr)">回复</button>
+                            @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="startReply(sr)">回复</button> }
                           </div></div>
                       </div>
                     }</div>
@@ -250,7 +256,7 @@
                           }
                         }
                         @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="openReport()">🚨</button> }
-                        <button class="reply-btn" (click)="startReply(r)">回复</button>
+                        @if (auth.isLoggedIn()) { <button class="reply-btn" (click)="startReply(r)">回复</button> }
                       </div></div>
                     @if (r.replyCount! > 0) { <button class="expand-btn" (click)="toggleReplies(r)">展开 {{ r.replyCount }} 条回复</button> }
                   </div>

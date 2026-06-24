@@ -39,6 +39,28 @@ UPDATE "Users" SET "Role" = 'admin' WHERE "IsAdmin" = 1;
 ALTER TABLE "Bottles" ADD COLUMN "ReportedBottleId" INTEGER NULL;
 
 
+-- 5. User 表：添加邮箱验证与密码重置列
+-- -----------------------------------------------------------------------------
+ALTER TABLE "Users" ADD COLUMN "EmailVerified"       INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "Users" ADD COLUMN "EmailVerifyToken"    TEXT    NULL;
+ALTER TABLE "Users" ADD COLUMN "ResetPasswordToken"  TEXT    NULL;
+ALTER TABLE "Users" ADD COLUMN "ResetPasswordExpires" TEXT   NULL;
+
+-- 回填已有用户的邮箱为已验证
+UPDATE "Users" SET "EmailVerified" = 1 WHERE "Email" IS NOT NULL AND "Email" != '';
+
+
+-- 6. SiteSettings 表：添加 SMTP 及站点 URL 列
+-- -----------------------------------------------------------------------------
+ALTER TABLE "SiteSettings" ADD COLUMN "SmtpHost"      TEXT    NOT NULL DEFAULT '';
+ALTER TABLE "SiteSettings" ADD COLUMN "SmtpPort"      INTEGER NOT NULL DEFAULT 587;
+ALTER TABLE "SiteSettings" ADD COLUMN "SmtpUser"      TEXT    NOT NULL DEFAULT '';
+ALTER TABLE "SiteSettings" ADD COLUMN "SmtpPassword"  TEXT    NOT NULL DEFAULT '';
+ALTER TABLE "SiteSettings" ADD COLUMN "SmtpFrom"      TEXT    NOT NULL DEFAULT '';
+ALTER TABLE "SiteSettings" ADD COLUMN "SmtpEnableSsl" INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE "SiteSettings" ADD COLUMN "SiteBaseUrl"   TEXT    NOT NULL DEFAULT '';
+
+
 -- =============================================================================
 -- 升级完成。验证：
 --   SELECT * FROM SiteSettings;

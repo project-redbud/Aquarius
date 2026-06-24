@@ -10,14 +10,39 @@
     <details class="daily-push-section">
       <summary>⚙️ 站点设置</summary>
       <div class="push-form">
-        <label>
-          站点名称
+        <label>站点名称
           <input type="text" [(ngModel)]="settingSiteName" placeholder="Aquarius" maxlength="50" />
         </label>
-        <label>
-          版权信息（支持 HTML）
+        <label>版权信息（支持 HTML）
           <textarea [(ngModel)]="settingCopyright" placeholder="© 2026 <a href=&quot;/&quot;>Aquarius</a>" maxlength="500" rows="2"></textarea>
         </label>
+        <label>站点 URL（用于邮件链接）
+          <input type="text" [(ngModel)]="settingSiteBaseUrl" placeholder="https://example.com" maxlength="300" />
+        </label>
+
+        <h3 style="margin-top:16px">📧 SMTP 邮件配置</h3>
+        <label>SMTP 服务器
+          <input type="text" [(ngModel)]="settingSmtpHost" placeholder="smtp.example.com" maxlength="200" />
+        </label>
+        <div class="row">
+          <label>端口
+            <input type="number" [(ngModel)]="settingSmtpPort" min="1" max="65535" style="width:100px" />
+          </label>
+          <label>
+            <input type="checkbox" [(ngModel)]="settingSmtpEnableSsl" />
+            启用 SSL
+          </label>
+        </div>
+        <label>用户名
+          <input type="text" [(ngModel)]="settingSmtpUser" placeholder="user@example.com" maxlength="200" />
+        </label>
+        <label>密码
+          <input type="password" [(ngModel)]="settingSmtpPassword" placeholder="留空则不修改" maxlength="200" />
+        </label>
+        <label>发件人地址
+          <input type="text" [(ngModel)]="settingSmtpFrom" placeholder="noreply@example.com" maxlength="200" />
+        </label>
+
         <button (click)="saveSettings()">💾 保存设置</button>
       </div>
     </details>

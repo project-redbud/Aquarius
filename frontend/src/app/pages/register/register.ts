@@ -1,7 +1,8 @@
 import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   standalone: true,
@@ -16,9 +17,11 @@ export class RegisterPage {
   confirmPassword = signal('');
   error = signal('');
   loading = signal(false);
+  success = signal(false);
+  registeredEmail = signal('');
 
   private auth = inject(AuthService);
-  private router = inject(Router);
+  private api = inject(ApiService);
 
   onSubmit() {
     const u = this.username().trim();
@@ -43,13 +46,30 @@ export class RegisterPage {
     this.loading.set(true);
 
     this.auth.register(u, e, p, cp).subscribe({
-      next: () => {
+      next: (res) => {
         this.loading.set(false);
-        this.router.navigate(['/pick']);
+        this.success.set(true);
+        this.registeredEmail.set(e);
       },
       error: (err) => {
         this.loading.set(false);
         this.error.set(err.error?.error || '注册失败，请重试');
+      }
+    });
+  }
+
+  resendVerification() {
+    const e = this.registeredEmail();
+    if (!e) return;
+    this.loading.set(true);
+    this.api.resendVerification(e).subscribe({
+      next: (res) => {
+        this.loading.set(false);
+        alert(res.message);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        alert(err.error?.error || '发送失败');
       }
     });
   }

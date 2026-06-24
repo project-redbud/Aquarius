@@ -13,4 +13,6 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.LoginPage), data: { title: '登录' } },
   { path: 'register', loadComponent: () => import('./pages/register/register').then(m => m.RegisterPage), data: { title: '注册' } },
   { path: 'report', loadComponent: () => import('./pages/report/report').then(m => m.ReportPage), data: { title: '举报' } },
+  { path: 'verify-email', loadComponent: () => import('./pages/verify-email/verify-email').then(m => m.VerifyEmailPage), data: { title: '验证邮箱' } },
+  { path: 'reset-password', loadComponent: () => import('./pages/reset-password/reset-password').then(m => m.ResetPasswordPage), data: { title: '重置密码' } },
 ];

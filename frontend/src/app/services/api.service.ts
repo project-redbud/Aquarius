@@ -220,12 +220,22 @@ export class ApiService {
     return this.http.post<any>(`${this.base}/admin/daily/${id}/republish`, { date, force });
   }
 
-  adminGetSettings(): Observable<{ siteName: string; copyright: string }> {
-    return this.http.get<{ siteName: string; copyright: string }>(`${this.base}/admin/settings`);
+  adminGetSettings(): Observable<any> {
+    return this.http.get<any>(`${this.base}/admin/settings`);
   }
 
-  adminUpdateSettings(siteName?: string, copyright?: string): Observable<{ siteName: string; copyright: string }> {
-    return this.http.put<{ siteName: string; copyright: string }>(`${this.base}/admin/settings`, { siteName, copyright });
+  adminUpdateSettings(
+    siteName?: string, copyright?: string,
+    smtpHost?: string, smtpPort?: number, smtpUser?: string,
+    smtpPassword?: string, smtpFrom?: string,
+    smtpEnableSsl?: boolean, siteBaseUrl?: string
+  ): Observable<any> {
+    return this.http.put<any>(`${this.base}/admin/settings`, {
+      siteName, copyright,
+      smtpHost, smtpPort, smtpUser,
+      smtpPassword, smtpFrom,
+      smtpEnableSsl, siteBaseUrl
+    });
   }
 
   // ── admin users ────────────────────────────────────────
@@ -272,8 +282,8 @@ export class ApiService {
 
   // ── my ─────────────────────────────────────────────────
 
-  getMyBottles(): Observable<Bottle[]> {
-    return this.http.get<Bottle[]>(`${this.base}/bottles/mine`, {
+  getMyBottles(page = 1, pageSize = 15): Observable<PaginatedResult<Bottle>> {
+    return this.http.get<PaginatedResult<Bottle>>(`${this.base}/bottles/mine?page=${page}&pageSize=${pageSize}`, {
       headers: this.headers()
     });
   }
@@ -284,9 +294,27 @@ export class ApiService {
     });
   }
 
-  getMyComments(): Observable<{ id: number; content: string; createdAt: string; editedAt?: string | null; bottleId: number; bottleContent: string }[]> {
-    return this.http.get<any[]>(`${this.base}/comments/mine`, {
+  getMyComments(page = 1, pageSize = 15): Observable<PaginatedResult<{ id: number; content: string; createdAt: string; editedAt?: string | null; bottleId: number; bottleContent: string }>> {
+    return this.http.get<any>(`${this.base}/comments/mine?page=${page}&pageSize=${pageSize}`, {
       headers: this.headers()
     });
+  }
+
+  // ── auth ───────────────────────────────────────────────
+
+  verifyEmail(token: string): Observable<{ token: string; username: string; isAdmin: boolean }> {
+    return this.http.post<{ token: string; username: string; isAdmin: boolean }>(`${this.base}/auth/verify-email`, { token });
+  }
+
+  resendVerification(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/auth/resend-verification`, { email });
+  }
+
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/auth/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/auth/reset-password`, { token, newPassword });
   }
 }

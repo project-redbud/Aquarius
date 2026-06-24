@@ -49,7 +49,22 @@
     text-align: center;
     font-size: .9rem;
     color: #6b7280;
+    margin: 0;
 
     a { color: #2563eb; font-weight: 600; text-decoration: none; }
+  }
+
+  .forgot-box {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    h3 { margin: 0; font-size: 1rem; }
+    .hint { margin: 0; font-size: .85rem; color: #6b7280; }
+    .forgot-msg { margin: 0; font-size: .85rem; color: #059669; }
   }
 }

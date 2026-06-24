@@ -2,7 +2,7 @@ import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ApiService, Bottle } from '../../services/api.service';
+import { ApiService, Bottle, PaginatedResult } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { LinkifyPipe } from '../../pipes/linkify.pipe';
 
@@ -30,11 +30,23 @@ export class MyPage implements OnInit {
   likedBottles = signal<Bottle[]>([]);
   loading = signal(false);
 
+  // Pagination state
+  readonly pageSize = 15;
+
+  // Bottles pagination
+  bottlesPage = signal(1);
+  bottlesTotal = signal(0);
+  bottlesTotalPages = computed(() => Math.max(1, Math.ceil(this.bottlesTotal() / this.pageSize)));
+
+  // Comments pagination
+  commentsPage = signal(1);
+  commentsTotal = signal(0);
+  commentsTotalPages = computed(() => Math.max(1, Math.ceil(this.commentsTotal() / this.pageSize)));
+
   // Likes pagination
   likesPage = signal(1);
   likesTotal = signal(0);
-  readonly likesPageSize = 15;
-  likesTotalPages = computed(() => Math.max(1, Math.ceil(this.likesTotal() / this.likesPageSize)));
+  likesTotalPages = computed(() => Math.max(1, Math.ceil(this.likesTotal() / this.pageSize)));
 
   // Edit state
   editingBottleId = signal<number | null>(null);
@@ -49,34 +61,56 @@ export class MyPage implements OnInit {
 
   constructor(private api: ApiService) {}
 
-  private loadedBottles = false;
-  private loadedComments = false;
-
   ngOnInit() {
-    this.loading.set(true);
-    this.api.getMyBottles().subscribe(data => {
-      this.myBottles.set(data);
-      this.loadedBottles = true;
-      if (this.loadedComments) this.loading.set(false);
-    });
-    this.api.getMyComments().subscribe(data => {
-      this.myComments.set(data);
-      this.loadedComments = true;
-      if (this.loadedBottles) this.loading.set(false);
-    });
+    this.loadBottlesPage(1);
+    this.loadCommentsPage(1);
     this.loadLikedPage(1);
   }
 
   switchTab(t: 'bottles' | 'comments' | 'likes') {
     this.tab.set(t);
-    if (t === 'likes' && this.likedBottles().length === 0) {
-      this.loadLikedPage(1);
-    }
+    if (t === 'likes' && this.likedBottles().length === 0) this.loadLikedPage(1);
   }
+
+  // ── Bottles pagination ──────────────────────────────────
+
+  loadBottlesPage(page: number) {
+    this.loading.set(true);
+    this.api.getMyBottles(page, this.pageSize).subscribe(res => {
+      this.myBottles.set(res.items);
+      this.bottlesTotal.set(res.total);
+      this.bottlesPage.set(res.page);
+      this.loading.set(false);
+    });
+  }
+
+  goToBottlesPage(page: number) {
+    if (page < 1 || page > this.bottlesTotalPages()) return;
+    this.loadBottlesPage(page);
+  }
+
+  // ── Comments pagination ─────────────────────────────────
+
+  loadCommentsPage(page: number) {
+    this.loading.set(true);
+    this.api.getMyComments(page, this.pageSize).subscribe(res => {
+      this.myComments.set(res.items);
+      this.commentsTotal.set(res.total);
+      this.commentsPage.set(res.page);
+      this.loading.set(false);
+    });
+  }
+
+  goToCommentsPage(page: number) {
+    if (page < 1 || page > this.commentsTotalPages()) return;
+    this.loadCommentsPage(page);
+  }
+
+  // ── Likes pagination ────────────────────────────────────
 
   loadLikedPage(page: number) {
     this.loading.set(true);
-    this.api.getMyLikedBottles(page, this.likesPageSize).subscribe(res => {
+    this.api.getMyLikedBottles(page, this.pageSize).subscribe(res => {
       this.likedBottles.set(res.items);
       this.likesTotal.set(res.total);
       this.likesPage.set(res.page);

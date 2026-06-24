@@ -45,6 +45,13 @@ export class AdminPage implements OnInit {
   // ── Site settings ────────────────────────────────────
   settingSiteName = signal('');
   settingCopyright = signal('');
+  settingSmtpHost = signal('');
+  settingSmtpPort = signal(587);
+  settingSmtpUser = signal('');
+  settingSmtpPassword = signal('');
+  settingSmtpFrom = signal('');
+  settingSmtpEnableSsl = signal(true);
+  settingSiteBaseUrl = signal('');
 
   ngOnInit() {
     if (this.auth.isAdmin()) {
@@ -60,13 +67,28 @@ export class AdminPage implements OnInit {
     this.api.adminGetSettings().subscribe(s => {
       this.settingSiteName.set(s.siteName);
       this.settingCopyright.set(s.copyright);
+      this.settingSmtpHost.set((s as any).smtpHost || '');
+      this.settingSmtpPort.set((s as any).smtpPort || 587);
+      this.settingSmtpUser.set((s as any).smtpUser || '');
+      this.settingSmtpFrom.set((s as any).smtpFrom || '');
+      this.settingSmtpEnableSsl.set((s as any).smtpEnableSsl !== false);
+      this.settingSiteBaseUrl.set((s as any).siteBaseUrl || '');
+      // password is masked by backend, only set if user typed something
     });
   }
 
   saveSettings() {
+    const smtpPwd = this.settingSmtpPassword().trim();
     this.api.adminUpdateSettings(
       this.settingSiteName().trim() || undefined,
-      this.settingCopyright().trim() || undefined
+      this.settingCopyright().trim() || undefined,
+      this.settingSmtpHost().trim() || undefined,
+      this.settingSmtpPort(),
+      this.settingSmtpUser().trim() || undefined,
+      smtpPwd || undefined,
+      this.settingSmtpFrom().trim() || undefined,
+      this.settingSmtpEnableSsl(),
+      this.settingSiteBaseUrl().trim() || undefined
     ).subscribe(s => {
       this.siteSettings.siteName.set(s.siteName);
       this.siteSettings.copyright.set(s.copyright);

@@ -41,13 +41,18 @@ export class AuthService {
     }).pipe(tap(res => this.persist(res)));
   }
 
-  register(username: string, email: string, password: string, confirmPassword: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.base}/register`, {
+  register(username: string, email: string, password: string, confirmPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/register`, {
       username,
       email,
       password,
       confirmPassword
-    }).pipe(tap(res => this.persist(res)));
+    });
+  }
+
+  /** 邮箱验证后保存登录状态 */
+  persistLogin(res: LoginResponse): void {
+    this.persist(res);
   }
 
   logout(): void {

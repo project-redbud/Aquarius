@@ -5,10 +5,10 @@
 
   <div class="tabs">
     <button [class.active]="tab() === 'bottles'" (click)="switchTab('bottles')">
-      🫧 我的瓶子 ({{ myBottles().length }})
+      🫧 我的瓶子 ({{ bottlesTotal() }})
     </button>
     <button [class.active]="tab() === 'comments'" (click)="switchTab('comments')">
-      💬 我的评论 ({{ myComments().length }})
+      💬 我的评论 ({{ commentsTotal() }})
     </button>
     <button [class.active]="tab() === 'likes'" (click)="switchTab('likes')">
       ❤️ 我的点赞 ({{ likesTotal() }})
@@ -66,6 +66,13 @@
           }
         </div>
       }
+      @if (bottlesTotalPages() > 1) {
+        <div class="pagination">
+          <button [disabled]="bottlesPage() <= 1" (click)="goToBottlesPage(bottlesPage() - 1)">← 上一页</button>
+          <span>{{ bottlesPage() }} / {{ bottlesTotalPages() }}</span>
+          <button [disabled]="bottlesPage() >= bottlesTotalPages()" (click)="goToBottlesPage(bottlesPage() + 1)">下一页 →</button>
+        </div>
+      }
     }
   } @else if (tab() === 'comments') {
     @if (myComments().length === 0) {
@@ -101,6 +108,13 @@
               <button class="danger" (click)="confirmDeleteComment(c.id)">删除</button>
             </div>
           }
+        </div>
+      }
+      @if (commentsTotalPages() > 1) {
+        <div class="pagination">
+          <button [disabled]="commentsPage() <= 1" (click)="goToCommentsPage(commentsPage() - 1)">← 上一页</button>
+          <span>{{ commentsPage() }} / {{ commentsTotalPages() }}</span>
+          <button [disabled]="commentsPage() >= commentsTotalPages()" (click)="goToCommentsPage(commentsPage() + 1)">下一页 →</button>
         </div>
       }
     }

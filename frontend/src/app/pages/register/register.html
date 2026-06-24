@@ -1,46 +1,56 @@
 <div class="page">
   <h1>📝 注册</h1>
 
-  <div class="form">
-    <input
-      type="text"
-      [(ngModel)]="username"
-      placeholder="用户名（至少2个字符）"
-      (keydown.enter)="onSubmit()"
-      autocomplete="username"
-    />
-    <input
-      type="email"
-      [(ngModel)]="email"
-      placeholder="电子邮件地址"
-      (keydown.enter)="onSubmit()"
-      autocomplete="email"
-    />
-    <input
-      type="password"
-      [(ngModel)]="password"
-      placeholder="密码（至少6个字符）"
-      (keydown.enter)="onSubmit()"
-      autocomplete="new-password"
-    />
-    <input
-      type="password"
-      [(ngModel)]="confirmPassword"
-      placeholder="确认密码"
-      (keydown.enter)="onSubmit()"
-      autocomplete="new-password"
-    />
+  @if (success()) {
+    <div class="success-box">
+      <h2>✅ 注册成功！</h2>
+      <p>验证邮件已发送至 <strong>{{ registeredEmail() }}</strong></p>
+      <p>请查收邮件并点击激活链接，激活后即可投瓶和评论。</p>
+      <p class="hint">没有收到邮件？检查垃圾箱或 <a href="javascript:void(0)" (click)="resendVerification()">重新发送</a></p>
+      <p><a routerLink="/login" class="link">前往登录</a></p>
+    </div>
+  } @else {
+    <div class="form">
+      <input
+        type="text"
+        [(ngModel)]="username"
+        placeholder="用户名（至少2个字符）"
+        (keydown.enter)="onSubmit()"
+        autocomplete="username"
+      />
+      <input
+        type="email"
+        [(ngModel)]="email"
+        placeholder="电子邮件地址"
+        (keydown.enter)="onSubmit()"
+        autocomplete="email"
+      />
+      <input
+        type="password"
+        [(ngModel)]="password"
+        placeholder="密码（至少6个字符）"
+        (keydown.enter)="onSubmit()"
+        autocomplete="new-password"
+      />
+      <input
+        type="password"
+        [(ngModel)]="confirmPassword"
+        placeholder="确认密码"
+        (keydown.enter)="onSubmit()"
+        autocomplete="new-password"
+      />
 
-    @if (error()) {
-      <div class="error">{{ error() }}</div>
-    }
+      @if (error()) {
+        <div class="error">{{ error() }}</div>
+      }
 
-    <button class="primary" [disabled]="loading()" (click)="onSubmit()">
-      {{ loading() ? '注册中...' : '注册' }}
-    </button>
+      <button class="primary" [disabled]="loading()" (click)="onSubmit()">
+        {{ loading() ? '注册中...' : '注册' }}
+      </button>
 
-    <p class="switch">
-      已有账号？<a routerLink="/login">登录</a>
-    </p>
-  </div>
+      <p class="switch">
+        已有账号？<a routerLink="/login">登录</a>
+      </p>
+    </div>
+  }
 </div>

@@ -116,7 +116,8 @@ public class CommentsController : ControllerBase
         return Ok(replies.Select(r => ToDto(r, includeReplies: false)).ToList());
     }
 
-    /// <summary>发表评论/回复</summary>
+    /// <summary>发表评论/回复（需要登录 + 邮箱已验证）</summary>
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<CommentDto>> Add(int bottleId,
         [FromBody] AddCommentRequest req,
@@ -125,10 +126,16 @@ public class CommentsController : ControllerBase
         var bottle = await _db.Bottles.FindAsync(bottleId);
         if (bottle == null) return NotFound();
 
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        // 邮箱未验证不可评论
+        var user = await _db.Users.FindAsync(userId.Value);
+        if (user == null || !user.EmailVerified)
+            return Unauthorized(new { error = "请先验证邮箱后再评论" });
+
         var token = !string.IsNullOrWhiteSpace(userToken) ? userToken.Trim()
             : Guid.NewGuid().ToString("N");
-
-        var userId = GetUserId();
 
         // 如果是回复，确定 commentId
         int? commentId = req.CommentId;
@@ -274,7 +281,9 @@ public class MyCommentsController : ControllerBase
 
     [HttpGet("mine")]
     public async Task<ActionResult> Mine(
-        [FromHeader(Name = "X-User-Token")] string? userToken)
+        [FromHeader(Name = "X-User-Token")] string? userToken,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 15)
     {
         var userId = GetUserId();
         var token = (userToken ?? "").Trim();
@@ -286,10 +295,13 @@ public class MyCommentsController : ControllerBase
         else if (!string.IsNullOrEmpty(token))
             query = query.Where(c => c.UserToken == token);
         else
-            return Ok(new List<object>());
+            return Ok(new { items = new List<object>(), total = 0, page = 1, pageSize = 15 });
 
+        var total = await query.CountAsync();
         var comments = await query
             .OrderByDescending(c => c.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(c => new
             {
                 c.Id,
@@ -305,6 +317,6 @@ public class MyCommentsController : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(comments);
+        return Ok(new { items = comments, total, page, pageSize });
     }
 }

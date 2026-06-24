@@ -27,13 +27,20 @@ public class BottlesController : ControllerBase
         return claim != null && int.TryParse(claim, out var id) ? id : null;
     }
 
-    /// <summary>投瓶</summary>
+    /// <summary>投瓶（需要登录 + 邮箱已验证）</summary>
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<BottleDto>> Throw([FromBody] ThrowBottleRequest req,
         [FromHeader(Name = "X-User-Token")] string? userToken)
     {
         var token = ResolveToken(userToken);
         var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        // 邮箱未验证不可投瓶
+        var user = await _db.Users.FindAsync(userId.Value);
+        if (user == null || !user.EmailVerified)
+            return Unauthorized(new { error = "请先验证邮箱后再投瓶" });
 
         string? imagePath = null;
         if (!string.IsNullOrWhiteSpace(req.ImageBase64))
@@ -146,10 +153,12 @@ public class BottlesController : ControllerBase
         return Ok(new { items, total, page, pageSize });
     }
 
-    /// <summary>我投的瓶子（登录用户 + 匿名用户）</summary>
+    /// <summary>我投的瓶子（分页，每页 15 条）</summary>
     [HttpGet("mine")]
-    public async Task<ActionResult<List<BottleDto>>> Mine(
-        [FromHeader(Name = "X-User-Token")] string? userToken)
+    public async Task<ActionResult> Mine(
+        [FromHeader(Name = "X-User-Token")] string? userToken,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 15)
     {
         var token = ResolveToken(userToken);
         var userId = GetUserId();
@@ -163,13 +172,17 @@ public class BottlesController : ControllerBase
             // 匿名用户：按 UserToken 查
             query = query.Where(b => b.UserToken == token);
 
-        var bottles = await query.OrderByDescending(b => b.CreatedAt).ToListAsync();
+        var total = await query.CountAsync();
+        var bottles = await query.OrderByDescending(b => b.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
 
-        var result = new List<BottleDto>();
+        var items = new List<BottleDto>();
         foreach (var b in bottles)
-            result.Add(await ToDto(b, token));
+            items.Add(await ToDto(b, token));
 
-        return Ok(result);
+        return Ok(new { items, total, page, pageSize });
     }
 
     /// <summary>编辑自己的瓶子</summary>

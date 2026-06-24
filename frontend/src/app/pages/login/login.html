@@ -26,7 +26,28 @@
     </button>
 
     <p class="switch">
-      还没有账号？<a routerLink="/register">注册</a>
+      还没有账号？<a routerLink="/register">注册</a><br />
+      <a href="javascript:void(0)" (click)="toggleForgot()">忘记密码？</a>
     </p>
+
+    @if (showForgot()) {
+      <div class="forgot-box">
+        <h3>🔑 找回密码</h3>
+        <p class="hint">输入注册邮箱，我们将发送重置密码链接。</p>
+        <input
+          type="email"
+          [(ngModel)]="forgotEmail"
+          placeholder="注册邮箱"
+          (keydown.enter)="submitForgot()"
+          autocomplete="email"
+        />
+        <button class="primary" [disabled]="forgotLoading() || !forgotEmail().trim()" (click)="submitForgot()">
+          {{ forgotLoading() ? '发送中...' : '发送重置链接' }}
+        </button>
+        @if (forgotMessage()) {
+          <p class="forgot-msg">{{ forgotMessage() }}</p>
+        }
+      </div>
+    }
   </div>
 </div>

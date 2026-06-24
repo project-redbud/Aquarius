@@ -2,8 +2,9 @@
   <h1>🫧 投一只瓶</h1>
 
   @if (!isLoggedIn()) {
-    <div class="register-hint">
-      💡 你当前以匿名身份投瓶。<a routerLink="/register">注册账号</a>后可持久保存和管理你的瓶子。
+    <div class="login-gate">
+      <p>🔒 请先<a routerLink="/login">登录</a>后再投瓶</p>
+      <p class="hint">还没有账号？<a routerLink="/register">注册</a></p>
     </div>
   }
 
@@ -70,7 +71,7 @@
     </div>
   }
 
-  <button class="primary" [disabled]="!content().trim() || sending()" (click)="throwBottle()">
-    {{ sending() ? '投掷中...' : '🫧 投出去' }}
+  <button class="primary" [disabled]="!content().trim() || sending() || !isLoggedIn()" (click)="throwBottle()">
+    {{ sending() ? '投掷中...' : !isLoggedIn() ? '请先登录' : '🫧 投出去' }}
   </button>
 </div>

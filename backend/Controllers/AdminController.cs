@@ -310,7 +310,13 @@ public class AdminController : ControllerBase
         if (!IsAdmin()) return Forbid();
         var s = await _db.SiteSettings.FirstOrDefaultAsync();
         if (s == null) return NotFound();
-        return Ok(new { s.SiteName, s.Copyright });
+        return Ok(new
+        {
+            s.SiteName, s.Copyright,
+            s.SmtpHost, s.SmtpPort, s.SmtpUser,
+            s.SmtpFrom, s.SmtpEnableSsl, s.SiteBaseUrl,
+            SmtpPassword = string.IsNullOrEmpty(s.SmtpPassword) ? "" : "••••••"
+        });
     }
 
     // ── Suggestions ──────────────────────────────────────
@@ -347,8 +353,21 @@ public class AdminController : ControllerBase
         if (s == null) return NotFound();
         s.SiteName = req.SiteName ?? s.SiteName;
         s.Copyright = req.Copyright ?? s.Copyright;
+        if (req.SmtpHost != null) s.SmtpHost = req.SmtpHost;
+        if (req.SmtpPort.HasValue) s.SmtpPort = req.SmtpPort.Value;
+        if (req.SmtpUser != null) s.SmtpUser = req.SmtpUser;
+        if (req.SmtpPassword != null) s.SmtpPassword = req.SmtpPassword;
+        if (req.SmtpFrom != null) s.SmtpFrom = req.SmtpFrom;
+        if (req.SmtpEnableSsl.HasValue) s.SmtpEnableSsl = req.SmtpEnableSsl.Value;
+        if (req.SiteBaseUrl != null) s.SiteBaseUrl = req.SiteBaseUrl;
         await _db.SaveChangesAsync();
-        return Ok(new { s.SiteName, s.Copyright });
+        return Ok(new
+        {
+            s.SiteName, s.Copyright,
+            s.SmtpHost, s.SmtpPort, s.SmtpUser,
+            s.SmtpFrom, s.SmtpEnableSsl, s.SiteBaseUrl,
+            SmtpPassword = string.IsNullOrEmpty(s.SmtpPassword) ? "" : "••••••"
+        });
     }
 }
 
@@ -356,6 +375,13 @@ public class UpdateSettingsRequest
 {
     public string? SiteName { get; set; }
     public string? Copyright { get; set; }
+    public string? SmtpHost { get; set; }
+    public int? SmtpPort { get; set; }
+    public string? SmtpUser { get; set; }
+    public string? SmtpPassword { get; set; }
+    public string? SmtpFrom { get; set; }
+    public bool? SmtpEnableSsl { get; set; }
+    public string? SiteBaseUrl { get; set; }
 }
 
 public class CreateDailyRequest
