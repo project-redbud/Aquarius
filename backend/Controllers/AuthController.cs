@@ -169,7 +169,7 @@ public class AuthController : ControllerBase
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == req.Email);
         if (user == null)
             // 不暴露用户是否存在
-            return Ok(new { message = "如果该邮箱已注册，验证邮件已重新发送" });
+            return Ok(new { message = "验证邮件已重新发送" });
 
         if (user.EmailVerified)
             return Ok(new { message = "邮箱已验证，可直接登录" });
@@ -194,7 +194,7 @@ public class AuthController : ControllerBase
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == req.Email);
         if (user == null)
             // 不暴露用户是否存在
-            return Ok(new { message = "如果该邮箱已注册，重置链接已发送" });
+            return Ok(new { message = "重置链接已发送" });
 
         user.ResetPasswordToken = GenerateCryptoToken();
         user.ResetPasswordExpires = DateTime.UtcNow.AddHours(1);

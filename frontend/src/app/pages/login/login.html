@@ -18,7 +18,21 @@
     />
 
     @if (error()) {
-      <div class="error">{{ error() }}</div>
+      <div class="error">
+        {{ error() }}
+        @if (error().includes('邮箱尚未验证')) {
+          <p class="resend-line">
+            @if (verifyCooldown() > 0) {
+              <span class="cooldown-text">重发验证邮件 ({{ verifyCooldown() }}s)</span>
+            } @else {
+              没有收到？<a href="javascript:void(0)" (click)="resendVerify()">重发验证邮件</a>
+            }
+          </p>
+        }
+      </div>
+      @if (verifyMsg()) {
+        <div class="error success">{{ verifyMsg() }}</div>
+      }
     }
 
     <button class="primary" [disabled]="loading()" (click)="onSubmit()">

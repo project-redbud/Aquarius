@@ -25,6 +25,10 @@ export class LoginPage implements OnInit {
   forgotLoading = signal(false);
   forgotCooldown = signal(0);
 
+  // Resend verification
+  verifyCooldown = signal(0);
+  verifyMsg = signal('');
+
   private auth = inject(AuthService);
   private api = inject(ApiService);
   private route = inject(ActivatedRoute);
@@ -87,6 +91,17 @@ export class LoginPage implements OnInit {
     });
   }
 
+  resendVerify() {
+    const email = this.loginField().trim();
+    if (!email || this.verifyCooldown() > 0) return;
+    this.startVerifyCooldown();
+    this.verifyMsg.set('');
+    this.api.resendVerification(email).subscribe({
+      next: r => { this.verifyMsg.set(r.message); },
+      error: e => { this.verifyMsg.set(e.error?.error || '发送失败'); }
+    });
+  }
+
   private forgotTimer: any;
   private startForgotCooldown() {
     this.forgotCooldown.set(60);
@@ -94,6 +109,16 @@ export class LoginPage implements OnInit {
       const v = this.forgotCooldown() - 1;
       this.forgotCooldown.set(v);
       if (v <= 0) clearInterval(this.forgotTimer);
+    }, 1000);
+  }
+
+  private verifyTimer: any;
+  private startVerifyCooldown() {
+    this.verifyCooldown.set(60);
+    this.verifyTimer = setInterval(() => {
+      const v = this.verifyCooldown() - 1;
+      this.verifyCooldown.set(v);
+      if (v <= 0) clearInterval(this.verifyTimer);
     }, 1000);
   }
 }

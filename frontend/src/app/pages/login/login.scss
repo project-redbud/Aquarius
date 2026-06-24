@@ -28,6 +28,11 @@
     padding: 8px 12px;
     border-radius: 8px;
     font-size: .9rem;
+
+    .resend-line { margin: 6px 0 0; }
+    a { color: #2563eb; }
+    .cooldown-text { color: #9ca3af; }
+    &.success { background: #ecfdf5; color: #059669; }
   }
 
   .primary {
