@@ -58,7 +58,7 @@
         </div>
       } @else {
         <div class="comment-input login-hint">
-          <span>🔒 <a [routerLink]="['/login']" [queryParams]="{returnUrl: '/bottle/' + bottle?.id}">登录</a>后评论</span>
+          <span>🔒 <a [routerLink]="['/login']" [queryParams]="{returnUrl: '/bottle/' + bottle.id}">登录</a>后评论</span>
         </div>
       }
       @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {

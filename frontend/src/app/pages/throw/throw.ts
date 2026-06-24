@@ -48,7 +48,7 @@ export class ThrowPage {
     if (!this.content().trim()) return;
     this.sending.set(true);
     try {
-      await this.api.throwBottle(
+      const bottle = await this.api.throwBottle(
         this.content().trim(),
         this.imageBase64() ?? undefined,
         this.isAnonymous() ? undefined : (this.authorName().trim() || undefined),
@@ -56,7 +56,7 @@ export class ThrowPage {
         this.commentsPrivate(),
         this.showAdminBadge()
       ).toPromise();
-      this.router.navigate(['/pick']);
+      this.router.navigate(['/bottle', bottle!.id]);
     } finally {
       this.sending.set(false);
     }
