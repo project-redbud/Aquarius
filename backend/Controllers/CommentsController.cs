@@ -48,6 +48,14 @@ public class CommentsController : ControllerBase
             bool isAuthor = (bottle.UserId != null && bottle.UserId == userId)
                 || (bottle.UserId == null && bottle.UserToken == token);
 
+            // 管理员私评开关
+            if (isAdmin && userId != null)
+            {
+                var admin = await _db.Users.FindAsync(userId.Value);
+                if (admin != null && !admin.ViewPrivateComments)
+                    isAdmin = false;
+            }
+
             if (isAdmin)
             {
                 Response.Headers["X-Comments-Private"] = "admin";
@@ -104,6 +112,14 @@ public class CommentsController : ControllerBase
             var token = (userToken ?? "").Trim();
             bool isAuthor = (bottle.UserId != null && bottle.UserId == userId)
                 || (bottle.UserId == null && bottle.UserToken == token);
+
+            // 管理员私评开关
+            if (isAdmin && userId != null)
+            {
+                var admin = await _db.Users.FindAsync(userId.Value);
+                if (admin != null && !admin.ViewPrivateComments)
+                    isAdmin = false;
+            }
 
             if (!isAdmin && !isAuthor)
             {
@@ -168,6 +184,23 @@ public class CommentsController : ControllerBase
         };
 
         _db.Comments.Add(comment);
+
+        // 通知瓶主（评论）
+        if (bottle.UserId != null && bottle.UserId != userId)
+        {
+            var commenter = user?.Username ?? "匿名";
+            _db.Notifications.Add(new Models.Notification
+            {
+                UserId = bottle.UserId.Value,
+                Type = "comment",
+                Title = $"{commenter} 评论了你的瓶子",
+                Content = comment.Content.Length > 50 ? comment.Content[..50] + "..." : comment.Content,
+                RelatedBottleId = bottleId,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
         await _db.SaveChangesAsync();
 
         // Load parent reply for quoting

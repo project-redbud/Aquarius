@@ -123,6 +123,21 @@ public class BottlesController : ControllerBase
                 return NotFound();
         }
 
+        // 通知瓶：仅管理员和目标用户可见
+        if (bottle.Type == "notification")
+        {
+            var isAdmin = User.FindFirst("isAdmin")?.Value == "true";
+            if (!isAdmin)
+            {
+                var uid = GetUserId();
+                if (uid == null) return NotFound();
+                var hasNotification = await _db.Notifications
+                    .AnyAsync(n => n.RelatedBottleId == id && n.UserId == uid.Value);
+                if (!hasNotification)
+                    return NotFound();
+            }
+        }
+
         return Ok(await ToDto(bottle, token));
     }
 
@@ -261,6 +276,23 @@ public class BottlesController : ControllerBase
         {
             _db.Likes.Add(new Like { BottleId = id, UserToken = token });
             bottle.LikeCount++;
+
+            // 通知瓶主（点赞）
+            if (bottle.UserId != null)
+            {
+                var liker = await _db.Users.FindAsync(GetUserId());
+                var likerName = liker?.Username ?? "匿名";
+                _db.Notifications.Add(new Models.Notification
+                {
+                    UserId = bottle.UserId.Value,
+                    Type = "like",
+                    Title = $"{likerName} 赞了你的瓶子",
+                    Content = bottle.Content.Length > 50 ? bottle.Content[..50] + "..." : bottle.Content,
+                    RelatedBottleId = id,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
         }
 
         await _db.SaveChangesAsync();

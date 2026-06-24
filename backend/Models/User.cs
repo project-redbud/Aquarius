@@ -42,6 +42,21 @@ public class User
     /// <summary>密码重置令牌过期时间。</summary>
     public DateTime? ResetPasswordExpires { get; set; }
 
+    /// <summary>通知偏好：default / notify_only / none</summary>
+    [MaxLength(20)]
+    public string NotifyPreference { get; set; } = "default";
+
+    /// <summary>管理员是否查看仅作者可见的评论（默认关闭）</summary>
+    public bool ViewPrivateComments { get; set; }
+
+    /// <summary>待验证的新邮箱。</summary>
+    [MaxLength(200)]
+    public string? NewEmail { get; set; }
+
+    /// <summary>新邮箱验证令牌。</summary>
+    [MaxLength(128)]
+    public string? NewEmailVerifyToken { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // ── Navigation ────────────────────────────────────────

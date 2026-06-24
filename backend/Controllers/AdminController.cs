@@ -374,6 +374,21 @@ public class AdminController : ControllerBase
             CreatedAt = DateTime.UtcNow
         });
 
+        // 意见瓶关闭 → 通知瓶主
+        if (bottle.Type == "suggestion" && bottle.UserId != null)
+        {
+            _db.Notifications.Add(new Models.Notification
+            {
+                UserId = bottle.UserId.Value,
+                Type = "bottle_processed",
+                Title = "你的意见已被处理",
+                Content = bottle.Content.Length > 50 ? bottle.Content[..50] + "..." : bottle.Content,
+                RelatedBottleId = id,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
         await _db.SaveChangesAsync();
         return Ok(new { message = "瓶子已关闭" });
     }
@@ -407,6 +422,79 @@ public class AdminController : ControllerBase
 
         await _db.SaveChangesAsync();
         return Ok(new { message = "瓶子已打开" });
+    }
+
+    /// <summary>发送系统通知（创建通知瓶 + 通知记录）</summary>
+    [HttpPost("notifications/send")]
+    public async Task<ActionResult> SendNotification([FromBody] SendNotificationRequest req)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var adminUser = await _db.Users.FindAsync(userId);
+        var adminName = adminUser?.Username ?? "管理员";
+
+        // 创建通知瓶（一切皆瓶）
+        var bottle = new Models.Bottle
+        {
+            Content = $"{req.Title}\n\n{req.Content}",
+            AuthorName = adminName,
+            UserToken = "system",
+            UserId = userId,
+            Type = "notification",
+            IsAdminBadge = true,
+            CommentsPrivate = false,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(365)
+        };
+        _db.Bottles.Add(bottle);
+        await _db.SaveChangesAsync();
+
+        // 确定目标用户列表
+        List<Models.User> targets;
+        if (!string.IsNullOrWhiteSpace(req.TargetUsers))
+        {
+            // 支持半角全角逗号分隔，匹配 UID 或用户名
+            var parts = req.TargetUsers
+                .Replace("，", ",")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            targets = new List<Models.User>();
+            foreach (var part in parts)
+            {
+                Models.User? u = null;
+                if (int.TryParse(part, out var uid))
+                    u = await _db.Users.FindAsync(uid);
+                else
+                    u = await _db.Users.FirstOrDefaultAsync(x => x.Username == part);
+
+                if (u != null && !targets.Contains(u))
+                    targets.Add(u);
+            }
+        }
+        else
+        {
+            targets = await _db.Users.Where(u => u.NotifyPreference != "none").ToListAsync();
+        }
+
+        // 为每个目标用户创建通知记录
+        foreach (var t in targets)
+        {
+            if (t.NotifyPreference == "none") continue;
+            _db.Notifications.Add(new Models.Notification
+            {
+                UserId = t.Id,
+                Type = "system",
+                Title = req.Title,
+                Content = req.Content,
+                RelatedBottleId = bottle.Id,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        await _db.SaveChangesAsync();
+        return Ok(new { bottleId = bottle.Id, targetCount = targets.Count });
     }
 
     // ── Site settings ────────────────────────────────────

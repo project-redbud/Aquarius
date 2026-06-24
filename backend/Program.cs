@@ -100,6 +100,12 @@ static void Migrate(AquariusDbContext db)
         "ALTER TABLE Bottles ADD COLUMN IsClosed INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE Bottles ADD COLUMN ClosedAt TEXT NULL",
         "ALTER TABLE Bottles ADD COLUMN ClosedByUserId INTEGER NULL",
+        // Notifications table + User settings
+        "CREATE TABLE IF NOT EXISTS Notifications (Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, UserId INTEGER NOT NULL, Type TEXT NOT NULL DEFAULT 'system', Title TEXT NOT NULL DEFAULT '', Content TEXT NOT NULL DEFAULT '', RelatedBottleId INTEGER NULL, IsRead INTEGER NOT NULL DEFAULT 0, CreatedAt TEXT NOT NULL DEFAULT '0001-01-01 00:00:00', FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE)",
+        "ALTER TABLE Users ADD COLUMN NotifyPreference TEXT NOT NULL DEFAULT 'default'",
+        "ALTER TABLE Users ADD COLUMN ViewPrivateComments INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE Users ADD COLUMN NewEmail TEXT NULL",
+        "ALTER TABLE Users ADD COLUMN NewEmailVerifyToken TEXT NULL",
     };
 
     foreach (var sql in sqls)

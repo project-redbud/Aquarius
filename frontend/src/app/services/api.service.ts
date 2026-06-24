@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -57,6 +57,9 @@ const STORAGE_KEY = 'aquarius_user_token';
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private base = '/api';
+
+  /** 共享未读通知数（App 角标 + 通知中心同步读取） */
+  readonly unreadCount = signal(0);
 
   constructor(private http: HttpClient) {}
 
@@ -321,6 +324,58 @@ export class ApiService {
 
   adminDeleteComment(commentId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/admin/comments/${commentId}`);
+  }
+
+  // ── notifications ─────────────────────────────────────
+
+  getNotifications(page = 1, pageSize = 20, type?: string): Observable<{ items: any[]; total: number; unreadTotal: number; page: number; pageSize: number }> {
+    let url = `${this.base}/notifications?page=${page}&pageSize=${pageSize}`;
+    if (type && type !== 'all') url += `&type=${type}`;
+    return this.http.get<any>(url);
+  }
+
+  getUnreadCount(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.base}/notifications/unread-count`);
+  }
+
+  markNotificationRead(id: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/notifications/${id}/read`, {});
+  }
+
+  markAllNotificationsRead(): Observable<void> {
+    return this.http.post<void>(`${this.base}/notifications/read-all`, {});
+  }
+
+  // ── admin notifications ────────────────────────────────
+
+  adminSendNotification(title: string, content: string, targetUsers?: string): Observable<{ bottleId: number; targetCount: number }> {
+    return this.http.post<{ bottleId: number; targetCount: number }>(`${this.base}/admin/notifications/send`, { title, content, targetUsers: targetUsers || null });
+  }
+
+  // ── user settings ──────────────────────────────────────
+
+  changePassword(oldPassword: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.base}/users/password`, { oldPassword, newPassword });
+  }
+
+  changeEmail(newEmail: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/users/change-email`, { newEmail });
+  }
+
+  verifyNewEmail(token: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/users/verify-new-email`, { token });
+  }
+
+  resendUserVerification(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/users/resend-verification`, {});
+  }
+
+  getUserPreferences(): Observable<{ notifyPreference: string; viewPrivateComments: boolean; email: string; emailVerified: boolean; newEmail?: string | null; isAdmin: boolean }> {
+    return this.http.get<any>(`${this.base}/users/preferences`);
+  }
+
+  updateUserPreferences(notifyPreference?: string, viewPrivateComments?: boolean): Observable<any> {
+    return this.http.put<any>(`${this.base}/users/preferences`, { notifyPreference, viewPrivateComments });
   }
 
   // ── auth ───────────────────────────────────────────────

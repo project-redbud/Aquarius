@@ -1,0 +1,44 @@
+<div class="page" (touchstart)="onTouchStart($event)" (touchmove)="onTouchMove($event)" (touchend)="onTouchEnd()">
+  <div class="pull-indicator" [style.height.px]="pullDistance()">
+    @if (refreshing()) { 🔄 刷新中... } @else if (pullDistance() > 30) { ↓ 释放刷新 }
+  </div>
+  <h1>🔔 通知中心</h1>
+
+  <div class="filter-row">
+    <button [class.active]="filter() === 'all'" (click)="setFilter('all')">全部</button>
+    <button [class.active]="filter() === 'system'" (click)="setFilter('system')">📢 系统</button>
+    <button [class.active]="filter() === 'like'" (click)="setFilter('like')">❤️ 点赞</button>
+    <button [class.active]="filter() === 'comment'" (click)="setFilter('comment')">💬 评论</button>
+    <button [class.active]="filter() === 'bottle_processed'" (click)="setFilter('bottle_processed')">✅ 已处理</button>
+    <button class="mark-all" [disabled]="unreadTotal() === 0" (click)="markAllRead()">全部已读</button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">加载中...</div>
+  } @else if (items().length === 0) {
+    <div class="empty">暂无通知 🔕</div>
+  } @else {
+    @for (n of items(); track n.id) {
+      <div class="notif-item" [class.unread]="!n.isRead" (click)="markRead(n.id)">
+        <div class="notif-header">
+          <span class="notif-type">{{ typeLabel(n.type) }}</span>
+          <span class="notif-time">{{ n.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+          @if (!n.isRead) { <span class="dot"></span> }
+        </div>
+        <p class="notif-title">{{ n.title }}</p>
+        @if (n.content) { <p class="notif-content">{{ n.content }}</p> }
+        @if (n.relatedBottleId) {
+          <a [routerLink]="['/bottle', n.relatedBottleId]" class="notif-link" (click)="markRead(n.id); $event.stopPropagation()">→ 查看瓶子</a>
+        }
+      </div>
+    }
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button [disabled]="page() <= 1" (click)="goPage(page() - 1)">←</button>
+        <span>{{ page() }} / {{ totalPages() }}</span>
+        <button [disabled]="page() >= totalPages()" (click)="goPage(page() + 1)">→</button>
+      </div>
+    }
+  }
+</div>

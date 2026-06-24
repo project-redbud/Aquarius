@@ -125,6 +125,47 @@ public class CommentDto
     public bool IsBottleOwnerBadge { get; set; }
 }
 
+public class NotificationDto
+{
+    public int Id { get; set; }
+    public string Type { get; set; } = "system";
+    public string Title { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public int? RelatedBottleId { get; set; }
+    public bool IsRead { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+public class ChangePasswordRequest
+{
+    public string OldPassword { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
+}
+
+public class ChangeEmailRequest
+{
+    public string NewEmail { get; set; } = string.Empty;
+}
+
+public class VerifyNewEmailRequest
+{
+    public string Token { get; set; } = string.Empty;
+}
+
+public class UpdatePreferencesRequest
+{
+    public string? NotifyPreference { get; set; }
+    public bool? ViewPrivateComments { get; set; }
+}
+
+public class SendNotificationRequest
+{
+    /// <summary>目标用户，逗号分隔的 UID 或用户名（留空=全员）。</summary>
+    public string? TargetUsers { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+}
+
 public class DailyPushDto
 {
     public BottleDto? Story { get; set; }

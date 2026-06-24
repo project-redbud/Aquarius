@@ -14,7 +14,7 @@
               <button (click)="menuOpen.set(false); startEditBottle()">✏️ 编辑</button>
             }
             <button (click)="shareBottle()">🔗 分享</button>
-            @if (auth.isLoggedIn() && bottle.type !== 'suggestion') {
+            @if (auth.isLoggedIn() && bottle.type !== 'suggestion' && bottle.type !== 'notification') {
               <button (click)="openReport()">🚨 举报</button>
             }
             @if (auth.isAdmin()) {
@@ -76,7 +76,7 @@
           <span>🔒 <a [routerLink]="['/login']" [queryParams]="{returnUrl: '/bottle/' + bottle.id}">登录</a>后评论</span>
         </div>
       }
-      @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
+      @if (bottle.type !== 'suggestion' && bottle.type !== 'notification' && (auth.isAdmin() || isMine(bottle.userId))) {
         <div class="badge-options">
           @if (auth.isAdmin()) {
             <label class="admin-badge-check">
@@ -97,7 +97,7 @@
     @if (commentsPrivateNote()) {
       <div class="comments-private-banner">
         @if (commentsPrivateNote() === 'admin') {
-          ⚠️ 评论开启了仅瓶主可见，但管理员可见。
+          ⚠️ 评论仅瓶主可见。管理员开启"查看仅瓶主可见的评论"选项后可见。
         } @else {
           ⚠️ 评论仅瓶主可见
         }
@@ -108,7 +108,7 @@
       <div class="comment">
         @if (replyTo()?.id === c.id) {
           <div class="reply-bar"><span>回复 #{{ c.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-          @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
+          @if (bottle.type !== 'suggestion' && bottle.type !== 'notification' && (auth.isAdmin() || isMine(bottle.userId))) {
             <div class="badge-options">
               @if (auth.isAdmin()) {
                 <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
@@ -150,7 +150,7 @@
                 <div class="reply-item">
                   @if (replyTo()?.id === r.id) {
                   <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-                  @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
+                  @if (bottle.type !== 'suggestion' && bottle.type !== 'notification' && (auth.isAdmin() || isMine(bottle.userId))) {
                     <div class="badge-options">
                       @if (auth.isAdmin()) {
                         <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
@@ -191,7 +191,7 @@
                       <div class="reply-item">
                         @if (replyTo()?.id === sr.id) {
                         <div class="reply-bar sub"><span>回复 #{{ sr.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-                        @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
+                        @if (bottle.type !== 'suggestion' && bottle.type !== 'notification' && (auth.isAdmin() || isMine(bottle.userId))) {
                           <div class="badge-options">
                             @if (auth.isAdmin()) {
                               <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>
@@ -238,7 +238,7 @@
                   <div class="reply-item">
                     @if (replyTo()?.id === r.id) {
                   <div class="reply-bar sub"><span>回复 #{{ r.id }}</span><input type="text" [(ngModel)]="replyText" placeholder="输入回复..." maxlength="300" (keydown.enter)="addComment()" /><button (click)="addComment()" [disabled]="!replyText().trim()">回复</button><button class="cancel" (click)="cancelReply()">取消</button></div>
-                  @if (bottle.type !== 'suggestion' && (auth.isAdmin() || isMine(bottle.userId))) {
+                  @if (bottle.type !== 'suggestion' && bottle.type !== 'notification' && (auth.isAdmin() || isMine(bottle.userId))) {
                     <div class="badge-options">
                       @if (auth.isAdmin()) {
                         <label class="admin-badge-check"><input type="checkbox" [(ngModel)]="commentAdminBadge" /> 🛡️ 管理员标识</label>

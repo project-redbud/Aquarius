@@ -132,6 +132,7 @@
       cursor: pointer;
       &:disabled { background: #86efac; cursor: not-allowed; }
     }
+    .msg-ok { margin-top: 8px; font-size: .85rem; color: #059669; }
   }
 }
 

@@ -21,6 +21,22 @@
   }
 }
 
+.links {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  a {
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #374151;
+    font-size: .9rem;
+    font-weight: 500;
+    &:hover { background: #e5e7eb; }
+  }
+}
+
 .suggestion-tag {
   background: #fef3c7;
   color: #92400e;

@@ -3,6 +3,11 @@
 
   <p class="user-greeting">你好，{{ auth.user()?.username }}@if (auth.isAdmin()) { <span class="admin-badge">管理员</span> }</p>
 
+  <div class="links">
+    <a routerLink="/notifications">🔔 通知中心</a>
+    <a routerLink="/settings">⚙️ 个人设置</a>
+  </div>
+
   <div class="tabs">
     <button [class.active]="tab() === 'bottles'" (click)="switchTab('bottles')">
       🫧 我的瓶子 ({{ bottlesTotal() }})

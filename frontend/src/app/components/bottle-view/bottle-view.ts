@@ -83,8 +83,8 @@ export class BottleViewComponent implements OnChanges {
       this.commentAdminBadge.set(false);
       this.commentBottleOwnerBadge.set(false);
 
-      // 意见瓶：管理员默认带标识
-      if (this.bottle.type === 'suggestion' && this.auth.isAdmin()) {
+      // 意见瓶/通知瓶：管理员默认带标识
+      if ((this.bottle.type === 'suggestion' || this.bottle.type === 'notification') && this.auth.isAdmin()) {
         this.commentAdminBadge.set(true);
       }
 

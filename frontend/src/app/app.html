@@ -3,7 +3,12 @@
   <a routerLink="/throw" routerLinkActive="active">🫧 投瓶</a>
   <a routerLink="/daily" routerLinkActive="active">📰 推送</a>
   @if (auth.isLoggedIn()) {
-    <a routerLink="/my" routerLinkActive="active">👤 我的</a>
+    <a routerLink="/my" routerLinkActive="active">
+      👤 我的
+      @if (unreadCount() > 0) {
+        <span class="badge">{{ unreadLabel() }}</span>
+      }
+    </a>
   }
   @if (auth.isAdmin()) {
     <a routerLink="/admin" routerLinkActive="active">⚙️</a>

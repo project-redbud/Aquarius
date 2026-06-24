@@ -1,0 +1,43 @@
+.page { max-width: 520px; margin: 0 auto; padding: 24px 16px; }
+h1 { margin-bottom: 16px; font-size: 1.5rem; }
+
+.pull-indicator {
+  overflow: hidden;
+  text-align: center;
+  color: #9ca3af;
+  font-size: .85rem;
+  transition: height .1s;
+}
+
+.filter-row {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;
+  button {
+    padding: 6px 12px; border: 1px solid #ddd; border-radius: 8px;
+    background: #fff; font-size: .85rem; cursor: pointer;
+    &.active { background: #dbeafe; border-color: #2563eb; color: #2563eb; }
+    &.mark-all { margin-left: auto; background: #2563eb; color: #fff; border-color: #2563eb; }
+    &.mark-all:disabled { background: #93c5fd; cursor: not-allowed; }
+  }
+}
+
+.loading, .empty { text-align: center; padding: 40px; color: #9ca3af; }
+
+.notif-item {
+  padding: 14px; border-radius: 10px; margin-bottom: 8px;
+  background: #fff; border: 1px solid #e5e7eb; cursor: pointer;
+  &.unread { background: #eff6ff; border-color: #bfdbfe; }
+  .notif-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .notif-type { font-size: .8rem; color: #6b7280; }
+  .notif-time { font-size: .75rem; color: #9ca3af; margin-left: auto; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #2563eb; }
+  .notif-title { margin: 4px 0; font-weight: 600; font-size: .95rem; }
+  .notif-content { margin: 0; font-size: .85rem; color: #6b7280; }
+  .notif-link { display: inline-block; margin-top: 6px; font-size: .85rem; color: #2563eb; text-decoration: none; }
+}
+
+.pagination {
+  display: flex; justify-content: center; align-items: center; gap: 12px; padding: 8px;
+  button { padding: 6px 14px; border: 1px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer; }
+  button:disabled { opacity: .4; }
+  span { font-size: .85rem; color: #666; }
+}

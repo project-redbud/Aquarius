@@ -322,6 +322,32 @@ export class AdminPage implements OnInit {
     this.loadSuggestions();
   }
 
+  // ── Notification push ─────────────────────────────────
+  notifTitle = signal('');
+  notifContent = signal('');
+  notifTargetUsers = signal('');
+  notifSending = signal(false);
+  notifResult = signal<number | null>(null);
+
+  sendNotification() {
+    this.notifSending.set(true);
+    this.notifResult.set(null);
+    this.api.adminSendNotification(
+      this.notifTitle().trim(),
+      this.notifContent().trim(),
+      this.notifTargetUsers().trim() || undefined
+    ).subscribe({
+      next: res => {
+        this.notifResult.set(res.bottleId);
+        this.notifTitle.set('');
+        this.notifContent.set('');
+        this.notifTargetUsers.set('');
+        this.notifSending.set(false);
+      },
+      error: () => { this.notifSending.set(false); }
+    });
+  }
+
   closeBottle(id: number) {
     if (!confirm('确定关闭此瓶子？关闭后不再被捞取，也无法评论。')) return;
     this.api.adminCloseBottle(id).subscribe(() => {

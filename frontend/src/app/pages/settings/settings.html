@@ -1,0 +1,58 @@
+<div class="page">
+  <h1>⚙️ 个人设置</h1>
+
+  <!-- Password -->
+  <section class="section">
+    <h2>🔑 修改密码</h2>
+    <input type="password" [(ngModel)]="oldPassword" placeholder="原密码" />
+    <input type="password" [(ngModel)]="newPassword" placeholder="新密码（至少6个字符）" />
+    <button [disabled]="pwdLoading()" (click)="changePassword()">{{ pwdLoading() ? '保存中...' : '保存' }}</button>
+    @if (pwdMsg()) { <p class="msg">{{ pwdMsg() }}</p> }
+  </section>
+
+  <!-- Email -->
+  <section class="section">
+    <h2>📧 邮箱</h2>
+    <p class="info">当前邮箱：{{ email() }} @if (emailVerified()) {✅ 已验证} @else {⚠️ 未验证 <a href="javascript:void(0)" (click)="resendVerification()">重发验证邮件</a>}</p>
+    @if (pendingEmail()) {
+      <p class="info pending">⏳ 待验证邮箱：{{ pendingEmail() }}（请查收验证邮件）</p>
+    }
+    <input type="email" [(ngModel)]="newEmail" placeholder="新邮箱地址" />
+    <button [disabled]="emailLoading()" (click)="changeEmail()">{{ emailLoading() ? '发送中...' : '修改邮箱' }}</button>
+    @if (emailMsg()) { <p class="msg">{{ emailMsg() }}</p> }
+  </section>
+
+  <!-- Notification preferences -->
+  <section class="section">
+    <h2>🔔 通知偏好</h2>
+    <label class="radio">
+      <input type="radio" name="notify" value="default" [(ngModel)]="notifyPreference" />
+      <span><strong>系统默认</strong><br /><small>站内通知 + 重要事件（如意见被处理）发邮件</small></span>
+    </label>
+    <label class="radio">
+      <input type="radio" name="notify" value="notify_only" [(ngModel)]="notifyPreference" />
+      <span><strong>仅接收通知</strong><br /><small>仅站内通知，不发邮件（特殊系统邮件除外）</small></span>
+    </label>
+    <label class="radio">
+      <input type="radio" name="notify" value="none" [(ngModel)]="notifyPreference" />
+      <span><strong>不接收通知</strong><br /><small>无通知、无邮件（特殊系统邮件除外）</small></span>
+    </label>
+
+    <p class="sys-mail-hint">特殊系统邮件：找回密码、验证邮件、邮箱更换通知等。</p>
+
+    <button [disabled]="prefLoading()" (click)="savePreferences()">{{ prefLoading() ? '保存中...' : '保存偏好' }}</button>
+    @if (prefMsg()) { <p class="msg">{{ prefMsg() }}</p> }
+  </section>
+
+  @if (isAdmin()) {
+    <section class="section">
+      <h2>🛡️ 管理员选项</h2>
+      <label class="checkbox">
+        <input type="checkbox" [ngModel]="viewPrivateComments()" (change)="toggleViewPrivateComments()" />
+        <span>查看仅瓶主可见的评论</span>
+      </label>
+    </section>
+  }
+
+  <p class="back"><a routerLink="/my">← 返回我的</a></p>
+</div>

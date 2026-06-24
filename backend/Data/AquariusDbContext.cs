@@ -14,6 +14,7 @@ public class AquariusDbContext : DbContext
     public DbSet<DailyPush> DailyPushes => Set<DailyPush>();
     public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
     public DbSet<BottleLog> BottleLogs => Set<BottleLog>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder model)
     {
@@ -84,5 +85,12 @@ public class AquariusDbContext : DbContext
             .WithMany()
             .HasForeignKey(l => l.OperatorUserId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Notification → User
+        model.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany()
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

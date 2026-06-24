@@ -15,4 +15,6 @@ export const routes: Routes = [
   { path: 'report', loadComponent: () => import('./pages/report/report').then(m => m.ReportPage), data: { title: '举报' } },
   { path: 'verify-email', loadComponent: () => import('./pages/verify-email/verify-email').then(m => m.VerifyEmailPage), data: { title: '验证邮箱' } },
   { path: 'reset-password', loadComponent: () => import('./pages/reset-password/reset-password').then(m => m.ResetPasswordPage), data: { title: '重置密码' } },
+  { path: 'notifications', loadComponent: () => import('./pages/notifications/notifications').then(m => m.NotificationsPage), canActivate: [authGuard], data: { title: '通知中心' } },
+  { path: 'settings', loadComponent: () => import('./pages/settings/settings').then(m => m.SettingsPage), canActivate: [authGuard], data: { title: '个人设置' } },
 ];

@@ -216,6 +216,27 @@
       }
     </details>
 
+    <details class="daily-push-section">
+      <summary>📢 通知推送</summary>
+      <div class="push-form">
+        <label>标题
+          <input type="text" [(ngModel)]="notifTitle" placeholder="通知标题" maxlength="200" />
+        </label>
+        <label>内容
+          <textarea [(ngModel)]="notifContent" placeholder="通知内容..." maxlength="500" rows="3"></textarea>
+        </label>
+        <label>目标用户（留空 = 所有人；多个用户用逗号分隔）
+          <input type="text" [(ngModel)]="notifTargetUsers" placeholder="UID 或用户名，逗号分隔" />
+        </label>
+        <button [disabled]="!notifTitle().trim() || !notifContent().trim() || notifSending()" (click)="sendNotification()">
+          {{ notifSending() ? '发送中...' : '📨 发送通知' }}
+        </button>
+        @if (notifResult()) {
+          <p class="msg-ok">已创建通知瓶 #{{ notifResult() }}，已推送给目标用户。</p>
+        }
+      </div>
+    </details>
+
     <button class="refresh" (click)="refreshBottles()">🔄 刷新瓶子列表 ({{ bottleTotal() }})</button>
 
     @for (b of bottles(); track b.id) {
