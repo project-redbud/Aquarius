@@ -119,7 +119,29 @@ public class AuthController : ControllerBase
         if (string.IsNullOrWhiteSpace(req.Token))
             return BadRequest(new { error = "验证令牌无效" });
 
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.EmailVerifyToken == req.Token);
+        // 先查找邮箱变更验证令牌
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.NewEmailVerifyToken == req.Token);
+        if (user != null)
+        {
+            var oldEmail = user.Email;
+            user.Email = user.NewEmail!;
+            user.EmailVerified = true;
+            user.NewEmail = null;
+            user.NewEmailVerifyToken = null;
+            await _db.SaveChangesAsync();
+
+            // 后台通知旧邮箱
+            var settings = await _db.SiteSettings.FirstOrDefaultAsync();
+            if (settings != null)
+                _email.SendBackground(settings, oldEmail, "你的 Aquarius 邮箱已变更",
+                    $"<p>你的 Aquarius 账号邮箱已从 {oldEmail} 变更为 {user.Email}。</p><p>如果不是你本人操作，请立即联系管理员。</p>");
+
+            var jwt = GenerateToken(user);
+            return Ok(new AuthResponse { Token = jwt, Username = user.Username, IsAdmin = user.IsAdmin, Role = user.Role });
+        }
+
+        // 再查找初始注册验证令牌
+        user = await _db.Users.FirstOrDefaultAsync(u => u.EmailVerifyToken == req.Token);
         if (user == null)
             return BadRequest(new { error = "验证链接无效或已过期" });
 
@@ -127,7 +149,6 @@ public class AuthController : ControllerBase
         user.EmailVerifyToken = null;
         await _db.SaveChangesAsync();
 
-        // 自动登录
         var token = GenerateToken(user);
         return Ok(new AuthResponse
         {

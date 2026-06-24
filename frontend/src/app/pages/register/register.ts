@@ -1,6 +1,6 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
 
@@ -10,7 +10,7 @@ import { ApiService } from '../../services/api.service';
   templateUrl: './register.html',
   styleUrls: ['./register.scss']
 })
-export class RegisterPage {
+export class RegisterPage implements OnInit {
   username = signal('');
   email = signal('');
   password = signal('');
@@ -22,6 +22,13 @@ export class RegisterPage {
 
   private auth = inject(AuthService);
   private api = inject(ApiService);
+  private router = inject(Router);
+
+  ngOnInit() {
+    if (this.auth.isLoggedIn()) {
+      this.router.navigate(['/my']);
+    }
+  }
 
   onSubmit() {
     const u = this.username().trim();

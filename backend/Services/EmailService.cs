@@ -32,6 +32,7 @@ public class EmailService
     /// <summary>发送邮件（后台任务，不阻塞）。如 SMTP 未配置则静默跳过。</summary>
     public void SendBackground(SiteSettings settings, string to, string subject, string body)
     {
+        Console.WriteLine($"[Email] Queuing background send to {to}: {subject}");
         _ = Task.Run(async () =>
         {
             using var client = BuildClient(settings);
@@ -45,6 +46,8 @@ public class EmailService
             var fromAddr = new MailAddress(settings.SmtpUser, displayName);
             using var msg = new MailMessage(fromAddr, new MailAddress(to))
             {
+                Subject = subject,
+                Body = body,
                 IsBodyHtml = true,
                 Sender = new MailAddress(settings.SmtpUser)
             };
@@ -77,6 +80,24 @@ public class EmailService
             </div>
             """;
         SendBackground(settings, to, "验证你的 Aquarius 邮箱", body);
+    }
+
+    /// <summary>发送邮箱变更确认邮件（后台）</summary>
+    public void SendEmailChangeBackground(SiteSettings settings, string to, string token)
+    {
+        var link = $"{settings.SiteBaseUrl.TrimEnd('/')}/verify-email?token={Uri.EscapeDataString(token)}";
+        var body = $"""
+            <div style="max-width:480px;margin:0 auto;font-family:sans-serif">
+              <h2>📧 Aquarius 邮箱变更确认</h2>
+              <p>你正在修改账号绑定的邮箱地址，请点击下方按钮确认变更：</p>
+              <p style="text-align:center;margin:24px 0">
+                <a href="{link}" style="display:inline-block;padding:12px 32px;background:#f59e0b;color:#fff;border-radius:8px;text-decoration:none">确认变更</a>
+              </p>
+              <p style="color:#888;font-size:14px">或复制链接到浏览器：<br>{link}</p>
+              <p style="color:#888;font-size:14px">链接 24 小时内有效。如果不是你本人操作，请忽略此邮件。</p>
+            </div>
+            """;
+        SendBackground(settings, to, "确认你的 Aquarius 邮箱变更", body);
     }
 
     /// <summary>发送密码重置邮件（后台）</summary>

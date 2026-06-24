@@ -73,9 +73,10 @@ export class SettingsPage implements OnInit {
 
   resendPendingVerification() {
     if (this.resendCooldown() > 0) return;
+    this.startCooldown();
     this.emailLoading.set(true);
     this.api.resendUserVerification().subscribe({
-      next: r => { alert(r.message); this.emailLoading.set(false); this.startCooldown(); },
+      next: r => { alert(r.message); this.emailLoading.set(false); },
       error: e => { alert(e.error?.error || '发送失败'); this.emailLoading.set(false); }
     });
   }

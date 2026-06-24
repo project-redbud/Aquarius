@@ -31,6 +31,10 @@ export class LoginPage implements OnInit {
   private router = inject(Router);
 
   ngOnInit() {
+    if (this.auth.isLoggedIn()) {
+      this.router.navigate(['/my']);
+      return;
+    }
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
   }
 
@@ -67,6 +71,7 @@ export class LoginPage implements OnInit {
     const email = this.forgotEmail().trim();
     if (!email || this.forgotCooldown() > 0) return;
 
+    this.startForgotCooldown();
     this.forgotLoading.set(true);
     this.forgotMessage.set('');
 
@@ -74,7 +79,6 @@ export class LoginPage implements OnInit {
       next: (res) => {
         this.forgotLoading.set(false);
         this.forgotMessage.set(res.message);
-        this.startForgotCooldown();
       },
       error: (err) => {
         this.forgotLoading.set(false);

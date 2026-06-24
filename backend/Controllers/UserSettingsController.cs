@@ -39,7 +39,7 @@ public class UserSettingsController : ControllerBase
         if (settings == null)
             return Ok(new { message = "验证邮件已发送，请查收" });
 
-        _email.SendVerificationBackground(settings, to, token);
+        _email.SendEmailChangeBackground(settings, to, token);
         return Ok(new { message = "验证邮件已发送到新邮箱，请查收" });
     }
 

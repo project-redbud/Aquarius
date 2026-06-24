@@ -17,6 +17,7 @@ h1 { margin-bottom: 20px; font-size: 1.5rem; }
   .msg { margin: 8px 0 0; font-size: .85rem; color: #059669; }
   .info { font-size: .9rem; color: #6b7280; margin-bottom: 8px; a { color: #2563eb; } }
   .info.pending { color: #d97706; }
+  a.disabled { color: #9ca3af !important; pointer-events: none; }
 }
 
 .radio, .checkbox {
