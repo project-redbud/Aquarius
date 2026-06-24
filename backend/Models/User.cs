@@ -46,6 +46,13 @@ public class User
     [MaxLength(20)]
     public string NotifyPreference { get; set; } = "default";
 
+    /// <summary>投瓶默认匿名（默认勾选）</summary>
+    public bool ThrowAnonymous { get; set; } = true;
+
+    /// <summary>默认匿名名称（为空时留空）</summary>
+    [MaxLength(50)]
+    public string? DefaultAuthorName { get; set; }
+
     /// <summary>管理员是否查看仅作者可见的评论（默认关闭）</summary>
     public bool ViewPrivateComments { get; set; }
 

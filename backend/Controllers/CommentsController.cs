@@ -188,12 +188,11 @@ public class CommentsController : ControllerBase
         // 通知瓶主（评论）
         if (bottle.UserId != null && bottle.UserId != userId)
         {
-            var commenter = user?.Username ?? "匿名";
             _db.Notifications.Add(new Models.Notification
             {
                 UserId = bottle.UserId.Value,
                 Type = "comment",
-                Title = $"{commenter} 评论了你的瓶子",
+                Title = "瓶子有人评论了",
                 Content = comment.Content.Length > 50 ? comment.Content[..50] + "..." : comment.Content,
                 RelatedBottleId = bottleId,
                 IsRead = false,

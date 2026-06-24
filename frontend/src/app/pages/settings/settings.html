@@ -1,6 +1,18 @@
 <div class="page">
   <h1>⚙️ 个人设置</h1>
 
+  <section class="section">
+    <h2>🌐 站点偏好</h2>
+    <label class="checkbox">
+      <input type="checkbox" [(ngModel)]="throwAnonymous" (change)="savePreferences()" />
+      <span>投瓶默认匿名</span>
+    </label>
+    <label class="input-row">
+      <span>默认匿名名称</span>
+      <input type="text" [(ngModel)]="defaultAuthorName" placeholder="留空则显示为匿名" maxlength="50" (change)="savePreferences()" />
+    </label>
+  </section>
+
   <!-- Password -->
   <section class="section">
     <h2>🔑 修改密码</h2>

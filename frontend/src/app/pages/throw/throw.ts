@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api.service';
@@ -12,10 +12,10 @@ import { Router } from '@angular/router';
   templateUrl: './throw.html',
   styleUrls: ['./throw.scss']
 })
-export class ThrowPage {
+export class ThrowPage implements OnInit {
   content = signal('');
   authorName = signal('');
-  isAnonymous = signal(false);
+  isAnonymous = signal(true);
   requireLogin = signal(false);
   commentsPrivate = signal(false);
   showAdminBadge = signal(false);
@@ -27,6 +27,17 @@ export class ThrowPage {
   isLoggedIn = this.auth.isLoggedIn;
 
   constructor(private api: ApiService, private imageService: ImageService, private router: Router) {}
+
+  ngOnInit() {
+    this.api.getUserPreferences().subscribe(p => {
+      if (!p.throwAnonymous) {
+        this.isAnonymous.set(false);
+        this.authorName.set(this.auth.user()?.username || '');
+      } else if (p.defaultAuthorName) {
+        this.authorName.set(p.defaultAuthorName);
+      }
+    });
+  }
 
   async onFileChange(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
@@ -44,6 +55,15 @@ export class ThrowPage {
     this.imageBase64.set(null);
   }
 
+  toggleAnonymous() {
+    this.isAnonymous.update(v => !v);
+    if (!this.isAnonymous()) {
+      this.authorName.set(this.auth.user()?.username || '');
+    } else {
+      this.authorName.set('');
+    }
+  }
+
   async throwBottle() {
     if (!this.content().trim()) return;
     this.sending.set(true);
@@ -51,7 +71,7 @@ export class ThrowPage {
       const bottle = await this.api.throwBottle(
         this.content().trim(),
         this.imageBase64() ?? undefined,
-        this.isAnonymous() ? undefined : (this.authorName().trim() || undefined),
+        this.authorName().trim() || (this.isAnonymous() ? undefined : (this.auth.user()?.username || undefined)),
         this.requireLogin(),
         this.commentsPrivate(),
         this.showAdminBadge()

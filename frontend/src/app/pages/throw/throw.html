@@ -37,17 +37,16 @@
   <!-- author -->
   <div class="author-row">
     <label>
-      <input type="checkbox" [(ngModel)]="isAnonymous" />
+      <input type="checkbox" [ngModel]="isAnonymous()" (change)="toggleAnonymous()" />
       匿名发布
     </label>
-    @if (!isAnonymous()) {
-      <input
-        type="text"
-        [(ngModel)]="authorName"
-        placeholder="留个名字（选填）"
-        maxlength="50"
-      />
-    }
+    <input
+      type="text"
+      [(ngModel)]="authorName"
+      [placeholder]="!isAnonymous() ? auth.user()?.username || '留个名字' : '留个名字'"
+      [disabled]="!isAnonymous()"
+      maxlength="50"
+    />
   </div>
 
   <!-- privacy options -->

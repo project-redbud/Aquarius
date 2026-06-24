@@ -30,6 +30,8 @@ export class SettingsPage implements OnInit {
   // Preferences
   notifyPreference = signal('default');
   viewPrivateComments = signal(false);
+  throwAnonymous = signal(true);
+  defaultAuthorName = signal('');
   isAdmin = signal(false);
   prefMsg = signal('');
   prefLoading = signal(false);
@@ -41,6 +43,8 @@ export class SettingsPage implements OnInit {
       this.pendingEmail.set(p.newEmail || null);
       this.notifyPreference.set(p.notifyPreference || 'default');
       this.viewPrivateComments.set(p.viewPrivateComments);
+      this.throwAnonymous.set(p.throwAnonymous !== false);
+      this.defaultAuthorName.set(p.defaultAuthorName || '');
       this.isAdmin.set(p.isAdmin);
     });
   }
@@ -93,7 +97,12 @@ export class SettingsPage implements OnInit {
 
   savePreferences() {
     this.prefLoading.set(true);
-    this.api.updateUserPreferences(this.notifyPreference(), this.viewPrivateComments()).subscribe({
+    this.api.updateUserPreferences(
+      this.notifyPreference(),
+      this.viewPrivateComments(),
+      this.throwAnonymous(),
+      this.defaultAuthorName().trim() || undefined
+    ).subscribe({
       next: () => { this.prefMsg.set('已保存'); this.prefLoading.set(false); },
       error: e => { this.prefMsg.set(e.error?.error || '保存失败'); this.prefLoading.set(false); }
     });

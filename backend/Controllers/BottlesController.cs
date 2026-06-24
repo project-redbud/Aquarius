@@ -280,13 +280,11 @@ public class BottlesController : ControllerBase
             // 通知瓶主（点赞）
             if (bottle.UserId != null)
             {
-                var liker = await _db.Users.FindAsync(GetUserId());
-                var likerName = liker?.Username ?? "匿名";
                 _db.Notifications.Add(new Models.Notification
                 {
                     UserId = bottle.UserId.Value,
                     Type = "like",
-                    Title = $"{likerName} 赞了你的瓶子",
+                    Title = "瓶子获得了点赞",
                     Content = bottle.Content.Length > 50 ? bottle.Content[..50] + "..." : bottle.Content,
                     RelatedBottleId = id,
                     IsRead = false,

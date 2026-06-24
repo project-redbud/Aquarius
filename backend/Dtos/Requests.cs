@@ -156,6 +156,8 @@ public class UpdatePreferencesRequest
 {
     public string? NotifyPreference { get; set; }
     public bool? ViewPrivateComments { get; set; }
+    public bool? ThrowAnonymous { get; set; }
+    public string? DefaultAuthorName { get; set; }
 }
 
 public class SendNotificationRequest
