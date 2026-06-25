@@ -1,14 +1,26 @@
 @echo off
 echo ==========================================
-echo  Aquarius Android Build - LOCALHOST
-echo  API: http://192.168.5.14:5185
+echo  Aquarius Android Build - PRODUCTION
 echo ==========================================
 
 cd /d "%~dp0"
 
+if not exist "src\environments\environment.server.ts" (
+  echo.
+  echo ERROR: src\environments\environment.server.ts not found!
+  echo Create it with your production server URL:
+  echo   export const environment = {
+  echo     production: true,
+  echo     apiBase: 'https://your-domain.com'
+  echo   };
+  echo.
+  pause
+  exit /b 1
+)
+
 echo.
-echo [1/3] Copying local environment...
-copy /Y src\environments\environment.local.ts src\environments\environment.prod.ts >nul
+echo [1/3] Copying server environment...
+copy /Y src\environments\environment.server.ts src\environments\environment.prod.ts >nul
 
 echo [2/3] Building Angular...
 call npm run build -- --configuration production
