@@ -3,7 +3,8 @@ import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'pick', pathMatch: 'full' },
+  { path: '', loadComponent: () => import('./pages/home/home').then(m => m.HomePage), data: { title: '首页' } },
+  { path: 'main', redirectTo: '', pathMatch: 'full' },
   { path: 'throw', loadComponent: () => import('./pages/throw/throw').then(m => m.ThrowPage), data: { title: '投瓶' } },
   { path: 'pick', loadComponent: () => import('./pages/pick/pick').then(m => m.PickPage), data: { title: '捞瓶' } },
   { path: 'daily', loadComponent: () => import('./pages/daily/daily').then(m => m.DailyPage), data: { title: '每日推送' } },
