@@ -21,7 +21,7 @@ export class HomePage implements OnInit {
   loading = signal(true);
 
   ngOnInit() {
-    this.http.get<any>('/api/home', { headers: { 'X-User-Token': this.api.getUserToken() } })
+    this.http.get<any>(this.api.base + '/home', { headers: { 'X-User-Token': this.api.getUserToken() } })
       .subscribe(data => {
         this.news.set(data.pushes.news);
         this.story.set(data.pushes.story);

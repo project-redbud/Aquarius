@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Bottle {
   id: number;
@@ -58,7 +59,7 @@ const STORAGE_KEY = 'aquarius_user_token';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private base = '/api';
+  base = environment.apiBase + '/api';
 
   /** 共享未读通知数（App 角标 + 通知中心同步读取） */
   readonly unreadCount = signal(0);
