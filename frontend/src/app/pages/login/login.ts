@@ -60,7 +60,8 @@ export class LoginPage implements OnInit {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err.error?.error || '登录失败，请重试');
+        const msg = typeof err.error === 'string' ? err.error : (err.error?.error || '登录失败，请重试');
+        this.error.set(msg);
       }
     });
   }
@@ -121,4 +122,6 @@ export class LoginPage implements OnInit {
       if (v <= 0) clearInterval(this.verifyTimer);
     }, 1000);
   }
+
+  isString(v: any): boolean { return typeof v === 'string'; }
 }
