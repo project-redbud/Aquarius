@@ -32,6 +32,7 @@ export class SettingsPage implements OnInit {
   viewPrivateComments = signal(false);
   throwAnonymous = signal(true);
   defaultAuthorName = signal('');
+  showAdminUsername = signal(true);
   isAdmin = signal(false);
   prefMsg = signal('');
   prefLoading = signal(false);
@@ -45,6 +46,7 @@ export class SettingsPage implements OnInit {
       this.viewPrivateComments.set(p.viewPrivateComments);
       this.throwAnonymous.set(p.throwAnonymous !== false);
       this.defaultAuthorName.set(p.defaultAuthorName || '');
+      this.showAdminUsername.set(p.showAdminUsername !== false);
       this.isAdmin.set(p.isAdmin);
     });
   }
@@ -101,7 +103,8 @@ export class SettingsPage implements OnInit {
       this.notifyPreference(),
       this.viewPrivateComments(),
       this.throwAnonymous(),
-      this.defaultAuthorName().trim() || undefined
+      this.defaultAuthorName().trim() || undefined,
+      this.showAdminUsername()
     ).subscribe({
       next: () => { this.prefMsg.set('已保存'); this.prefLoading.set(false); },
       error: e => { this.prefMsg.set(e.error?.error || '保存失败'); this.prefLoading.set(false); }

@@ -68,6 +68,10 @@
         <input type="checkbox" [ngModel]="viewPrivateComments()" (change)="toggleViewPrivateComments()" />
         <span>查看仅瓶主可见的评论</span>
       </label>
+      <label class="checkbox">
+        <input type="checkbox" [(ngModel)]="showAdminUsername" (change)="savePreferences()" />
+        <span>管理员标识同时显示我的用户名</span>
+      </label>
     </section>
   }
 

@@ -71,7 +71,37 @@ public class CommentsController : ControllerBase
             }
         }
 
-        return Ok(comments.Select(c => ToDto(c, includeReplies: true)).ToList());
+        var result = comments.Select(c => ToDto(c, includeReplies: true)).ToList();
+
+        // 为管理员评论填充用户名
+        var adminIds = result.Where(c => c.IsAdminBadge && c.UserId != null)
+            .Select(c => c.UserId!.Value).Distinct().ToList();
+        var adminNames = new Dictionary<int, string>();
+        foreach (var aid in adminIds)
+        {
+            var u = await _db.Users.FindAsync(aid);
+            if (u != null) adminNames[aid] = u.Username;
+        }
+        foreach (var c in result)
+        {
+            if (c.IsAdminBadge && c.UserId != null && adminNames.ContainsKey(c.UserId.Value))
+                c.AdminUsername = adminNames[c.UserId.Value];
+            // Also set for nested replies
+            SetReplyAdminUsernames(c.Replies, adminNames);
+        }
+
+        return Ok(result);
+    }
+
+    private static void SetReplyAdminUsernames(List<CommentDto> replies, Dictionary<int, string> names)
+    {
+        foreach (var r in replies)
+        {
+            if (r.IsAdminBadge && r.UserId != null && names.ContainsKey(r.UserId.Value))
+                r.AdminUsername = names[r.UserId.Value];
+            if (r.Replies.Count > 0)
+                SetReplyAdminUsernames(r.Replies, names);
+        }
     }
 
     private static bool IsOwnComment(Comment c, int? userId, string token)

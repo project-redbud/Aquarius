@@ -121,6 +121,9 @@ public class CommentDto
     /// <summary>管理员标识。</summary>
     public bool IsAdminBadge { get; set; }
 
+    /// <summary>管理员用户名（IsAdminBadge=true 时有值）。</summary>
+    public string? AdminUsername { get; set; }
+
     /// <summary>瓶主标识。</summary>
     public bool IsBottleOwnerBadge { get; set; }
 }
@@ -158,6 +161,7 @@ public class UpdatePreferencesRequest
     public bool? ViewPrivateComments { get; set; }
     public bool? ThrowAnonymous { get; set; }
     public string? DefaultAuthorName { get; set; }
+    public bool? ShowAdminUsername { get; set; }
 }
 
 public class SendNotificationRequest

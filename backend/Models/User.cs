@@ -53,6 +53,9 @@ public class User
     [MaxLength(50)]
     public string? DefaultAuthorName { get; set; }
 
+    /// <summary>管理员标识同时显示用户名（默认勾选）</summary>
+    public bool ShowAdminUsername { get; set; } = true;
+
     /// <summary>管理员是否查看仅作者可见的评论（默认关闭）</summary>
     public bool ViewPrivateComments { get; set; }
 

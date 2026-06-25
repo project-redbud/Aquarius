@@ -176,6 +176,7 @@ public class UserSettingsController : ControllerBase
             user.ViewPrivateComments,
             user.ThrowAnonymous,
             user.DefaultAuthorName,
+            user.ShowAdminUsername,
             user.Email,
             emailVerified = user.EmailVerified,
             newEmail = user.NewEmail,
@@ -206,6 +207,9 @@ public class UserSettingsController : ControllerBase
 
         if (req.DefaultAuthorName != null)
             user.DefaultAuthorName = string.IsNullOrWhiteSpace(req.DefaultAuthorName) ? null : req.DefaultAuthorName.Trim();
+
+        if (req.ShowAdminUsername.HasValue && user.IsAdmin)
+            user.ShowAdminUsername = req.ShowAdminUsername.Value;
 
         await _db.SaveChangesAsync();
         return Ok(new { user.NotifyPreference, user.ViewPrivateComments, user.ThrowAnonymous, user.DefaultAuthorName });

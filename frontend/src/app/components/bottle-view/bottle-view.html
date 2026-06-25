@@ -132,7 +132,7 @@
           <p><span class="floor">{{ floorLabel(i) }}</span> <span [innerHTML]="c.content | linkify"></span></p>
         }
         @if (c.editedAt) { <span class="edited-tag">(已编辑)</span> }
-        <div class="comment-meta"><span class="meta-left"><span class="rid">#{{ c.id }}</span><span class="time">@if (c.isAdminBadge) {🛡️}@if (c.isBottleOwnerBadge) {🧴}{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span></span>
+        <div class="comment-meta"><span class="meta-left"><span class="rid">#{{ c.id }}</span><span class="time">@if (c.isAdminBadge) {🛡️@if (c.adminUsername) {{{ c.adminUsername }}&nbsp;}}@if (c.isBottleOwnerBadge) {🧴}{{ c.createdAt | date:'yyyy-MM-dd HH:mm' }}</span></span>
           <div class="meta-actions">
             @if (isMine(c.userId)) {
               <button class="reply-btn" (click)="startEditComment(c)">✏️</button>
@@ -175,7 +175,7 @@
                   }
                   @if (r.editedAt) { <span class="edited-tag">(已编辑)</span> }
                   @if (r.parentContent) { <blockquote [innerHTML]="r.parentContent | linkify"></blockquote> }
-                  <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">@if (r.isAdminBadge) {🛡️}@if (r.isBottleOwnerBadge) {🧴}{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                  <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">@if (r.isAdminBadge) {🛡️@if (r.adminUsername) {{{ r.adminUsername }}&nbsp;}}@if (r.isBottleOwnerBadge) {🧴}{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                     <div class="meta-actions">
                       @if (isMine(r.userId)) {
                         <button class="reply-btn" (click)="startEditComment(r)">✏️</button>
@@ -216,7 +216,7 @@
                         }
                         @if (sr.editedAt) { <span class="edited-tag">(已编辑)</span> }
                         @if (sr.parentContent) { <blockquote [innerHTML]="sr.parentContent | linkify"></blockquote> }
-                        <div class="reply-meta"><span class="rid">#{{ sr.id }}</span><span class="time">@if (sr.isAdminBadge) {🛡️}@if (sr.isBottleOwnerBadge) {🧴}{{ sr.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                        <div class="reply-meta"><span class="rid">#{{ sr.id }}</span><span class="time">@if (sr.isAdminBadge) {🛡️@if (sr.adminUsername) {{{ sr.adminUsername }}&nbsp;}}@if (sr.isBottleOwnerBadge) {🧴}{{ sr.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                           <div class="meta-actions">
                             @if (isMine(sr.userId)) {
                               <button class="reply-btn" (click)="startEditComment(sr)">✏️</button>
@@ -263,7 +263,7 @@
                     }
                     @if (r.editedAt) { <span class="edited-tag">(已编辑)</span> }
                     @if (r.parentContent) { <blockquote [innerHTML]="r.parentContent | linkify"></blockquote> }
-                    <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">@if (r.isAdminBadge) {🛡️}@if (r.isBottleOwnerBadge) {🧴}{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                    <div class="reply-meta"><span class="rid">#{{ r.id }}</span><span class="time">@if (r.isAdminBadge) {🛡️@if (r.adminUsername) {{{ r.adminUsername }}&nbsp;}}@if (r.isBottleOwnerBadge) {🧴}{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
                       <div class="meta-actions">
                         @if (isMine(r.userId)) {
                           <button class="reply-btn" (click)="startEditComment(r)">✏️</button>

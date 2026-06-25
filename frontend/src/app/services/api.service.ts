@@ -37,6 +37,7 @@ export interface Comment {
   replyCount?: number;
   replies?: Comment[];
   isAdminBadge: boolean;
+  adminUsername?: string | null;
   isBottleOwnerBadge: boolean;
 }
 
@@ -370,12 +371,12 @@ export class ApiService {
     return this.http.post<{ message: string }>(`${this.base}/users/resend-verification`, {});
   }
 
-  getUserPreferences(): Observable<{ notifyPreference: string; viewPrivateComments: boolean; throwAnonymous: boolean; defaultAuthorName?: string | null; email: string; emailVerified: boolean; newEmail?: string | null; isAdmin: boolean }> {
+  getUserPreferences(): Observable<{ notifyPreference: string; viewPrivateComments: boolean; throwAnonymous: boolean; defaultAuthorName?: string | null; showAdminUsername: boolean; email: string; emailVerified: boolean; newEmail?: string | null; isAdmin: boolean }> {
     return this.http.get<any>(`${this.base}/users/preferences`);
   }
 
-  updateUserPreferences(notifyPreference?: string, viewPrivateComments?: boolean, throwAnonymous?: boolean, defaultAuthorName?: string): Observable<any> {
-    return this.http.put<any>(`${this.base}/users/preferences`, { notifyPreference, viewPrivateComments, throwAnonymous, defaultAuthorName });
+  updateUserPreferences(notifyPreference?: string, viewPrivateComments?: boolean, throwAnonymous?: boolean, defaultAuthorName?: string, showAdminUsername?: boolean): Observable<any> {
+    return this.http.put<any>(`${this.base}/users/preferences`, { notifyPreference, viewPrivateComments, throwAnonymous, defaultAuthorName, showAdminUsername });
   }
 
   // ── auth ───────────────────────────────────────────────

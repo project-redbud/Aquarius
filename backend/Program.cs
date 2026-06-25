@@ -108,6 +108,7 @@ static void Migrate(AquariusDbContext db)
         "ALTER TABLE Users ADD COLUMN NewEmailVerifyToken TEXT NULL",
         "ALTER TABLE Users ADD COLUMN ThrowAnonymous INTEGER NOT NULL DEFAULT 1",
         "ALTER TABLE Users ADD COLUMN DefaultAuthorName TEXT NULL",
+        "ALTER TABLE Users ADD COLUMN ShowAdminUsername INTEGER NOT NULL DEFAULT 1",
     };
 
     foreach (var sql in sqls)
