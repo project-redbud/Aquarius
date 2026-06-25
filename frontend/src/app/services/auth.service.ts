@@ -1,6 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface AuthUser {
   userId: number;
@@ -19,7 +20,7 @@ const USER_KEY = 'aquarius_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private base = '/api/auth';
+  private base = environment.apiBase + '/api/auth';
 
   // ── Reactive state ─────────────────────────────────────
   private _token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
