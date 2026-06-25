@@ -326,6 +326,7 @@ export class AdminPage implements OnInit {
   notifTitle = signal('');
   notifContent = signal('');
   notifTargetUsers = signal('');
+  notifExpireDays = signal(7);
   notifSending = signal(false);
   notifResult = signal<number | null>(null);
 
@@ -335,13 +336,15 @@ export class AdminPage implements OnInit {
     this.api.adminSendNotification(
       this.notifTitle().trim(),
       this.notifContent().trim(),
-      this.notifTargetUsers().trim() || undefined
+      this.notifTargetUsers().trim() || undefined,
+      this.notifExpireDays()
     ).subscribe({
       next: res => {
         this.notifResult.set(res.bottleId);
         this.notifTitle.set('');
         this.notifContent.set('');
         this.notifTargetUsers.set('');
+        this.notifExpireDays.set(7);
         this.notifSending.set(false);
       },
       error: () => { this.notifSending.set(false); }

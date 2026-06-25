@@ -42,12 +42,14 @@ public class EmailService
                 return;
             }
 
-            var displayName = string.IsNullOrWhiteSpace(settings.SiteName) ? "Aquarius" : settings.SiteName;
+            var siteName = string.IsNullOrWhiteSpace(settings.SiteName) ? "Aquarius" : settings.SiteName;
+            var displayName = siteName;
             var fromAddr = new MailAddress(settings.SmtpUser, displayName);
+            var fullBody = body + $"<hr style=\"border:none;border-top:1px solid #e5e7eb;margin:16px 0\"><p style=\"color:#9ca3af;font-size:12px\">{siteName} 运营团队</p>";
             using var msg = new MailMessage(fromAddr, new MailAddress(to))
             {
                 Subject = subject,
-                Body = body,
+                Body = fullBody,
                 IsBodyHtml = true,
                 Sender = new MailAddress(settings.SmtpUser)
             };

@@ -228,6 +228,9 @@
         <label>目标用户（留空 = 所有人；多个用户用逗号分隔）
           <input type="text" [(ngModel)]="notifTargetUsers" placeholder="UID 或用户名，逗号分隔" />
         </label>
+        <label>过期天数（默认 7 天）
+          <input type="number" [(ngModel)]="notifExpireDays" min="1" max="365" style="width:100px" />
+        </label>
         <button [disabled]="!notifTitle().trim() || !notifContent().trim() || notifSending()" (click)="sendNotification()">
           {{ notifSending() ? '发送中...' : '📨 发送通知' }}
         </button>

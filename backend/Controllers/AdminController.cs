@@ -13,8 +13,13 @@ namespace Aquarius.Api.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly AquariusDbContext _db;
+    private readonly Aquarius.Api.Services.EmailService _email;
 
-    public AdminController(AquariusDbContext db) => _db = db;
+    public AdminController(AquariusDbContext db, Aquarius.Api.Services.EmailService email)
+    {
+        _db = db;
+        _email = email;
+    }
 
     private bool IsAdmin()
     {
@@ -118,7 +123,7 @@ public class AdminController : ControllerBase
             UserToken = "system",
             Type = req.Type,
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            ExpiresAt = DateTime.MaxValue
         };
         _db.Bottles.Add(bottle);
         await _db.SaveChangesAsync();
@@ -238,7 +243,7 @@ public class AdminController : ControllerBase
             UserToken = "system",
             Type = source.Type,
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            ExpiresAt = DateTime.MaxValue
         };
         _db.Bottles.Add(bottle);
         await _db.SaveChangesAsync();
@@ -387,6 +392,19 @@ public class AdminController : ControllerBase
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
             });
+
+            // 按通知偏好发送邮件
+            var owner = await _db.Users.FindAsync(bottle.UserId.Value);
+            if (owner != null && owner.NotifyPreference == "default")
+            {
+                var settings = await _db.SiteSettings.FirstOrDefaultAsync();
+                if (settings != null)
+                {
+                    var link = $"{settings.SiteBaseUrl.TrimEnd('/')}/bottle/{id}";
+                    _email.SendBackground(settings, owner.Email, "你的意见已被处理",
+                        $"<p>你在 Aquarius 提交的意见已被管理员处理。</p><p><a href=\"{link}\">点击链接前往</a></p>");
+                }
+            }
         }
 
         await _db.SaveChangesAsync();
@@ -445,7 +463,7 @@ public class AdminController : ControllerBase
             IsAdminBadge = true,
             CommentsPrivate = false,
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(365)
+            ExpiresAt = DateTime.UtcNow.AddDays(req.ExpireDays > 0 ? req.ExpireDays : 7)
         };
         _db.Bottles.Add(bottle);
         await _db.SaveChangesAsync();

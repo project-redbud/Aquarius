@@ -278,6 +278,11 @@ export class BottleViewComponent implements OnChanges {
     const content = this.editCommentContent().trim();
     if (!b || !content) return;
     this.api.editComment(b.id, c.id, content).subscribe(() => {
+      // Reload parent comment's replies if editing a reply
+      const parentId = c.commentId ?? c.id;
+      if (c.commentId != null && this.expandedReplies()[parentId]) {
+        this.loadReplies(parentId);
+      }
       this.loadComments();
       this.editingCommentId.set(null);
     });
@@ -316,7 +321,9 @@ export class BottleViewComponent implements OnChanges {
     this.api.addComment(b.id, text, commentId, parentReplyId, this.commentAdminBadge(), this.commentBottleOwnerBadge()).subscribe(() => {
       if (parent) { this.loadReplies(this.rootCommentId(parent)); this.cancelReply(); }
       else { this.commentText.set(''); }
-      this.commentAdminBadge.set(false);
+      if (b.type !== 'suggestion' && b.type !== 'notification') {
+        this.commentAdminBadge.set(false);
+      }
       this.commentBottleOwnerBadge.set(false);
       this.loadComments();
     });

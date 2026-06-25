@@ -108,8 +108,12 @@ public class BottlesController : ControllerBase
         if (bottle.RequireLogin && GetUserId() == null)
             return NotFound();
 
-        // 过期保护：已过期的瓶子返回 404
-        if (bottle.ExpiresAt <= DateTime.UtcNow)
+        // 过期保护：意见瓶/每日推送/通知瓶不受过期影响
+        if (bottle.Type is "suggestion" or "story" or "qa" or "notification")
+        {
+            // 不检查过期
+        }
+        else if (bottle.ExpiresAt <= DateTime.UtcNow)
             return NotFound();
 
         // 意见瓶：仅瓶主和管理员可见
@@ -123,20 +127,7 @@ public class BottlesController : ControllerBase
                 return NotFound();
         }
 
-        // 通知瓶：仅管理员和目标用户可见
-        if (bottle.Type == "notification")
-        {
-            var isAdmin = User.FindFirst("isAdmin")?.Value == "true";
-            if (!isAdmin)
-            {
-                var uid = GetUserId();
-                if (uid == null) return NotFound();
-                var hasNotification = await _db.Notifications
-                    .AnyAsync(n => n.RelatedBottleId == id && n.UserId == uid.Value);
-                if (!hasNotification)
-                    return NotFound();
-            }
-        }
+        // 通知瓶：登录用户均可查看（新用户也能看到历史通知瓶）
 
         return Ok(await ToDto(bottle, token));
     }
@@ -277,10 +268,15 @@ public class BottlesController : ControllerBase
             _db.Likes.Add(new Like { BottleId = id, UserToken = token });
             bottle.LikeCount++;
 
-            // 通知瓶主（点赞）
-            if (bottle.UserId != null)
+            // 通知瓶主（点赞）— 不通知自己点赞，已有未读点赞通知则去重
+            if (bottle.UserId != null && bottle.UserId != GetUserId())
             {
-                _db.Notifications.Add(new Models.Notification
+                var alreadyNotified = await _db.Notifications
+                    .AnyAsync(n => n.UserId == bottle.UserId.Value && n.Type == "like"
+                        && n.RelatedBottleId == id && !n.IsRead);
+                if (!alreadyNotified)
+                {
+                    _db.Notifications.Add(new Models.Notification
                 {
                     UserId = bottle.UserId.Value,
                     Type = "like",
@@ -290,6 +286,7 @@ public class BottlesController : ControllerBase
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow
                 });
+                }
             }
         }
 

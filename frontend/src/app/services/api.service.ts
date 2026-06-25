@@ -348,8 +348,8 @@ export class ApiService {
 
   // ── admin notifications ────────────────────────────────
 
-  adminSendNotification(title: string, content: string, targetUsers?: string): Observable<{ bottleId: number; targetCount: number }> {
-    return this.http.post<{ bottleId: number; targetCount: number }>(`${this.base}/admin/notifications/send`, { title, content, targetUsers: targetUsers || null });
+  adminSendNotification(title: string, content: string, targetUsers?: string, expireDays?: number): Observable<{ bottleId: number; targetCount: number }> {
+    return this.http.post<{ bottleId: number; targetCount: number }>(`${this.base}/admin/notifications/send`, { title, content, targetUsers: targetUsers || null, expireDays: expireDays ?? 7 });
   }
 
   // ── user settings ──────────────────────────────────────

@@ -42,7 +42,7 @@ public class AuthController : ControllerBase
             return BadRequest(new { error = "两次输入的密码不一致" });
 
         // 唯一性检查
-        if (await _db.Users.AnyAsync(u => u.Username == req.Username))
+        if (await _db.Users.AnyAsync(u => u.Username.ToLower() == req.Username.ToLower().Trim()))
             return BadRequest(new { error = "用户名已被注册" });
         if (await _db.Users.AnyAsync(u => u.Email == req.Email))
             return BadRequest(new { error = "电子邮件已被注册" });
@@ -67,6 +67,32 @@ public class AuthController : ControllerBase
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
+        // 为新用户推送已有的全员通知瓶记录
+        var existingNotifBottles = await _db.Bottles
+            .Where(b => b.Type == "notification" && b.ExpiresAt > DateTime.UtcNow)
+            .Select(b => new { b.Id, b.Content, b.CreatedAt })
+            .ToListAsync();
+
+        foreach (var nb in existingNotifBottles)
+        {
+            var title = nb.Content.Contains('\n')
+                ? nb.Content[..nb.Content.IndexOf('\n')]
+                : (nb.Content.Length > 50 ? nb.Content[..50] : nb.Content);
+            _db.Notifications.Add(new Models.Notification
+            {
+                UserId = user.Id,
+                Type = "system",
+                Title = title,
+                Content = nb.Content.Length > 100 ? nb.Content[..100] + "..." : nb.Content,
+                RelatedBottleId = nb.Id,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        if (existingNotifBottles.Count > 0)
+            await _db.SaveChangesAsync();
+
         // 发送验证邮件
         var settings = await _db.SiteSettings.FirstOrDefaultAsync();
         if (settings != null)
@@ -84,7 +110,7 @@ public class AuthController : ControllerBase
 
         // 按用户名或邮箱查找
         var user = await _db.Users.FirstOrDefaultAsync(u =>
-            u.Username == req.Login || u.Email == req.Login);
+            u.Username.ToLower() == req.Login.ToLower() || u.Email == req.Login);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
             return Unauthorized(new { error = "用户名/邮箱或密码错误" });

@@ -4,7 +4,7 @@
   <p class="user-greeting">你好，{{ auth.user()?.username }}@if (auth.isAdmin()) { <span class="admin-badge">管理员</span> }</p>
 
   <div class="links">
-    <a routerLink="/notifications">🔔 通知中心</a>
+    <a routerLink="/notifications">🔔 通知中心@if (unreadCount() > 0) { <span class="notif-badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span> }</a>
     <a routerLink="/settings">⚙️ 个人设置</a>
   </div>
 

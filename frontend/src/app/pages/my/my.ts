@@ -23,6 +23,7 @@ interface MyComment {
 })
 export class MyPage implements OnInit {
   auth = inject(AuthService);
+  unreadCount = inject(ApiService).unreadCount;
 
   tab = signal<'bottles' | 'comments' | 'likes'>('bottles');
   myBottles = signal<Bottle[]>([]);

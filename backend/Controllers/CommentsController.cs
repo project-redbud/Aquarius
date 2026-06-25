@@ -185,7 +185,7 @@ public class CommentsController : ControllerBase
 
         _db.Comments.Add(comment);
 
-        // 通知瓶主（评论）
+        // 通知瓶主（评论）— 不通知自己
         if (bottle.UserId != null && bottle.UserId != userId)
         {
             _db.Notifications.Add(new Models.Notification
@@ -198,6 +198,25 @@ public class CommentsController : ControllerBase
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
             });
+        }
+
+        // 通知被回复的评论作者（楼中楼）— 不通知自己，也不重复通知瓶主
+        if (parentReplyId != null)
+        {
+            var parentReply = await _db.Comments.FindAsync(parentReplyId.Value);
+            if (parentReply?.UserId != null && parentReply.UserId != userId && parentReply.UserId != bottle.UserId)
+            {
+                _db.Notifications.Add(new Models.Notification
+                {
+                    UserId = parentReply.UserId.Value,
+                    Type = "comment",
+                    Title = "有人回复了你的评论",
+                    Content = comment.Content.Length > 50 ? comment.Content[..50] + "..." : comment.Content,
+                    RelatedBottleId = bottleId,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
         }
 
         await _db.SaveChangesAsync();

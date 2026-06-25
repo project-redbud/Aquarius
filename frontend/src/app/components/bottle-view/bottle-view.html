@@ -32,6 +32,9 @@
     @if (bottle.isClosed) {
       <div class="closed-banner">🔒 此瓶子已被管理员关闭，不再接受评论和捞取</div>
     }
+    @if (bottle.type === 'suggestion' && bottle.reportedBottleId) {
+      <div class="suggestion-banner">📬 对瓶子 #{{ bottle.reportedBottleId }} 的意见 <a [routerLink]="['/bottle', bottle.reportedBottleId]" class="goto-btn">→ 前往查看</a></div>
+    }
     @if (bottle.imagePath) { <img [src]="'/' + bottle.imagePath" alt="bottle image" class="bottle-img" /> }
     <p class="content" [innerHTML]="bottle.content | linkify"></p>
     <div class="actions">

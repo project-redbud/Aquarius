@@ -166,6 +166,8 @@ public class SendNotificationRequest
     public string? TargetUsers { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
+    /// <summary>过期天数（默认 7 天）。</summary>
+    public int ExpireDays { get; set; } = 7;
 }
 
 public class DailyPushDto
