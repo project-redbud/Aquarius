@@ -1,9 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SiteSettingsService {
-  private base = '/api';
+  private base = environment.apiBase + '/api';
 
   siteName = signal('Aquarius');
   copyright = signal('');
