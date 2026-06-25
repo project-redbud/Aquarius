@@ -54,6 +54,7 @@
           <label>
             类型
             <select [(ngModel)]="pushType">
+              <option value="news">📰 每日新闻</option>
               <option value="story">📖 每日故事</option>
               <option value="qa">❓ 每日问答</option>
             </select>
@@ -84,7 +85,7 @@
           @for (p of dailyPushes(); track p.id) {
             <div class="push-row">
               <div class="push-info">
-                <span class="push-type">{{ p.type === 'story' ? '📖 每日故事' : '❓ 每日问答' }}</span>
+                <span class="push-type">{{ p.type === 'story' ? '📖 每日故事' : p.type === 'qa' ? '❓ 每日问答' : '📰 每日新闻' }}</span>
                 <span class="push-date">{{ p.date | date:'yyyy-MM-dd' }}</span>
               </div>
               @if (editingPushId() === p.id) {
@@ -127,8 +128,8 @@
       <summary>👥 用户管理 ({{ userTotal() }})</summary>
       <div class="push-form">
         <div class="row">
-          <input type="text" [(ngModel)]="userSearch" placeholder="搜索用户名/邮箱..." (keydown.enter)="searchUsers()" />
-          <button (click)="searchUsers()">🔍 搜索</button>
+          <input type="text" [(ngModel)]="userSearch" placeholder="搜索用户名/邮箱..." (keydown.enter)="searchUsers()" style="flex:1;padding:11px 12px;border-radius:10px;border:1px solid #d1d5db;font-size:.95rem" />
+          <button (click)="searchUsers()" style="padding:11px 18px;border-radius:10px">🔍 搜索</button>
         </div>
       </div>
       @if (users().length === 0) {
@@ -170,6 +171,13 @@
                   @for (b of userDetail().bottles || []; track b.id) {
                     <p style="margin:2px 0">🫧 <a [routerLink]="['/bottle', b.id]">#{{ b.id }}</a> {{ b.content?.slice(0,40) }}...</p>
                   }
+                  <div style="margin-top:8px;border-top:1px solid #e5e7eb;padding-top:8px">
+                    <p>📧 邮箱: {{ u.email }} @if (u.emailVerified) {✅} @else {⚠️}</p>
+                    <input type="email" [(ngModel)]="editUserEmail" [placeholder]="u.email" style="width:200px;padding:4px 8px;border-radius:4px;border:1px solid #ddd" />
+                    <label style="margin-left:8px"><input type="checkbox" [(ngModel)]="editUserVerified" /> 已验证</label>
+                    <button (click)="saveUserEmail(u.id)" style="margin-left:8px;padding:4px 10px">保存</button>
+                    @if (editUserMsg()) { <span style="color:#059669;margin-left:8px">{{ editUserMsg() }}</span> }
+                  </div>
                 </div>
               }
             </div>
@@ -236,6 +244,35 @@
         </button>
         @if (notifResult()) {
           <p class="msg-ok">已创建通知瓶 #{{ notifResult() }}，已推送给目标用户。</p>
+        }
+      </div>
+    </details>
+
+    <details class="daily-push-section">
+      <summary>📋 管理日志报表</summary>
+      <div style="padding:8px 16px">
+        <button class="refresh" (click)="loadLogReport()">🔄 加载日志</button>
+        @if (logItems().length > 0) {
+          <div class="push-list">
+            @for (l of logItems(); track l.id) {
+              <div class="push-row">
+                <div class="push-info">
+                  <span class="push-type">{{ l.operatorUsername }}</span>
+                  <span>{{ actionLabel(l.action) }}</span>
+                  <a class="push-date" [routerLink]="['/bottle', l.bottleId]" target="_blank">→ 瓶子 #{{ l.bottleId }}</a>
+                  <span class="push-date">{{ l.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                </div>
+                @if (l.detail) { <p class="push-content">{{ l.detail }}</p> }
+              </div>
+            }
+          </div>
+          @if (logTotalPages() > 1) {
+            <div class="pagination">
+              <button [disabled]="logPage() <= 1" (click)="goLogPage(logPage() - 1)">←</button>
+              <span>{{ logPage() }} / {{ logTotalPages() }}</span>
+              <button [disabled]="logPage() >= logTotalPages()" (click)="goLogPage(logPage() + 1)">→</button>
+            </div>
+          }
         }
       </div>
     </details>

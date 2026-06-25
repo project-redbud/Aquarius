@@ -42,6 +42,7 @@ export interface Comment {
 }
 
 export interface DailyPush {
+  news: Bottle | null;
   story: Bottle | null;
   qa: Bottle | null;
 }
@@ -269,6 +270,14 @@ export class ApiService {
 
   adminSetUserRole(id: number, role: string): Observable<any> {
     return this.http.post<any>(`${this.base}/admin/users/${id}/role`, { role });
+  }
+
+  adminSetUserEmail(id: number, email: string, verified: boolean): Observable<any> {
+    return this.http.put<any>(`${this.base}/admin/users/${id}/email`, { email, verified });
+  }
+
+  adminLogReport(page = 1, pageSize = 30): Observable<any> {
+    return this.http.get<any>(`${this.base}/admin/logs?page=${page}&pageSize=${pageSize}`);
   }
 
   adminSearch(q: string): Observable<{ users: any[]; bottles: any[] }> {

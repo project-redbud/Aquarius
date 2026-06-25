@@ -178,4 +178,5 @@ public class DailyPushDto
 {
     public BottleDto? Story { get; set; }
     public BottleDto? Qa { get; set; }
+    public BottleDto? News { get; set; }
 }

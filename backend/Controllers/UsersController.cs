@@ -90,6 +90,30 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>修改用户邮箱（管理员）</summary>
+    [HttpPut("{id}/email")]
+    public async Task<ActionResult> SetEmail(int id, [FromBody] SetEmailRequest req)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var user = await _db.Users.FindAsync(id);
+        if (user == null) return NotFound();
+
+        if (string.IsNullOrWhiteSpace(req.Email) || !req.Email.Contains('@'))
+            return BadRequest(new { error = "无效的邮箱地址" });
+
+        if (await _db.Users.AnyAsync(u => u.Id != id && u.Email == req.Email))
+            return BadRequest(new { error = "邮箱已被使用" });
+
+        user.Email = req.Email.Trim();
+        user.EmailVerified = req.Verified;
+        user.NewEmail = null;
+        user.NewEmailVerifyToken = null;
+        await _db.SaveChangesAsync();
+
+        return Ok(new { user.Id, user.Username, user.Email, user.EmailVerified });
+    }
+
     /// <summary>封禁用户</summary>
     [HttpPost("{id}/ban")]
     public async Task<ActionResult> Ban(int id, [FromBody] BanRequest req)
@@ -172,6 +196,12 @@ public class BanRequest
 {
     public string Reason { get; set; } = "";
     public int Days { get; set; }
+}
+
+public class SetEmailRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public bool Verified { get; set; }
 }
 
 public class RoleRequest

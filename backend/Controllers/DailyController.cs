@@ -55,6 +55,11 @@ public class DailyController : ControllerBase
             .OrderByDescending(d => d.CreatedAt)
             .FirstOrDefaultAsync();
 
+        var news = await _db.DailyPushes
+            .Where(d => d.Date >= dayStart && d.Date < dayEnd && d.Type == "news")
+            .OrderByDescending(d => d.CreatedAt)
+            .FirstOrDefaultAsync();
+
         BottleDto? ToPushBottle(Models.DailyPush? push)
         {
             if (push == null) return null;
@@ -63,7 +68,7 @@ public class DailyController : ControllerBase
                 Id = push.BottleId ?? 0,
                 Content = push.Content,
                 ImagePath = push.ImagePath,
-                AuthorName = push.Type == "story" ? "📖 每日故事" : "❓ 每日问答",
+                AuthorName = push.Type switch { "story" => "📖 每日故事", "qa" => "❓ 每日问答", "news" => "📰 每日新闻", _ => "📖 每日故事" },
                 Type = push.Type,
                 CreatedAt = push.CreatedAt,
                 ExpiresAt = push.CreatedAt.AddDays(7)
@@ -73,7 +78,8 @@ public class DailyController : ControllerBase
         return Ok(new DailyPushDto
         {
             Story = ToPushBottle(story),
-            Qa = ToPushBottle(qa)
+            Qa = ToPushBottle(qa),
+            News = ToPushBottle(news)
         });
     }
 }

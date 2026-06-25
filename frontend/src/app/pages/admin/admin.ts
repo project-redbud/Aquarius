@@ -351,6 +351,48 @@ export class AdminPage implements OnInit {
     });
   }
 
+  // ── Log report ───────────────────────────────────────
+
+  logItems = signal<any[]>([]);
+  logPage = signal(1);
+  logTotal = signal(0);
+  readonly logPageSize = 30;
+  logTotalPages = computed(() => Math.max(1, Math.ceil(this.logTotal() / this.logPageSize)));
+
+  loadLogReport() {
+    this.api.adminLogReport(this.logPage(), this.logPageSize).subscribe(res => {
+      this.logItems.set(res.items);
+      this.logTotal.set(res.total);
+    });
+  }
+
+  goLogPage(p: number) {
+    if (p < 1 || p > this.logTotalPages()) return;
+    this.logPage.set(p);
+    this.loadLogReport();
+  }
+
+  // ── User email edit ─────────────────────────────────
+
+  editUserEmail = signal('');
+  editUserVerified = signal(true);
+  editUserMsg = signal('');
+
+  saveUserEmail(id: number) {
+    const email = this.editUserEmail().trim() || undefined;
+    if (!email) { this.editUserMsg.set('请输入邮箱'); return; }
+    this.api.adminSetUserEmail(id, email, this.editUserVerified()).subscribe(() => {
+      this.editUserMsg.set('已保存');
+      this.editUserEmail.set('');
+      this.loadUsers();
+    });
+  }
+
+  actionLabel(a: string): string {
+    const m: Record<string, string> = { close: '🔒 关闭', open: '🔓 打开', delete_reply: '🗑️ 删回复', republish_daily: '🔄 重新推送' };
+    return m[a] || a;
+  }
+
   closeBottle(id: number) {
     if (!confirm('确定关闭此瓶子？关闭后不再被捞取，也无法评论。')) return;
     this.api.adminCloseBottle(id).subscribe(() => {

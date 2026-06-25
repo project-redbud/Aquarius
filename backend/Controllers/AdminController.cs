@@ -119,7 +119,7 @@ public class AdminController : ControllerBase
         {
             Content = req.Content,
             ImagePath = req.ImagePath,
-            AuthorName = req.Type == "story" ? "📖 每日故事" : "❓ 每日问答",
+            AuthorName = req.Type switch { "story" => "📖 每日故事", "qa" => "❓ 每日问答", "news" => "📰 每日新闻", _ => "📖 每日故事" },
             UserToken = "system",
             Type = req.Type,
             CreatedAt = DateTime.UtcNow,
@@ -239,7 +239,7 @@ public class AdminController : ControllerBase
         {
             Content = source.Content,
             ImagePath = source.ImagePath,
-            AuthorName = source.Type == "story" ? "📖 每日故事" : "❓ 每日问答",
+            AuthorName = source.Type switch { "story" => "📖 每日故事", "qa" => "❓ 每日问答", "news" => "📰 每日新闻", _ => "📖 每日故事" },
             UserToken = "system",
             Type = source.Type,
             CreatedAt = DateTime.UtcNow,
@@ -513,6 +513,35 @@ public class AdminController : ControllerBase
 
         await _db.SaveChangesAsync();
         return Ok(new { bottleId = bottle.Id, targetCount = targets.Count });
+    }
+
+    /// <summary>管理日志报表（分页）</summary>
+    [HttpGet("logs")]
+    public async Task<ActionResult> LogReport(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 30)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var query = _db.BottleLogs
+            .OrderByDescending(l => l.CreatedAt);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(l => new
+            {
+                l.Id,
+                l.BottleId,
+                l.OperatorUsername,
+                l.Action,
+                l.Detail,
+                l.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(new { items, total, page, pageSize });
     }
 
     // ── Site settings ────────────────────────────────────

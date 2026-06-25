@@ -6,6 +6,16 @@
   } @else if (!daily()) {
     <div class="empty">加载中...</div>
   } @else {
+    @if (daily()!.news) {
+      <a [routerLink]="['/bottle', daily()!.news!.id]" target="_blank" rel="noopener" class="card news card-link">
+        <span class="badge">📰 每日新闻</span>
+        @if (daily()!.news!.imagePath) {
+          <img [src]="'/' + daily()!.news!.imagePath" alt="news" />
+        }
+        <p [innerHTML]="daily()!.news!.content | linkify"></p>
+      </a>
+    }
+
     @if (daily()!.story) {
       <a [routerLink]="['/bottle', daily()!.story!.id]" target="_blank" rel="noopener" class="card story card-link">
         <span class="badge">📖 每日故事</span>
@@ -26,7 +36,7 @@
       </a>
     }
 
-    @if (!daily()!.story && !daily()!.qa) {
+    @if (!daily()!.news && !daily()!.story && !daily()!.qa) {
       <div class="empty">{{ currentDate() | date:'yyyy-MM-dd' }} 没有推送 👀</div>
     }
   }
