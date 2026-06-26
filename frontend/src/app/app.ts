@@ -32,11 +32,19 @@ export class App implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Android 返回键处理
+    let lastBack = 0;
     CapApp.addListener('backButton', ({ canGoBack }) => {
       if (canGoBack) {
         this.location.back();
       } else {
-        CapApp.exitApp();
+        const now = Date.now();
+        if (now - lastBack < 2000) {
+          CapApp.exitApp();
+        } else {
+          lastBack = now;
+          // Toast-like hint — use a brief console or a simple alert
+          alert('再按一次退出 Aquarius');
+        }
       }
     });
 
