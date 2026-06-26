@@ -349,6 +349,6 @@
 
 @if (zoomImage()) {
   <div class="report-overlay" (click)="zoomImage.set(null)">
-    <img [src]="zoomImage()" class="zoom-img" (click)="$event.stopPropagation()" />
+    <img [src]="zoomImage()" class="zoom-img" />
   </div>
 }
