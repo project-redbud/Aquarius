@@ -50,6 +50,7 @@ export class AdminPage implements OnInit {
   settingSmtpUser = signal('');
   settingSmtpPassword = signal('');
   settingSmtpFrom = signal('');
+  settingSmtpEnabled = signal(true);
   settingSmtpEnableSsl = signal(true);
   settingSiteBaseUrl = signal('');
 
@@ -71,6 +72,7 @@ export class AdminPage implements OnInit {
       this.settingSmtpPort.set((s as any).smtpPort || 587);
       this.settingSmtpUser.set((s as any).smtpUser || '');
       this.settingSmtpFrom.set((s as any).smtpFrom || '');
+      this.settingSmtpEnabled.set((s as any).smtpEnabled !== false);
       this.settingSmtpEnableSsl.set((s as any).smtpEnableSsl !== false);
       this.settingSiteBaseUrl.set((s as any).siteBaseUrl || '');
       // password is masked by backend, only set if user typed something
@@ -87,6 +89,7 @@ export class AdminPage implements OnInit {
       this.settingSmtpUser().trim() || undefined,
       smtpPwd || undefined,
       this.settingSmtpFrom().trim() || undefined,
+      this.settingSmtpEnabled(),
       this.settingSmtpEnableSsl(),
       this.settingSiteBaseUrl().trim() || undefined
     ).subscribe(s => {
@@ -274,10 +277,15 @@ export class AdminPage implements OnInit {
   cancelBan() { this.banUserId.set(null); }
   confirmBan() {
     const id = this.banUserId(); if (!id) return;
-    this.api.adminBanUser(id, this.banReason(), this.banDays()).subscribe(() => {
-      this.cancelBan();
-      this.loadUsers();
-      alert('已封禁');
+    this.api.adminBanUser(id, this.banReason(), this.banDays()).subscribe({
+      next: () => {
+        this.cancelBan();
+        this.loadUsers();
+        alert('已封禁');
+      },
+      error: (err) => {
+        alert(err.error?.error || '封禁失败');
+      }
     });
   }
 

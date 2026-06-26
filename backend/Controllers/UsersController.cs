@@ -160,6 +160,15 @@ public class UsersController : ControllerBase
         user.BanReason = null;
         user.BannedUntil = null;
         await _db.SaveChangesAsync();
+
+        // 发送解封通知邮件
+        var settings = await _db.SiteSettings.FirstOrDefaultAsync();
+        if (settings != null)
+        {
+            _email.SendBackground(settings, user.Email, "你的 Aquarius 账号已解封",
+                "<p>你的账号已被管理员解封，现在可以正常使用了。</p><p>请遵守社区规则，祝使用愉快！</p>");
+        }
+
         return Ok(new { user.Id, user.Username, user.IsBanned });
     }
 

@@ -235,13 +235,13 @@ export class ApiService {
     siteName?: string, copyright?: string,
     smtpHost?: string, smtpPort?: number, smtpUser?: string,
     smtpPassword?: string, smtpFrom?: string,
-    smtpEnableSsl?: boolean, siteBaseUrl?: string
+    smtpEnabled?: boolean, smtpEnableSsl?: boolean, siteBaseUrl?: string
   ): Observable<any> {
     return this.http.put<any>(`${this.base}/admin/settings`, {
       siteName, copyright,
       smtpHost, smtpPort, smtpUser,
       smtpPassword, smtpFrom,
-      smtpEnableSsl, siteBaseUrl
+      smtpEnabled, smtpEnableSsl, siteBaseUrl
     });
   }
 

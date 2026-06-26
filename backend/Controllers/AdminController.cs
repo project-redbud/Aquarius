@@ -556,7 +556,7 @@ public class AdminController : ControllerBase
         {
             s.SiteName, s.Copyright,
             s.SmtpHost, s.SmtpPort, s.SmtpUser,
-            s.SmtpFrom, s.SmtpEnableSsl, s.SiteBaseUrl,
+            s.SmtpFrom, s.SmtpEnabled, s.SmtpEnableSsl, s.SiteBaseUrl,
             SmtpPassword = string.IsNullOrEmpty(s.SmtpPassword) ? "" : "••••••"
         });
     }
@@ -602,6 +602,7 @@ public class AdminController : ControllerBase
         if (req.SmtpUser != null) s.SmtpUser = req.SmtpUser;
         if (req.SmtpPassword != null) s.SmtpPassword = req.SmtpPassword;
         if (req.SmtpFrom != null) s.SmtpFrom = req.SmtpFrom;
+        if (req.SmtpEnabled.HasValue) s.SmtpEnabled = req.SmtpEnabled.Value;
         if (req.SmtpEnableSsl.HasValue) s.SmtpEnableSsl = req.SmtpEnableSsl.Value;
         if (req.SiteBaseUrl != null) s.SiteBaseUrl = req.SiteBaseUrl;
         await _db.SaveChangesAsync();
@@ -609,7 +610,7 @@ public class AdminController : ControllerBase
         {
             s.SiteName, s.Copyright,
             s.SmtpHost, s.SmtpPort, s.SmtpUser,
-            s.SmtpFrom, s.SmtpEnableSsl, s.SiteBaseUrl,
+            s.SmtpFrom, s.SmtpEnabled, s.SmtpEnableSsl, s.SiteBaseUrl,
             SmtpPassword = string.IsNullOrEmpty(s.SmtpPassword) ? "" : "••••••"
         });
     }
@@ -624,6 +625,7 @@ public class UpdateSettingsRequest
     public string? SmtpUser { get; set; }
     public string? SmtpPassword { get; set; }
     public string? SmtpFrom { get; set; }
+    public bool? SmtpEnabled { get; set; }
     public bool? SmtpEnableSsl { get; set; }
     public string? SiteBaseUrl { get; set; }
 }

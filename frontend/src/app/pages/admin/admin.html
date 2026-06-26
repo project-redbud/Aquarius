@@ -29,8 +29,12 @@
             <input type="number" [(ngModel)]="settingSmtpPort" min="1" max="65535" style="width:100px" />
           </label>
           <label>
+            <input type="checkbox" [(ngModel)]="settingSmtpEnabled" />
+            启用
+          </label>
+          <label>
             <input type="checkbox" [(ngModel)]="settingSmtpEnableSsl" />
-            启用 SSL
+            SSL
           </label>
         </div>
         <label>用户名

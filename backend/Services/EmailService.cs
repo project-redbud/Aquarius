@@ -32,6 +32,11 @@ public class EmailService
     /// <summary>发送邮件（后台任务，不阻塞）。如 SMTP 未配置则静默跳过。</summary>
     public void SendBackground(SiteSettings settings, string to, string subject, string body)
     {
+        if (!settings.SmtpEnabled)
+        {
+            Console.WriteLine($"[Email] SMTP disabled. Would send to {to}: {subject}");
+            return;
+        }
         Console.WriteLine($"[Email] Queuing background send to {to}: {subject}");
         _ = Task.Run(async () =>
         {

@@ -21,6 +21,8 @@ public class SiteSettings
     [System.ComponentModel.DataAnnotations.MaxLength(200)]
     public string SmtpFrom { get; set; } = "";
 
+    public bool SmtpEnabled { get; set; } = true;
+
     public bool SmtpEnableSsl { get; set; } = true;
 
     /// <summary>站点基础 URL，用于生成邮件中的链接（如 https://example.com）</summary>
