@@ -99,8 +99,15 @@
     width: 100%;
     border-radius: 12px;
     margin-bottom: 12px;
-    max-height: 300px;
-    object-fit: cover;
+    max-height: 400px;
+    object-fit: contain;
+    cursor: pointer;
+    background: #f9fafb;
+  }
+
+  .zoom-img {
+    max-width: 95vw; max-height: 90vh;
+    border-radius: 12px; object-fit: contain;
   }
 
   .content {

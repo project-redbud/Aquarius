@@ -47,6 +47,8 @@ export class BottleViewComponent implements OnChanges {
   logs = signal<{ id: number; operatorUsername: string; action: string; detail?: string | null; createdAt: string }[]>([]);
   logsLoading = signal(false);
 
+  zoomImage = signal<string | null>(null);
+
   /** 评论私密提示：null=正常, 'hidden'=隐藏, 'admin'=管理员可见 */
   commentsPrivateNote = signal<string | null>(null);
 

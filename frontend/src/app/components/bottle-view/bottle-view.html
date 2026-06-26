@@ -35,7 +35,7 @@
     @if (bottle.type === 'suggestion' && bottle.reportedBottleId) {
       <div class="suggestion-banner">📬 对瓶子 #{{ bottle.reportedBottleId }} 的意见 <a [routerLink]="['/bottle', bottle.reportedBottleId]" class="goto-btn">→ 前往查看</a></div>
     }
-    @if (bottle.imagePath) { <img [src]="'/' + bottle.imagePath" alt="bottle image" class="bottle-img" /> }
+    @if (bottle.imagePath) { <img [src]="'/' + bottle.imagePath" alt="bottle image" class="bottle-img" (click)="zoomImage.set(bottle.imagePath)" /> }
     <p class="content" [innerHTML]="bottle.content | linkify"></p>
     <div class="actions">
       <button [class.liked]="bottle.likedByMe" (click)="toggleLike()">{{ bottle.likedByMe ? '❤️' : '🤍' }} {{ bottle.likeCount }}</button>
@@ -344,5 +344,11 @@
         <button class="cancel" (click)="closeReport()">取消</button>
       </div>
     </div>
+  </div>
+}
+
+@if (zoomImage()) {
+  <div class="report-overlay" (click)="zoomImage.set(null)">
+    <img [src]="'/' + zoomImage()" class="zoom-img" (click)="$event.stopPropagation()" />
   </div>
 }

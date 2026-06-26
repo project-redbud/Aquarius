@@ -12,8 +12,13 @@ namespace Aquarius.Api.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly AquariusDbContext _db;
+    private readonly Aquarius.Api.Services.EmailService _email;
 
-    public UsersController(AquariusDbContext db) => _db = db;
+    public UsersController(AquariusDbContext db, Aquarius.Api.Services.EmailService email)
+    {
+        _db = db;
+        _email = email;
+    }
 
     private bool IsAdmin() => User.FindFirst("isAdmin")?.Value == "true";
 
@@ -128,6 +133,16 @@ public class UsersController : ControllerBase
         user.BanReason = req.Reason;
         user.BannedUntil = req.Days > 0 ? DateTime.UtcNow.AddDays(req.Days) : null;
         await _db.SaveChangesAsync();
+
+        // 发送封禁通知邮件
+        var settings = await _db.SiteSettings.FirstOrDefaultAsync();
+        if (settings != null)
+        {
+            var reasonStr = string.IsNullOrWhiteSpace(req.Reason) ? "" : $"理由：{req.Reason}。";
+            var untilStr = req.Days > 0 ? $"封禁至 {DateTime.UtcNow.AddDays(req.Days):yyyy-MM-dd}。" : "永久封禁。";
+            _email.SendBackground(settings, user.Email, "你的 Aquarius 账号已被封禁",
+                $"<p>你的账号因违反社区规则已被封禁。</p><p>{reasonStr}{untilStr}</p><p>如有疑问请联系管理员。</p>");
+        }
 
         return Ok(new { user.Id, user.Username, user.IsBanned, user.BanReason, user.BannedUntil });
     }

@@ -2,6 +2,6 @@
   <div class="pull-indicator" [style.height.px]="pullDistance()">
     @if (refreshing()) { 🔄 刷新中... } @else if (pullDistance() > 30) { ↓ 释放刷新 }
   </div>
-  <a routerLink="/pick" class="back">← 返回捞瓶</a>
+  <a [routerLink]="backUrl()" class="back">← {{ backLabel() }}</a>
   <app-bottle-view [bottle]="bottle()" [loading]="loading()"></app-bottle-view>
 </div>

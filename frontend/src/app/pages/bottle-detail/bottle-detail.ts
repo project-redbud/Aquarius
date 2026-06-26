@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
@@ -16,6 +16,20 @@ export class BottleDetailPage implements OnInit, OnDestroy {
   bottle = signal<Bottle | null>(null);
   loading = signal(true);
   refreshing = signal(false);
+
+  backUrl = computed(() => {
+    const t = this.bottle()?.type;
+    if (t === 'story' || t === 'qa' || t === 'news') return '/daily';
+    if (t === 'suggestion' || t === 'notification') return '/my';
+    return '/pick';
+  });
+
+  backLabel = computed(() => {
+    const t = this.bottle()?.type;
+    if (t === 'story' || t === 'qa' || t === 'news') return '返回推送';
+    if (t === 'suggestion' || t === 'notification') return '返回我的';
+    return '返回捞瓶';
+  });
   private title = inject(Title);
   private settings = inject(SiteSettingsService);
   private sub?: Subscription;
