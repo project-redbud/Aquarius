@@ -19,19 +19,26 @@ if not exist "src\environments\environment.server.ts" (
 )
 
 echo.
-echo [1/3] Copying server environment...
+echo [1/5] Copying server environment...
 copy /Y src\environments\environment.server.ts src\environments\environment.prod.ts >nul
 
-echo [2/3] Building Angular...
+echo [2/5] Building Angular...
 call npm run build -- --configuration production
 if %errorlevel% neq 0 goto :error
 
-echo [3/3] Copying Capacitor config...
+echo [3/5] Copying Capacitor config...
 copy /Y capacitor.config.json android\app\src\main\assets\capacitor.config.json >nul 2>nul
 
-echo [4/4] Syncing with Capacitor...
+echo [4/5] Syncing with Capacitor...
 call npx cap sync android
 if %errorlevel% neq 0 goto :error
+
+echo [5/5] Copying app icons (after sync)...
+for %%d in (mdpi hdpi xhdpi xxhdpi xxxhdpi) do (
+  copy /Y ..\aquarius_logo.png android\app\src\main\res\mipmap-%%d\ic_launcher.png >nul
+  copy /Y ..\aquarius_logo.png android\app\src\main\res\mipmap-%%d\ic_launcher_round.png >nul
+)
+copy /Y ..\aquarius_launcher.png android\app\src\main\res\drawable\splash.png >nul
 
 echo.
 echo ==========================================
