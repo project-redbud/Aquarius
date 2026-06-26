@@ -28,7 +28,9 @@ export class BottleDetailPage implements OnInit, OnDestroy {
     const t = this.bottle()?.type;
     const b = this.bottle();
     if ((t === 'story' || t === 'qa' || t === 'news') && b?.createdAt) {
-      return { date: new Date(b.createdAt).toISOString().slice(0, 10) };
+      const d = new Date(b.createdAt);
+      const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      return { date };
     }
     return {};
   });
