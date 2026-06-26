@@ -17,15 +17,20 @@ export class BottleDetailPage implements OnInit, OnDestroy {
   loading = signal(true);
   refreshing = signal(false);
 
-  backUrl = computed(() => {
-    const b = this.bottle();
-    const t = b?.type;
-    if (t === 'story' || t === 'qa' || t === 'news') {
-      const d = b?.createdAt ? new Date(b.createdAt).toISOString().slice(0, 10) : '';
-      return '/daily' + (d ? '?date=' + d : '');
-    }
+  backPath = computed(() => {
+    const t = this.bottle()?.type;
+    if (t === 'story' || t === 'qa' || t === 'news') return '/daily';
     if (t === 'suggestion' || t === 'notification') return '/my';
     return '/pick';
+  });
+
+  backParams = computed(() => {
+    const t = this.bottle()?.type;
+    const b = this.bottle();
+    if ((t === 'story' || t === 'qa' || t === 'news') && b?.createdAt) {
+      return { date: new Date(b.createdAt).toISOString().slice(0, 10) };
+    }
+    return {};
   });
 
   backLabel = computed(() => {
