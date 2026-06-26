@@ -7,7 +7,7 @@
     <div class="empty">加载中...</div>
   } @else {
     @if (daily()!.news) {
-      <a [routerLink]="['/bottle', daily()!.news!.id]" target="_blank" rel="noopener" class="card news card-link">
+      <a [routerLink]="['/bottle', daily()!.news!.id]" class="card news card-link">
         <span class="badge">📰 每日新闻</span>
         @if (daily()!.news!.imagePath) {
           <img [src]="'/' + daily()!.news!.imagePath" alt="news" />
@@ -17,7 +17,7 @@
     }
 
     @if (daily()!.story) {
-      <a [routerLink]="['/bottle', daily()!.story!.id]" target="_blank" rel="noopener" class="card story card-link">
+      <a [routerLink]="['/bottle', daily()!.story!.id]" class="card story card-link">
         <span class="badge">📖 每日故事</span>
         @if (daily()!.story!.imagePath) {
           <img [src]="'/' + daily()!.story!.imagePath" alt="story" />
@@ -27,7 +27,7 @@
     }
 
     @if (daily()!.qa) {
-      <a [routerLink]="['/bottle', daily()!.qa!.id]" target="_blank" rel="noopener" class="card qa card-link">
+      <a [routerLink]="['/bottle', daily()!.qa!.id]" class="card qa card-link">
         <span class="badge">❓ 每日问答</span>
         @if (daily()!.qa!.imagePath) {
           <img [src]="'/' + daily()!.qa!.imagePath" alt="qa" />
