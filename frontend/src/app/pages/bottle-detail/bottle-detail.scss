@@ -3,6 +3,11 @@
   margin: 0 auto;
   padding: 24px 16px;
 
+  .pull-indicator {
+    overflow: hidden; text-align: center; color: #9ca3af;
+    font-size: .85rem; transition: height .1s;
+  }
+
   .back {
     display: inline-block;
     margin-bottom: 16px;

@@ -159,7 +159,24 @@ public class CommentsController : ControllerBase
             }
         }
 
-        return Ok(replies.Select(r => ToDto(r, includeReplies: false)).ToList());
+        var replyDtos = replies.Select(r => ToDto(r, includeReplies: false)).ToList();
+
+        var adminIds = replyDtos.Where(c => c.IsAdminBadge && c.UserId != null)
+            .Select(c => c.UserId!.Value).Distinct().ToList();
+        var names = new Dictionary<int, string>();
+        foreach (var aid in adminIds)
+        {
+            var u = await _db.Users.FindAsync(aid);
+            if (u != null) names[aid] = u.Username;
+        }
+        foreach (var c in replyDtos)
+        {
+            if (c.IsAdminBadge && c.UserId != null && names.ContainsKey(c.UserId.Value))
+                c.AdminUsername = names[c.UserId.Value];
+            SetReplyAdminUsernames(c.Replies, names);
+        }
+
+        return Ok(replyDtos);
     }
 
     /// <summary>发表评论/回复（需要登录 + 邮箱已验证）</summary>

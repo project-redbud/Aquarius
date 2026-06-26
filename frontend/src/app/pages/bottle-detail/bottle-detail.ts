@@ -15,22 +15,53 @@ import { BottleViewComponent } from '../../components/bottle-view/bottle-view';
 export class BottleDetailPage implements OnInit, OnDestroy {
   bottle = signal<Bottle | null>(null);
   loading = signal(true);
+  refreshing = signal(false);
   private title = inject(Title);
   private settings = inject(SiteSettingsService);
   private sub?: Subscription;
+  private currentId = 0;
 
   constructor(private route: ActivatedRoute, private api: ApiService) {}
 
   ngOnInit() {
     this.sub = this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
-      this.loading.set(true);
-      this.title.setTitle(`瓶子 #${id} - ${this.settings.siteName()}`);
-      if (id) this.api.getBottle(id).subscribe({
-        next: b => { this.bottle.set(b); this.loading.set(false); },
-        error: () => { this.bottle.set(null); this.loading.set(false); }
-      });
+      this.currentId = id;
+      this.loadBottle();
     });
+  }
+
+  loadBottle() {
+    const id = this.currentId;
+    if (!id) return;
+    this.loading.set(true);
+    this.title.setTitle(`瓶子 #${id} - ${this.settings.siteName()}`);
+    this.api.getBottle(id).subscribe({
+      next: b => { this.bottle.set(b); this.loading.set(false); this.refreshing.set(false); },
+      error: () => { this.bottle.set(null); this.loading.set(false); this.refreshing.set(false); }
+    });
+  }
+
+  // Pull-to-refresh
+  touchStartY = 0;
+  pullDistance = signal(0);
+
+  onTouchStart(e: TouchEvent) {
+    if (window.scrollY === 0) this.touchStartY = e.touches[0].clientY;
+  }
+  onTouchMove(e: TouchEvent) {
+    if (window.scrollY === 0) {
+      const d = e.touches[0].clientY - this.touchStartY;
+      if (d > 0 && d < 120) this.pullDistance.set(d);
+    }
+  }
+  onTouchEnd() {
+    if (this.pullDistance() > 60) {
+      this.refreshing.set(true);
+      this.loadBottle();
+    }
+    this.pullDistance.set(0);
+    this.touchStartY = 0;
   }
 
   ngOnDestroy() {

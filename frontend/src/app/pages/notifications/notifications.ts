@@ -68,6 +68,8 @@ export class NotificationsPage implements OnInit {
   }
 
   markRead(id: number) {
+    const item = this.items().find(n => n.id === id);
+    if (!item || item.isRead) return; // 已读不重复处理
     this.api.markNotificationRead(id).subscribe(() => {
       this.items.update(list => list.map(n => n.id === id ? { ...n, isRead: true } : n));
       const newUnread = Math.max(0, this.unreadTotal() - 1);
