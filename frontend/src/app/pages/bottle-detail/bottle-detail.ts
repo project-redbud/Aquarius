@@ -18,8 +18,12 @@ export class BottleDetailPage implements OnInit, OnDestroy {
   refreshing = signal(false);
 
   backUrl = computed(() => {
-    const t = this.bottle()?.type;
-    if (t === 'story' || t === 'qa' || t === 'news') return '/daily';
+    const b = this.bottle();
+    const t = b?.type;
+    if (t === 'story' || t === 'qa' || t === 'news') {
+      const d = b?.createdAt ? new Date(b.createdAt).toISOString().slice(0, 10) : '';
+      return '/daily' + (d ? '?date=' + d : '');
+    }
     if (t === 'suggestion' || t === 'notification') return '/my';
     return '/pick';
   });

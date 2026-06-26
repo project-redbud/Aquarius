@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService, DailyPush } from '../../services/api.service';
 import { LinkifyPipe } from '../../pipes/linkify.pipe';
 
@@ -18,12 +18,22 @@ export class DailyPage implements OnInit {
   readonly minDate: Date;
   readonly maxDate: Date;
 
-  constructor(private api: ApiService) {
+  constructor(private api: ApiService, private route: ActivatedRoute) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     this.maxDate = today;
     this.minDate = new Date(today);
     this.minDate.setDate(this.minDate.getDate() - 6);
+
+    // 支持通过 queryParam date 跳转到指定日期
+    const dateParam = this.route.snapshot.queryParamMap.get('date');
+    if (dateParam) {
+      const d = new Date(dateParam + 'T00:00:00');
+      if (!isNaN(d.getTime()) && d >= this.minDate && d <= this.maxDate) {
+        this.currentDate.set(d);
+        return;
+      }
+    }
     this.currentDate.set(new Date(today));
   }
 
