@@ -1,10 +1,12 @@
 import { Component, inject, OnInit, OnDestroy, computed } from '@angular/core';
+import { Location } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { filter, interval, startWith, switchMap, Subscription } from 'rxjs';
 import { AuthService } from './services/auth.service';
 import { ApiService } from './services/api.service';
 import { SiteSettingsService } from './services/site-settings.service';
+import { App as CapApp } from '@capacitor/app';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +18,7 @@ import { SiteSettingsService } from './services/site-settings.service';
 export class App implements OnInit, OnDestroy {
   auth = inject(AuthService);
   settings = inject(SiteSettingsService);
+  private location = inject(Location);
   private api = inject(ApiService);
   private router = inject(Router);
   private title = inject(Title);
@@ -28,6 +31,15 @@ export class App implements OnInit, OnDestroy {
   });
 
   ngOnInit() {
+    // Android 返回键处理
+    CapApp.addListener('backButton', ({ canGoBack }) => {
+      if (canGoBack) {
+        this.location.back();
+      } else {
+        CapApp.exitApp();
+      }
+    });
+
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
       const route = this.router.routerState.root.firstChild?.snapshot;
       const subtitle = route?.data['title'];
