@@ -402,7 +402,7 @@ public class BottlesController : ControllerBase
             LikedByMe = liked,
             CreatedAt = b.CreatedAt,
             EditedAt = b.EditedAt,
-            UserId = b.UserId,
+            UserId = (User.FindFirst("isAdmin")?.Value == "true" || b.UserId == GetUserId()) ? b.UserId : null,
             RequireLogin = b.RequireLogin,
             CommentsPrivate = b.CommentsPrivate,
             ExpiresAt = b.ExpiresAt,

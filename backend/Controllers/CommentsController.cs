@@ -310,7 +310,7 @@ public class CommentsController : ControllerBase
 
     // ── helpers ────────────────────────────────────────────
 
-    private static CommentDto ToDto(Comment c, bool includeReplies)
+    private CommentDto ToDto(Comment c, bool includeReplies)
     {
         string? parentContent = null;
         if (c.ParentReply != null)
@@ -321,6 +321,7 @@ public class CommentsController : ControllerBase
             parentContent = $"#{c.ParentReplyId}: {body}";
         }
 
+        var isAdmin = User.FindFirst("isAdmin")?.Value == "true";
         var dto = new CommentDto
         {
             Id = c.Id,
@@ -329,7 +330,7 @@ public class CommentsController : ControllerBase
             ParentReplyId = c.ParentReplyId,
             CreatedAt = c.CreatedAt,
             EditedAt = c.EditedAt,
-            UserId = c.UserId,
+            UserId = isAdmin ? c.UserId : null,
             ReplyCount = c.Replies.Count,
             ParentContent = parentContent,
             IsAdminBadge = c.IsAdminBadge,
