@@ -29,3 +29,7 @@
 @if (settings.copyright()) {
   <footer [innerHTML]="settings.copyright()"></footer>
 }
+
+@if (toastMsg()) {
+  <div class="toast">{{ toastMsg() }}</div>
+}

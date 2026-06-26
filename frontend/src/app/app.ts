@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, computed } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -30,6 +30,9 @@ export class App implements OnInit, OnDestroy {
     return c > 9 ? '9+' : c > 0 ? String(c) : '';
   });
 
+  toastMsg = signal('');
+  private toastTimer: any;
+
   ngOnInit() {
     // Android 返回键处理
     let lastBack = 0;
@@ -42,8 +45,7 @@ export class App implements OnInit, OnDestroy {
           CapApp.exitApp();
         } else {
           lastBack = now;
-          // Toast-like hint — use a brief console or a simple alert
-          alert('再按一次退出 Aquarius');
+          this.showToast('再按一次退出');
         }
       }
     });
@@ -55,13 +57,18 @@ export class App implements OnInit, OnDestroy {
       this.title.setTitle(subtitle ? `${subtitle} - ${siteName}` : siteName);
     });
 
-    // Poll unread count every 30s when logged in
     this.pollSub = interval(30000).pipe(
       startWith(0),
       switchMap(() => this.auth.isLoggedIn() ? this.api.getUnreadCount() : [{ count: 0 }])
     ).subscribe(res => {
       this.api.unreadCount.set(res.count);
     });
+  }
+
+  showToast(msg: string) {
+    this.toastMsg.set(msg);
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.toastMsg.set(''), 2000);
   }
 
   ngOnDestroy() {
