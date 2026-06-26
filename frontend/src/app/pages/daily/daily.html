@@ -10,7 +10,7 @@
       <a [routerLink]="['/bottle', daily()!.news!.id]" class="card news card-link">
         <span class="badge">📰 每日新闻</span>
         @if (daily()!.news!.imagePath) {
-          <img [src]="'/' + daily()!.news!.imagePath" alt="news" />
+          <img [src]="api.imageUrl(daily()!.news!.imagePath)" alt="news" />
         }
         <p [innerHTML]="daily()!.news!.content | linkify"></p>
       </a>
@@ -20,7 +20,7 @@
       <a [routerLink]="['/bottle', daily()!.story!.id]" class="card story card-link">
         <span class="badge">📖 每日故事</span>
         @if (daily()!.story!.imagePath) {
-          <img [src]="'/' + daily()!.story!.imagePath" alt="story" />
+          <img [src]="api.imageUrl(daily()!.story!.imagePath)" alt="story" />
         }
         <p [innerHTML]="daily()!.story!.content | linkify"></p>
       </a>
@@ -30,7 +30,7 @@
       <a [routerLink]="['/bottle', daily()!.qa!.id]" class="card qa card-link">
         <span class="badge">❓ 每日问答</span>
         @if (daily()!.qa!.imagePath) {
-          <img [src]="'/' + daily()!.qa!.imagePath" alt="qa" />
+          <img [src]="api.imageUrl(daily()!.qa!.imagePath)" alt="qa" />
         }
         <p [innerHTML]="daily()!.qa!.content | linkify"></p>
       </a>

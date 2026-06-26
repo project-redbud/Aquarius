@@ -39,7 +39,7 @@
             <p class="edited-hint">编辑于 {{ b.editedAt | date:'yyyy-MM-dd HH:mm' }}</p>
           }
           @if (b.imagePath) {
-            <img [src]="'/' + b.imagePath" alt="my bottle" />
+            <img [src]="api.imageUrl(b.imagePath)" alt="my bottle" />
           }
           @if (editingBottleId() === b.id) {
             <textarea [(ngModel)]="editBottleContent" rows="3" maxlength="500"></textarea>
@@ -130,7 +130,7 @@
             <span class="time">{{ b.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
           </div>
           @if (b.imagePath) {
-            <img [src]="'/' + b.imagePath" alt="bottle image" />
+            <img [src]="api.imageUrl(b.imagePath)" alt="bottle image" />
           }
           <p class="content-text" [innerHTML]="b.content | linkify"></p>
           <div class="stats">❤️ {{ b.likeCount }} · 💬 {{ b.commentCount }}</div>

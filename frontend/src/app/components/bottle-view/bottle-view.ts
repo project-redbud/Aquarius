@@ -6,6 +6,7 @@ import { ApiService, Bottle, Comment } from '../../services/api.service';
 import { LinkifyPipe } from '../../pipes/linkify.pipe';
 import { AuthService } from '../../services/auth.service';
 import { ImageService } from '../../services/image.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -48,6 +49,12 @@ export class BottleViewComponent implements OnChanges {
   logsLoading = signal(false);
 
   zoomImage = signal<string | null>(null);
+
+  imageUrl(path: string | null | undefined): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return environment.apiBase + '/' + path;
+  }
 
   /** 评论私密提示：null=正常, 'hidden'=隐藏, 'admin'=管理员可见 */
   commentsPrivateNote = signal<string | null>(null);

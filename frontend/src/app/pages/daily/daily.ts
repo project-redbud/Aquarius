@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService, DailyPush } from '../../services/api.service';
@@ -17,8 +17,9 @@ export class DailyPage implements OnInit {
 
   readonly minDate: Date;
   readonly maxDate: Date;
+  api = inject(ApiService);
 
-  constructor(private api: ApiService, private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     this.maxDate = today;

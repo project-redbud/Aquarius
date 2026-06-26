@@ -64,6 +64,13 @@ export class ApiService {
   /** 共享未读通知数（App 角标 + 通知中心同步读取） */
   readonly unreadCount = signal(0);
 
+  /** 拼接完整图片 URL */
+  imageUrl(path: string | null | undefined): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return environment.apiBase + '/' + path;
+  }
+
   constructor(private http: HttpClient) {}
 
   // ── user identity ──────────────────────────────────────

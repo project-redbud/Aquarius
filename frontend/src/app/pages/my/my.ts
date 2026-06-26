@@ -24,6 +24,7 @@ interface MyComment {
 export class MyPage implements OnInit {
   auth = inject(AuthService);
   unreadCount = inject(ApiService).unreadCount;
+  api = inject(ApiService);
 
   tab = signal<'bottles' | 'comments' | 'likes'>('bottles');
   myBottles = signal<Bottle[]>([]);
@@ -59,8 +60,6 @@ export class MyPage implements OnInit {
   editCommentBottleId = signal<number | null>(null);
 
   deletingId = signal<number | null>(null);
-
-  constructor(private api: ApiService) {}
 
   ngOnInit() {
     this.loadBottlesPage(1);
