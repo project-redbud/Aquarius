@@ -22,9 +22,11 @@ call npx cap sync android
 if %errorlevel% neq 0 goto :error
 
 echo [5/5] Copying app icons (after sync)...
+rmdir /s /q android\app\src\main\res\mipmap-anydpi-v26 >nul 2>nul
 for %%d in (mdpi hdpi xhdpi xxhdpi xxxhdpi) do (
   copy /Y ..\aquarius_logo.png android\app\src\main\res\mipmap-%%d\ic_launcher.png >nul
   copy /Y ..\aquarius_logo.png android\app\src\main\res\mipmap-%%d\ic_launcher_round.png >nul
+  copy /Y ..\aquarius_logo.png android\app\src\main\res\mipmap-%%d\ic_launcher_foreground.png >nul
 )
 copy /Y ..\aquarius_launcher.png android\app\src\main\res\drawable\splash.png >nul
 
