@@ -34,8 +34,8 @@ public class HomeController : ControllerBase
                 ImagePath = p.ImagePath,
                 AuthorName = p.Type switch { "story" => "📖 每日故事", "qa" => "❓ 每日问答", "news" => "📰 每日新闻", _ => "📖 每日故事" },
                 Type = p.Type,
-                CreatedAt = p.CreatedAt,
-                ExpiresAt = p.CreatedAt.AddDays(7)
+                CreatedAt = p.Date.Date + p.CreatedAt.TimeOfDay,
+                ExpiresAt = p.Date.Date.AddDays(7)
             };
         }
 

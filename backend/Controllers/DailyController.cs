@@ -70,8 +70,8 @@ public class DailyController : ControllerBase
                 ImagePath = push.ImagePath,
                 AuthorName = push.Type switch { "story" => "📖 每日故事", "qa" => "❓ 每日问答", "news" => "📰 每日新闻", _ => "📖 每日故事" },
                 Type = push.Type,
-                CreatedAt = push.CreatedAt,
-                ExpiresAt = push.CreatedAt.AddDays(7)
+                CreatedAt = push.Date.Date + push.CreatedAt.TimeOfDay,
+                ExpiresAt = push.Date.Date.AddDays(7)
             };
         }
 
