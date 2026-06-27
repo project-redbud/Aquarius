@@ -16,11 +16,16 @@ public class HomeController : ControllerBase
     [HttpGet]
     public async Task<ActionResult> Index()
     {
-        var today = DateTime.Today;
+        // ── 最新推送日期（有推送的最后一天）──
+        var latestPushDate = await _db.DailyPushes
+            .OrderByDescending(d => d.Date)
+            .Select(d => d.Date)
+            .FirstOrDefaultAsync();
+        var targetDate = latestPushDate != default ? latestPushDate.Date : DateTime.Today;
 
-        // ── 今日推送 ──────────────────────────────────
+        // ── 当日推送 ──────────────────────────────────
         var pushes = await _db.DailyPushes
-            .Where(d => d.Date == today)
+            .Where(d => d.Date == targetDate)
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync();
 
