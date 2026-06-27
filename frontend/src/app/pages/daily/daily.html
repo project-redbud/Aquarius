@@ -3,48 +3,48 @@
 
   @if (loading()) {
     <div class="empty">加载中...</div>
-  } @else if (!daily()) {
+  } @else if (!currentDay()) {
     <div class="empty">加载中...</div>
   } @else {
-    @if (daily()!.news) {
-      <a [routerLink]="['/bottle', daily()!.news!.id]" class="card news card-link">
+    @if (currentDay()!.news) {
+      <a [routerLink]="['/bottle', currentDay()!.news!.id]" class="card news card-link">
         <span class="badge">📰 每日新闻</span>
-        @if (daily()!.news!.imagePath) {
-          <img [src]="api.imageUrl(daily()!.news!.imagePath)" alt="news" />
+        @if (currentDay()!.news!.imagePath) {
+          <img [src]="api.imageUrl(currentDay()!.news!.imagePath)" alt="news" />
         }
-        <p [innerHTML]="daily()!.news!.content | linkify"></p>
+        <p [innerHTML]="currentDay()!.news!.content | linkify"></p>
       </a>
     }
 
-    @if (daily()!.story) {
-      <a [routerLink]="['/bottle', daily()!.story!.id]" class="card story card-link">
+    @if (currentDay()!.story) {
+      <a [routerLink]="['/bottle', currentDay()!.story!.id]" class="card story card-link">
         <span class="badge">📖 每日故事</span>
-        @if (daily()!.story!.imagePath) {
-          <img [src]="api.imageUrl(daily()!.story!.imagePath)" alt="story" />
+        @if (currentDay()!.story!.imagePath) {
+          <img [src]="api.imageUrl(currentDay()!.story!.imagePath)" alt="story" />
         }
-        <p [innerHTML]="daily()!.story!.content | linkify"></p>
+        <p [innerHTML]="currentDay()!.story!.content | linkify"></p>
       </a>
     }
 
-    @if (daily()!.qa) {
-      <a [routerLink]="['/bottle', daily()!.qa!.id]" class="card qa card-link">
+    @if (currentDay()!.qa) {
+      <a [routerLink]="['/bottle', currentDay()!.qa!.id]" class="card qa card-link">
         <span class="badge">❓ 每日问答</span>
-        @if (daily()!.qa!.imagePath) {
-          <img [src]="api.imageUrl(daily()!.qa!.imagePath)" alt="qa" />
+        @if (currentDay()!.qa!.imagePath) {
+          <img [src]="api.imageUrl(currentDay()!.qa!.imagePath)" alt="qa" />
         }
-        <p [innerHTML]="daily()!.qa!.content | linkify"></p>
+        <p [innerHTML]="currentDay()!.qa!.content | linkify"></p>
       </a>
     }
 
-    @if (!daily()!.news && !daily()!.story && !daily()!.qa) {
-      <div class="empty">{{ currentDate() | date:'yyyy-MM-dd' }} 没有推送 👀</div>
+    @if (!currentDay()!.news && !currentDay()!.story && !currentDay()!.qa) {
+      <div class="empty">{{ currentDate() }} 没有推送 👀</div>
     }
   }
 
   <!-- date navigation -->
   <div class="date-nav">
     <button [disabled]="!canGoPrev()" (click)="goToPrevDay()">← 前一天</button>
-    <span>{{ currentDate() | date:'yyyy-MM-dd' }}</span>
+    <span>{{ currentDate() }}</span>
     <button [disabled]="!canGoNext()" (click)="goToNextDay()">后一天 →</button>
   </div>
 </div>

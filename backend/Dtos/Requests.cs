@@ -180,3 +180,18 @@ public class DailyPushDto
     public BottleDto? Qa { get; set; }
     public BottleDto? News { get; set; }
 }
+
+public class DailyDayItem
+{
+    public string Date { get; set; } = string.Empty;
+    public BottleDto? Story { get; set; }
+    public BottleDto? Qa { get; set; }
+    public BottleDto? News { get; set; }
+}
+
+public class DailyListResponse
+{
+    public string MinDate { get; set; } = string.Empty;
+    public string MaxDate { get; set; } = string.Empty;
+    public List<DailyDayItem> Days { get; set; } = [];
+}

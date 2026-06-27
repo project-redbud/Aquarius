@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { ApiService, DailyPush } from '../../services/api.service';
+import { ApiService, DailyDayItem, DailyListResponse } from '../../services/api.service';
 import { LinkifyPipe } from '../../pipes/linkify.pipe';
 
 @Component({
@@ -11,80 +11,67 @@ import { LinkifyPipe } from '../../pipes/linkify.pipe';
   styleUrls: ['./daily.scss']
 })
 export class DailyPage implements OnInit {
-  daily = signal<DailyPush | null>(null);
-  currentDate = signal(new Date());
+  days = signal<DailyDayItem[]>([]);
+  currentDate = signal('');
   loading = signal(false);
+  minDate = '';
+  maxDate = '';
 
-  readonly minDate: Date;
-  readonly maxDate: Date;
   api = inject(ApiService);
 
-  constructor(private route: ActivatedRoute) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    this.maxDate = today;
-    this.minDate = new Date(today);
-    this.minDate.setDate(this.minDate.getDate() - 6);
-
-    // 支持通过 queryParam date 跳转到指定日期
-    const dateParam = this.route.snapshot.queryParamMap.get('date');
-    if (dateParam) {
-      const d = new Date(dateParam + 'T00:00:00');
-      if (!isNaN(d.getTime()) && d >= this.minDate && d <= this.maxDate) {
-        this.currentDate.set(d);
-        return;
-      }
-    }
-    this.currentDate.set(new Date(today));
-  }
+  constructor(private route: ActivatedRoute) {}
 
   ngOnInit() {
-    this.loadDaily();
+    this.loadAll();
   }
 
-  private fmt(d: Date): string {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  }
-
-  loadDaily() {
-    const dateStr = this.fmt(this.currentDate());
+  /** 一次性加载 7 天窗口全部推送 + 边界，后续翻页纯客户端过滤。 */
+  loadAll() {
     this.loading.set(true);
-    this.api.getDaily(dateStr).subscribe(d => {
-      this.daily.set(d);
-      this.loading.set(false);
+    this.api.getDaily().subscribe({
+      next: (res: DailyListResponse) => {
+        this.days.set(res.days);
+        this.minDate = res.minDate;
+        this.maxDate = res.maxDate;
+
+        // queryParam ?date=XX 优先，否则默认最新日期
+        const dateParam = this.route.snapshot.queryParamMap.get('date');
+        if (dateParam && this.days().some(d => d.date === dateParam)) {
+          this.currentDate.set(dateParam);
+        } else {
+          this.currentDate.set(res.maxDate);
+        }
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        // API 失败时给一个空数组避免卡死
+        this.days.set([]);
+      }
     });
   }
 
+  /** 当前选中日期对应的推送数据。 */
+  currentDay(): DailyDayItem | undefined {
+    return this.days().find(d => d.date === this.currentDate());
+  }
+
   goToPrevDay() {
-    const d = new Date(this.currentDate());
-    d.setDate(d.getDate() - 1);
-    if (d >= this.minDate) {
-      this.currentDate.set(d);
-      this.loadDaily();
-    }
+    const idx = this.days().findIndex(d => d.date === this.currentDate());
+    if (idx > 0) this.currentDate.set(this.days()[idx - 1].date);
   }
 
   goToNextDay() {
-    const d = new Date(this.currentDate());
-    d.setDate(d.getDate() + 1);
-    if (d <= this.maxDate) {
-      this.currentDate.set(d);
-      this.loadDaily();
-    }
+    const idx = this.days().findIndex(d => d.date === this.currentDate());
+    if (idx >= 0 && idx < this.days().length - 1) this.currentDate.set(this.days()[idx + 1].date);
   }
 
   canGoPrev(): boolean {
-    const d = new Date(this.currentDate());
-    d.setDate(d.getDate() - 1);
-    return d >= this.minDate;
+    return this.days().findIndex(d => d.date === this.currentDate()) > 0;
   }
 
   canGoNext(): boolean {
-    const d = new Date(this.currentDate());
-    d.setDate(d.getDate() + 1);
-    return d <= this.maxDate;
+    const idx = this.days().findIndex(d => d.date === this.currentDate());
+    return idx >= 0 && idx < this.days().length - 1;
   }
 }

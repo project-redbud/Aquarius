@@ -48,6 +48,19 @@ export interface DailyPush {
   qa: Bottle | null;
 }
 
+export interface DailyDayItem {
+  date: string;
+  story: Bottle | null;
+  qa: Bottle | null;
+  news: Bottle | null;
+}
+
+export interface DailyListResponse {
+  minDate: string;
+  maxDate: string;
+  days: DailyDayItem[];
+}
+
 export interface PaginatedResult<T> {
   items: T[];
   total: number;
@@ -184,10 +197,12 @@ export class ApiService {
 
   // ── daily ──────────────────────────────────────────────
 
-  getDaily(date?: string): Observable<DailyPush> {
+  getDaily(): Observable<DailyListResponse>;
+  getDaily(date: string): Observable<DailyPush>;
+  getDaily(date?: string): Observable<DailyPush | DailyListResponse> {
     let url = `${this.base}/daily`;
     if (date) url += `?date=${date}`;
-    return this.http.get<DailyPush>(url, {
+    return this.http.get<DailyPush | DailyListResponse>(url, {
       headers: this.headers()
     });
   }
