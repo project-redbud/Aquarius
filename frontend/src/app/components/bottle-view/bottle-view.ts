@@ -27,7 +27,7 @@ export class BottleViewComponent implements OnChanges {
   replyTo = signal<Comment | null>(null);
   replyText = signal('');
   expandedReplies = signal<Record<number, Comment[]>>({});
-  sortAsc = signal(false);
+  sortAsc = signal(true);
 
   editingBottle = signal(false);
   editBottleContent = signal('');
