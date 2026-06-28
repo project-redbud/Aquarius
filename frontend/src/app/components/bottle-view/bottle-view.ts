@@ -49,6 +49,67 @@ export class BottleViewComponent implements OnChanges {
   logsLoading = signal(false);
 
   zoomImage = signal<string | null>(null);
+  zoomScale = signal(1);
+  zoomTranslateX = signal(0);
+  zoomTranslateY = signal(0);
+  private pinchStartDist = 0;
+  private pinchStartScale = 1;
+  private lastZoomTapTime = 0;
+
+  openZoom(url: string) {
+    this.zoomScale.set(1);
+    this.zoomTranslateX.set(0);
+    this.zoomTranslateY.set(0);
+    this.zoomImage.set(url);
+  }
+
+  closeZoom() { this.zoomImage.set(null); }
+
+  onZoomTouchStart(e: TouchEvent) {
+    if (e.touches.length === 2) {
+      this.pinchStartDist = this._touchDist(e.touches);
+      this.pinchStartScale = this.zoomScale();
+      e.preventDefault();
+    }
+  }
+
+  onZoomTouchMove(e: TouchEvent) {
+    if (e.touches.length === 2) {
+      const dist = this._touchDist(e.touches);
+      const s = Math.max(0.5, Math.min(5, this.pinchStartScale * (dist / this.pinchStartDist)));
+      this.zoomScale.set(Math.round(s * 100) / 100);
+      e.preventDefault();
+    }
+  }
+
+  onZoomClick(e: MouseEvent) {
+    const now = Date.now();
+    if (now - this.lastZoomTapTime < 300) {
+      // double-tap → toggle 1x / 2x
+      if (this.zoomScale() > 1.1) {
+        this.zoomScale.set(1);
+        this.zoomTranslateX.set(0);
+        this.zoomTranslateY.set(0);
+      } else {
+        this.zoomScale.set(2);
+      }
+    }
+    this.lastZoomTapTime = now;
+    e.stopPropagation();
+  }
+
+  onZoomWheel(e: WheelEvent) {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.15 : 0.15;
+    const s = Math.max(0.5, Math.min(5, this.zoomScale() + delta));
+    this.zoomScale.set(Math.round(s * 100) / 100);
+  }
+
+  private _touchDist(touches: TouchList): number {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
 
   imageUrl(path: string | null | undefined): string {
     if (!path) return '';

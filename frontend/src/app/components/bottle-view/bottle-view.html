@@ -35,7 +35,7 @@
     @if (bottle.type === 'suggestion' && bottle.reportedBottleId) {
       <div class="suggestion-banner">📬 对瓶子 #{{ bottle.reportedBottleId }} 的意见 <a [routerLink]="['/bottle', bottle.reportedBottleId]" class="goto-btn">→ 前往查看</a></div>
     }
-    @if (bottle.imagePath) { <img [src]="imageUrl(bottle.imagePath)" alt="bottle image" class="bottle-img" (click)="zoomImage.set(imageUrl(bottle.imagePath))" /> }
+    @if (bottle.imagePath) { <img [src]="imageUrl(bottle.imagePath)" alt="bottle image" class="bottle-img" (click)="openZoom(imageUrl(bottle.imagePath))" /> }
     <p class="content" [innerHTML]="bottle.content | linkify"></p>
     <div class="actions">
       <button [class.liked]="bottle.likedByMe" (click)="toggleLike()">{{ bottle.likedByMe ? '❤️' : '🤍' }} {{ bottle.likeCount }}</button>
@@ -348,7 +348,15 @@
 }
 
 @if (zoomImage()) {
-  <div class="report-overlay" (click)="zoomImage.set(null)">
-    <img [src]="zoomImage()" class="zoom-img" />
+  <div class="report-overlay" (click)="closeZoom()">
+    <img
+      [src]="zoomImage()"
+      class="zoom-img"
+      [style.transform]="'scale(' + zoomScale() + ') translate(' + zoomTranslateX() + 'px, ' + zoomTranslateY() + 'px)'"
+      (click)="onZoomClick($event)"
+      (touchstart)="onZoomTouchStart($event)"
+      (touchmove)="onZoomTouchMove($event)"
+      (wheel)="onZoomWheel($event)"
+    />
   </div>
 }
