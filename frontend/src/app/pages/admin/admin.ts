@@ -397,7 +397,7 @@ export class AdminPage implements OnInit {
   }
 
   actionLabel(a: string): string {
-    const m: Record<string, string> = { close: '🔒 关闭', open: '🔓 打开', delete_reply: '🗑️ 删回复', republish_daily: '🔄 重新推送' };
+    const m: Record<string, string> = { close: '🔒 关闭', open: '🔓 打开', delete_reply: '🗑️ 删回复', republish_daily: '🔄 重新推送', essence_on: '💎 精华', essence_off: '💎 取消精华' };
     return m[a] || a;
   }
 
@@ -411,7 +411,7 @@ export class AdminPage implements OnInit {
 
   toggleEssence(bottleId: number) {
     this.api.adminToggleEssence(bottleId).subscribe(res => {
-      this.bottles.update(list => list.map(b => b.id === bottleId ? { ...b, isEssence: res.isEssence } : b));
+      this.bottles.update(list => list.map(b => b.id === bottleId ? { ...b, isEssence: res.isEssence, essenceLikeCount: res.isEssence ? 5 : 0 } : b));
     });
   }
 

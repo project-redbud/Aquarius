@@ -253,6 +253,7 @@ export class BottleViewComponent implements OnChanges {
     this.menuOpen.set(false);
     this.api.adminToggleEssence(this.bottle.id).subscribe(res => {
       this.bottle!.isEssence = res.isEssence;
+      this.bottle!.essenceLikeCount = res.isEssence ? 5 : 0;
       this.cdr.detectChanges();
     });
   }
@@ -262,7 +263,9 @@ export class BottleViewComponent implements OnChanges {
       close: '🔒 关闭瓶子',
       open: '🔓 打开瓶子',
       delete_reply: '🗑️ 删除回复',
-      republish_daily: '🔄 重新推送'
+      republish_daily: '🔄 重新推送',
+      essence_on: '💎 设为精华',
+      essence_off: '💎 取消精华'
     };
     return map[action] || action;
   }
