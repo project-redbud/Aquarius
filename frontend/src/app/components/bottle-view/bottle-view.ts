@@ -391,10 +391,6 @@ export class BottleViewComponent implements OnChanges {
     this.api.addComment(b.id, text, commentId, parentReplyId, this.commentAdminBadge(), this.commentBottleOwnerBadge()).subscribe(() => {
       if (parent) { this.loadReplies(this.rootCommentId(parent)); this.cancelReply(); }
       else { this.commentText.set(''); }
-      if (b.type !== 'suggestion' && b.type !== 'notification') {
-        this.commentAdminBadge.set(false);
-      }
-      this.commentBottleOwnerBadge.set(false);
       this.loadComments();
     });
   }
