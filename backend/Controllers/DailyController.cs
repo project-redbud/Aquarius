@@ -78,7 +78,7 @@ public class DailyController : ControllerBase
         // ── 无参：返回 7 天窗口全部推送 + 边界（前端据此渲染日期选择器）──
         var recentCutoff = DateTime.Today.AddDays(-6);
         var latestPushDate = await _db.DailyPushes
-            .Where(d => d.Date >= recentCutoff)
+            .Where(d => d.Date >= recentCutoff && d.Date <= DateTime.Today)
             .OrderByDescending(d => d.Date)
             .Select(d => d.Date)
             .FirstOrDefaultAsync();
@@ -86,9 +86,6 @@ public class DailyController : ControllerBase
         var maxDate = latestPushDate != default
             ? latestPushDate.Date
             : DateTime.Today.AddDays(-1);
-        // 不允许超过今天（定时推送尚未到日期）
-        if (maxDate > DateTime.Today)
-            maxDate = DateTime.Today;
         var minDate = maxDate.AddDays(-6);
 
         var windowStart = minDate;
