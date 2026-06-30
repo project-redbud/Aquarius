@@ -409,6 +409,21 @@ export class AdminPage implements OnInit {
     });
   }
 
+  deleteComment(bottleId: number, commentId: number) {
+    if (!confirm('确定删除这条评论？其所有子回复也会被删除。')) return;
+    this.api.adminDeleteComment(commentId).subscribe(() => {
+      // 从本地缓存中移除
+      const cache = { ...this.commentsCache() };
+      const list = cache[bottleId];
+      if (list) {
+        cache[bottleId] = list
+          .filter(c => c.id !== commentId)
+          .map(c => ({ ...c, replies: c.replies?.filter((r: any) => r.id !== commentId) || [] }));
+      }
+      this.commentsCache.set(cache);
+    });
+  }
+
   openBottle(id: number) {
     if (!confirm('确定重新打开此瓶子？')) return;
     this.api.adminOpenBottle(id).subscribe(() => {

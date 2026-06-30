@@ -330,6 +330,7 @@
               @if (c.editedAt) {
                 <span class="edited">(已编辑)</span>
               }
+              <button class="danger" style="margin-left:8px;padding:1px 6px;font-size:.75rem" (click)="deleteComment(b.id, c.id)">✕</button>
 
               @if (c.replies && c.replies.length > 0) {
                 <div class="admin-replies">
@@ -346,6 +347,7 @@
                       @if (r.editedAt) {
                         <span class="edited">(已编辑)</span>
                       }
+                      <button class="danger" style="margin-left:8px;padding:1px 6px;font-size:.75rem" (click)="deleteComment(b.id, r.id)">✕</button>
                     </div>
                   }
                 </div>
