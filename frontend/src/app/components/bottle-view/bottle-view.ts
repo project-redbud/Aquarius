@@ -6,6 +6,7 @@ import { ApiService, Bottle, Comment } from '../../services/api.service';
 import { LinkifyPipe } from '../../pipes/linkify.pipe';
 import { AuthService } from '../../services/auth.service';
 import { ImageService } from '../../services/image.service';
+import { SiteSettingsService } from '../../services/site-settings.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -152,7 +153,7 @@ export class BottleViewComponent implements OnChanges {
   }
   toggleSort() { this.sortAsc.update(v => !v); }
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private el: ElementRef, private router: Router, private image: ImageService) {}
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private el: ElementRef, private router: Router, private image: ImageService, private siteSettings: SiteSettingsService) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['bottle'] && this.bottle) {
@@ -293,7 +294,8 @@ export class BottleViewComponent implements OnChanges {
   shareBottle() {
     const id = this.bottle?.id;
     if (!id) return;
-    const url = `${location.origin}/bottle/${id}`;
+    const base = this.siteSettings.siteBaseUrl() || location.origin;
+    const url = `${base.replace(/\/+$/, '')}/bottle/${id}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url)
         .then(() => { this.menuOpen.set(false); alert('链接已复制到剪贴板'); })

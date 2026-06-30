@@ -300,7 +300,9 @@ public class AdminController : ControllerBase
                 CommentCount = b.Comments.Count,
                 b.CreatedAt,
                 b.EditedAt,
-                b.UserId
+                b.UserId,
+                b.IsClosed,
+                b.IsEssence
             })
             .ToListAsync();
 
@@ -440,6 +442,34 @@ public class AdminController : ControllerBase
 
         await _db.SaveChangesAsync();
         return Ok(new { message = "瓶子已打开" });
+    }
+
+    /// <summary>切换精华状态（精华瓶获得 5 个虚空点赞 + 【精华】标识）</summary>
+    [HttpPost("bottles/{id}/essence")]
+    public async Task<ActionResult> ToggleEssence(int id)
+    {
+        if (!IsAdmin()) return Forbid();
+
+        var bottle = await _db.Bottles.FindAsync(id);
+        if (bottle == null) return NotFound();
+
+        bottle.IsEssence = !bottle.IsEssence;
+
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var user = await _db.Users.FindAsync(userId);
+
+        _db.BottleLogs.Add(new Models.BottleLog
+        {
+            BottleId = id,
+            OperatorUserId = userId,
+            OperatorUsername = user?.Username ?? "未知",
+            Action = bottle.IsEssence ? "essence_on" : "essence_off",
+            Detail = null,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _db.SaveChangesAsync();
+        return Ok(new { isEssence = bottle.IsEssence });
     }
 
     /// <summary>发送系统通知（创建通知瓶 + 通知记录）</summary>

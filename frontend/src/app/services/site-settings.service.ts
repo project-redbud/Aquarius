@@ -8,16 +8,18 @@ export class SiteSettingsService {
 
   siteName = signal('Aquarius');
   copyright = signal('');
+  siteBaseUrl = signal('');
 
   constructor(private http: HttpClient) {
     this.load();
   }
 
   load() {
-    this.http.get<{ siteName: string; copyright: string }>(`${this.base}/settings`)
+    this.http.get<{ siteName: string; copyright: string; siteBaseUrl: string }>(`${this.base}/settings`)
       .subscribe(s => {
         this.siteName.set(s.siteName);
         this.copyright.set(s.copyright);
+        this.siteBaseUrl.set(s.siteBaseUrl || '');
       });
   }
 }

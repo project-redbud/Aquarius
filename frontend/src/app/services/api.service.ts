@@ -24,6 +24,8 @@ export interface Bottle {
   adminUsername?: string | null;
   reportedBottleId?: number | null;
   isClosed: boolean;
+  isEssence: boolean;
+  essenceLikeCount: number;
 }
 
 export interface Comment {
@@ -354,6 +356,10 @@ export class ApiService {
 
   adminOpenBottle(id: number): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.base}/admin/bottles/${id}/open`, {});
+  }
+
+  adminToggleEssence(id: number): Observable<{ isEssence: boolean }> {
+    return this.http.post<{ isEssence: boolean }>(`${this.base}/admin/bottles/${id}/essence`, {});
   }
 
   adminDeleteComment(commentId: number): Observable<void> {

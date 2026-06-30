@@ -16,7 +16,7 @@ public class SettingsController : ControllerBase
     public async Task<ActionResult> Get()
     {
         var s = await _db.SiteSettings.FirstOrDefaultAsync();
-        if (s == null) return Ok(new { siteName = "Aquarius", copyright = "" });
-        return Ok(new { siteName = s.SiteName, copyright = s.Copyright });
+        if (s == null) return Ok(new { siteName = "Aquarius", copyright = "", siteBaseUrl = "" });
+        return Ok(new { siteName = s.SiteName, copyright = s.Copyright, siteBaseUrl = s.SiteBaseUrl });
     }
 }

@@ -3,7 +3,7 @@
 @else {
   <div class="bottle-card">
     <div class="header">
-      <span class="author">{{ bottle.authorName || '匿名' }}@if (bottle.isAdminBadge) { @if (bottle.adminUsername && bottle.authorName !== bottle.adminUsername) { （🛡️{{ bottle.adminUsername }}） } @else { 🛡️ } }</span>
+      <span class="author">{{ bottle.authorName || '匿名' }}@if (bottle.isAdminBadge) { @if (bottle.adminUsername && bottle.authorName !== bottle.adminUsername) { （🛡️{{ bottle.adminUsername }}） } @else { 🛡️ } }@if (bottle.isEssence) { 💎 }</span>
       <span class="right"><span class="bottle-num">#{{ bottle.id }}</span><span class="time">{{ bottle.type === 'normal' ? (bottle.createdAt | date:'yyyy-MM-dd HH:mm') : (bottle.createdAt | date:'yyyy-MM-dd') }}</span>
         <button class="more-btn" (click)="toggleMenu()">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>

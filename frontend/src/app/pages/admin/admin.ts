@@ -409,6 +409,12 @@ export class AdminPage implements OnInit {
     });
   }
 
+  toggleEssence(bottleId: number) {
+    this.api.adminToggleEssence(bottleId).subscribe(res => {
+      this.bottles.update(list => list.map(b => b.id === bottleId ? { ...b, isEssence: res.isEssence } : b));
+    });
+  }
+
   deleteComment(bottleId: number, commentId: number) {
     if (!confirm('确定删除这条评论？其所有子回复也会被删除。')) return;
     this.api.adminDeleteComment(commentId).subscribe(() => {

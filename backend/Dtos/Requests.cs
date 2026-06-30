@@ -82,6 +82,8 @@ public class BottleDto
     public string? AdminUsername { get; set; }
     public int? ReportedBottleId { get; set; }
     public bool IsClosed { get; set; }
+    public bool IsEssence { get; set; }
+    public int EssenceLikeCount => IsEssence ? 5 : 0;
 }
 
 public class BottleLogDto

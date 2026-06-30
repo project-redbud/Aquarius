@@ -65,6 +65,9 @@ public class Bottle
     /// <summary>关闭操作人 ID。</summary>
     public int? ClosedByUserId { get; set; }
 
+    /// <summary>精华瓶：管理员标记，显示【精华】标识并提供 5 个虚空点赞。</summary>
+    public bool IsEssence { get; set; }
+
     // ── FK to User ─────────────────────────────────────────
     public int? UserId { get; set; }
 

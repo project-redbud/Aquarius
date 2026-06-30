@@ -16,7 +16,7 @@
         <label>版权信息（支持 HTML）
           <textarea [(ngModel)]="settingCopyright" placeholder="© 2026 <a href=&quot;/&quot;>Aquarius</a>" maxlength="500" rows="2"></textarea>
         </label>
-        <label>站点 URL（用于邮件链接）
+        <label>站点 URL（用于邮件链接和分享链接）
           <input type="text" [(ngModel)]="settingSiteBaseUrl" placeholder="https://example.com" maxlength="300" />
         </label>
 
@@ -312,6 +312,7 @@
             {{ commentsCache()[b.id] ? '隐藏评论' : '查看评论' }}
             @if (loadingComments()[b.id]) { ... }
           </button>
+          <button (click)="toggleEssence(b.id)" [class.active]="b.isEssence">{{ b.isEssence ? '💎 取消精华' : '💎 设为精华' }}</button>
           <button class="danger" (click)="deleteBottle(b.id)">删除</button>
         </div>
 

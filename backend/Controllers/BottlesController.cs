@@ -410,7 +410,8 @@ public class BottlesController : ControllerBase
             LastReThrowAt = b.LastReThrowAt,
             IsAdminBadge = b.IsAdminBadge,
             ReportedBottleId = b.ReportedBottleId,
-            IsClosed = b.IsClosed
+            IsClosed = b.IsClosed,
+            IsEssence = b.IsEssence
         };
 
         if (b.IsAdminBadge && b.UserId != null)

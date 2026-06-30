@@ -50,6 +50,7 @@ public class HomeController : ControllerBase
 
         // ── 最新 TOP10 ─────────────────────────────────
         var latestBottles = await _db.Bottles
+            .Include(b => b.Comments)
             .Where(b => b.Type == "normal" && b.ExpiresAt > DateTime.UtcNow && !b.IsClosed)
             .OrderByDescending(b => b.CreatedAt)
             .Take(10)
@@ -63,6 +64,7 @@ public class HomeController : ControllerBase
 
         // ── 最热 TOP10 ─────────────────────────────────
         var candidates = await _db.Bottles
+            .Include(b => b.Comments)
             .Where(b => b.Type == "normal" && b.ExpiresAt > DateTime.UtcNow && !b.IsClosed)
             .ToListAsync();
 
