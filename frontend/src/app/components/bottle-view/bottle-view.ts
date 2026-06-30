@@ -248,6 +248,15 @@ export class BottleViewComponent implements OnChanges {
     });
   }
 
+  toggleEssence() {
+    if (!this.bottle) return;
+    this.menuOpen.set(false);
+    this.api.adminToggleEssence(this.bottle.id).subscribe(res => {
+      this.bottle!.isEssence = res.isEssence;
+      this.cdr.detectChanges();
+    });
+  }
+
   actionLabel(action: string): string {
     const map: Record<string, string> = {
       close: '🔒 关闭瓶子',

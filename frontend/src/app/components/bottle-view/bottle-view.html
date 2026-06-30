@@ -23,6 +23,7 @@
               } @else {
                 <button (click)="adminCloseBottle()">🔒 关闭</button>
               }
+              <button (click)="toggleEssence()">{{ bottle.isEssence ? '💎 取消精华' : '💎 设为精华' }}</button>
             }
             <button (click)="openLog()">📋 日志</button>
           </div>
@@ -38,7 +39,7 @@
     @if (bottle.imagePath) { <img [src]="imageUrl(bottle.imagePath)" alt="bottle image" class="bottle-img" (click)="openZoom(imageUrl(bottle.imagePath))" /> }
     <p class="content" [innerHTML]="bottle.content | linkify"></p>
     <div class="actions">
-      <button [class.liked]="bottle.likedByMe" (click)="toggleLike()">{{ bottle.likedByMe ? '❤️' : '🤍' }} {{ bottle.likeCount }}</button>
+      <button [class.liked]="bottle.likedByMe" (click)="toggleLike()">{{ bottle.likedByMe ? '❤️' : '🤍' }} {{ bottle.likeCount + (bottle.essenceLikeCount || 0) }}</button>
       <span>💬 {{ comments().length }}</span>
     </div>
 
