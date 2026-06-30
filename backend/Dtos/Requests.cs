@@ -79,6 +79,7 @@ public class BottleDto
     public int ReThrowCount { get; set; }
     public DateTime? LastReThrowAt { get; set; }
     public bool IsAdminBadge { get; set; }
+    public string? AdminUsername { get; set; }
     public int? ReportedBottleId { get; set; }
     public bool IsClosed { get; set; }
 }

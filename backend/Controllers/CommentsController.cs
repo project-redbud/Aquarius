@@ -73,9 +73,14 @@ public class CommentsController : ControllerBase
 
         var result = comments.Select(c => ToDto(c, includeReplies: true)).ToList();
 
-        // 为管理员评论填充用户名
-        var adminIds = result.Where(c => c.IsAdminBadge && c.UserId != null)
-            .Select(c => c.UserId!.Value).Distinct().ToList();
+        // 为管理员评论填充用户名（从 raw 实体收集，DTO 可能已清空 UserId）
+        var adminIds = comments
+            .Where(c => c.IsAdminBadge && c.UserId != null)
+            .Select(c => c.UserId!.Value)
+            .Union(comments.SelectMany(c => c.Replies)
+                .Where(r => r.IsAdminBadge && r.UserId != null)
+                .Select(r => r.UserId!.Value))
+            .Distinct().ToList();
         var adminNames = new Dictionary<int, string>();
         foreach (var aid in adminIds)
         {
@@ -161,8 +166,13 @@ public class CommentsController : ControllerBase
 
         var replyDtos = replies.Select(r => ToDto(r, includeReplies: false)).ToList();
 
-        var adminIds = replyDtos.Where(c => c.IsAdminBadge && c.UserId != null)
-            .Select(c => c.UserId!.Value).Distinct().ToList();
+        var adminIds = replies
+            .Where(r => r.IsAdminBadge && r.UserId != null)
+            .Select(r => r.UserId!.Value)
+            .Union(replies.SelectMany(r => r.Replies)
+                .Where(rr => rr.IsAdminBadge && rr.UserId != null)
+                .Select(rr => rr.UserId!.Value))
+            .Distinct().ToList();
         var names = new Dictionary<int, string>();
         foreach (var aid in adminIds)
         {

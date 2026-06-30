@@ -390,7 +390,7 @@ public class BottlesController : ControllerBase
     private async Task<BottleDto> ToDto(Bottle b, string token)
     {
         var liked = await _db.Likes.AnyAsync(l => l.BottleId == b.Id && l.UserToken == token);
-        return new BottleDto
+        var dto = new BottleDto
         {
             Id = b.Id,
             Content = b.Content,
@@ -412,6 +412,14 @@ public class BottlesController : ControllerBase
             ReportedBottleId = b.ReportedBottleId,
             IsClosed = b.IsClosed
         };
+
+        if (b.IsAdminBadge && b.UserId != null)
+        {
+            var u = await _db.Users.FindAsync(b.UserId.Value);
+            if (u != null) dto.AdminUsername = u.Username;
+        }
+
+        return dto;
     }
 
     private async Task<string?> SaveImage(string base64)

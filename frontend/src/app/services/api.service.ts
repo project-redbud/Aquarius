@@ -21,6 +21,7 @@ export interface Bottle {
   reThrowCount: number;
   lastReThrowAt?: string | null;
   isAdminBadge: boolean;
+  adminUsername?: string | null;
   reportedBottleId?: number | null;
   isClosed: boolean;
 }
