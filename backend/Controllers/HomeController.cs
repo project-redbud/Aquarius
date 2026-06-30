@@ -78,6 +78,16 @@ public class HomeController : ControllerBase
             .Take(10)
             .ToList();
 
-        return Ok(new { pushes = new { news, story, qa }, latest, hot });
+        // ── 小黑板：未过期的通知瓶 ──────────────────────
+        var notices = await _db.Bottles
+            .Where(b => b.Type == "notification" && b.ExpiresAt > DateTime.UtcNow && !b.IsClosed)
+            .OrderByDescending(b => b.CreatedAt)
+            .Select(b => new
+            {
+                b.Id, b.Content, b.AuthorName, b.CreatedAt, b.ExpiresAt
+            })
+            .ToListAsync();
+
+        return Ok(new { pushes = new { news, story, qa }, latest, hot, notices });
     }
 }

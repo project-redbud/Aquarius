@@ -30,6 +30,19 @@
       }
     </section>
 
+    @if (notices().length > 0) {
+      <section class="notice-board">
+        <h2>📋 小黑板</h2>
+        @for (n of notices(); track n.id) {
+          <a [routerLink]="['/bottle', n.id]" class="notice-item">
+            <span class="notice-author">{{ n.authorName || '系统通知' }}</span>
+            <span class="notice-content">{{ truncate(n.content, 80) }}</span>
+            <span class="notice-time">{{ n.createdAt | date:'MM-dd' }}</span>
+          </a>
+        }
+      </section>
+    }
+
     <section class="bottle-list">
       <h2>🆕 最新漂流</h2>
       @for (b of latest(); track b.id) {

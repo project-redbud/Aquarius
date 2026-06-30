@@ -18,6 +18,7 @@ export class HomePage implements OnInit {
   qa = signal<any>(null);
   latest = signal<any[]>([]);
   hot = signal<any[]>([]);
+  notices = signal<any[]>([]);
   loading = signal(true);
 
   ngOnInit() {
@@ -28,6 +29,7 @@ export class HomePage implements OnInit {
         this.qa.set(data.pushes.qa);
         this.latest.set(data.latest);
         this.hot.set(data.hot);
+        this.notices.set(data.notices || []);
         this.loading.set(false);
       });
   }
