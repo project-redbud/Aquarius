@@ -86,6 +86,9 @@ public class DailyController : ControllerBase
         var maxDate = latestPushDate != default
             ? latestPushDate.Date
             : DateTime.Today.AddDays(-1);
+        // 不允许超过今天（定时推送尚未到日期）
+        if (maxDate > DateTime.Today)
+            maxDate = DateTime.Today;
         var minDate = maxDate.AddDays(-6);
 
         var windowStart = minDate;

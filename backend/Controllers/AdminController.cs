@@ -122,7 +122,7 @@ public class AdminController : ControllerBase
             AuthorName = req.Type switch { "story" => "📖 每日故事", "qa" => "❓ 每日问答", "news" => "📰 每日新闻", _ => "📖 每日故事" },
             UserToken = "system",
             Type = req.Type,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = date.Date + DateTime.UtcNow.TimeOfDay,
             ExpiresAt = DateTime.MaxValue
         };
         _db.Bottles.Add(bottle);
@@ -242,7 +242,7 @@ public class AdminController : ControllerBase
             AuthorName = source.Type switch { "story" => "📖 每日故事", "qa" => "❓ 每日问答", "news" => "📰 每日新闻", _ => "📖 每日故事" },
             UserToken = "system",
             Type = source.Type,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = newDate.Date + DateTime.UtcNow.TimeOfDay,
             ExpiresAt = DateTime.MaxValue
         };
         _db.Bottles.Add(bottle);
