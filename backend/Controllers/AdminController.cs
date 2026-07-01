@@ -468,6 +468,22 @@ public class AdminController : ControllerBase
             CreatedAt = DateTime.UtcNow
         });
 
+        // 通知瓶主（瓶主不是自己时才发）
+        if (bottle.UserId != null && bottle.UserId != userId)
+        {
+            var label = bottle.IsEssence ? "设为精华 💎" : "取消精华";
+            _db.Notifications.Add(new Models.Notification
+            {
+                UserId = bottle.UserId.Value,
+                Type = "bottle_essence",
+                Title = $"你的瓶子被{label}",
+                Content = bottle.Content.Length > 50 ? bottle.Content[..50] + "..." : bottle.Content,
+                RelatedBottleId = id,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
         await _db.SaveChangesAsync();
         return Ok(new { isEssence = bottle.IsEssence });
     }
