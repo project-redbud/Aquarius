@@ -475,7 +475,7 @@ public class AdminController : ControllerBase
             _db.Notifications.Add(new Models.Notification
             {
                 UserId = bottle.UserId.Value,
-                Type = "bottle_essence",
+                Type = "like",
                 Title = $"你的瓶子被{label}",
                 Content = bottle.Content.Length > 50 ? bottle.Content[..50] + "..." : bottle.Content,
                 RelatedBottleId = id,
