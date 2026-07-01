@@ -335,7 +335,7 @@ public class AdminController : ControllerBase
         var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
         var user = await _db.Users.FindAsync(userId);
 
-        var detail = comment.Content.Length > 50 ? comment.Content[..50] + "..." : comment.Content;
+        var detail = comment.Content.Length > 200 ? comment.Content[..200] + "..." : comment.Content;
 
         _db.Comments.RemoveRange(comment.Replies);
         _db.Comments.Remove(comment);
@@ -389,7 +389,7 @@ public class AdminController : ControllerBase
                 UserId = bottle.UserId.Value,
                 Type = "bottle_processed",
                 Title = "你的意见已被处理",
-                Content = bottle.Content.Length > 50 ? bottle.Content[..50] + "..." : bottle.Content,
+                Content = bottle.Content.Length > 200 ? bottle.Content[..200] + "..." : bottle.Content,
                 RelatedBottleId = id,
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
@@ -477,7 +477,7 @@ public class AdminController : ControllerBase
                 UserId = bottle.UserId.Value,
                 Type = "like",
                 Title = $"你的瓶子被{label}",
-                Content = bottle.Content.Length > 50 ? bottle.Content[..50] + "..." : bottle.Content,
+                Content = bottle.Content.Length > 200 ? bottle.Content[..200] + "..." : bottle.Content,
                 RelatedBottleId = id,
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow

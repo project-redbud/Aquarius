@@ -250,7 +250,7 @@ public class CommentsController : ControllerBase
                 UserId = bottle.UserId.Value,
                 Type = "comment",
                 Title = "瓶子有人评论了",
-                Content = comment.Content.Length > 50 ? comment.Content[..50] + "..." : comment.Content,
+                Content = comment.Content.Length > 200 ? comment.Content[..200] + "..." : comment.Content,
                 RelatedBottleId = bottleId,
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
@@ -268,7 +268,7 @@ public class CommentsController : ControllerBase
                     UserId = parentReply.UserId.Value,
                     Type = "comment",
                     Title = "有人回复了你的评论",
-                    Content = comment.Content.Length > 50 ? comment.Content[..50] + "..." : comment.Content,
+                    Content = comment.Content.Length > 200 ? comment.Content[..200] + "..." : comment.Content,
                     RelatedBottleId = bottleId,
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow
@@ -425,8 +425,8 @@ public class MyCommentsController : ControllerBase
                 c.CommentId,
                 c.ParentReplyId,
                 BottleId = c.BottleId,
-                BottleContent = c.Bottle!.Content.Length > 50
-                    ? c.Bottle.Content.Substring(0, 50) + "..."
+                BottleContent = c.Bottle!.Content.Length > 200
+                    ? c.Bottle.Content.Substring(0, 200) + "..."
                     : c.Bottle.Content
             })
             .ToListAsync();

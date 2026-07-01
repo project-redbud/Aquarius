@@ -222,7 +222,7 @@ export class AdminPage implements OnInit {
         const label = type === 'story' ? '故事' : '问答';
         const ok = confirm(
           `📅 ${date} 的「${label}」推送已存在：\n\n` +
-          `"${existing.content.slice(0, 80)}${existing.content.length > 80 ? '...' : ''}"\n\n` +
+          `"${existing.content.slice(0, 200)}${existing.content.length > 80 ? '...' : ''}"\n\n` +
           `是否更新为新内容？`
         );
         if (ok) this.doCreateDaily(type, content, date);

@@ -4,7 +4,7 @@ namespace Aquarius.Api.Dtos;
 
 public class ThrowBottleRequest
 {
-    [Required, MaxLength(500)]
+    [Required, MaxLength(2000)]
     public string Content { get; set; } = string.Empty;
 
     /// <summary>Base64 编码的图片数据（可选）。</summary>
@@ -44,7 +44,7 @@ public class AddCommentRequest
 
 public class EditBottleRequest
 {
-    [Required, MaxLength(500)]
+    [Required, MaxLength(2000)]
     public string Content { get; set; } = string.Empty;
 
     /// <summary>Base64 编码的图片数据（可选）。</summary>

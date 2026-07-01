@@ -77,13 +77,13 @@ public class AuthController : ControllerBase
         {
             var title = nb.Content.Contains('\n')
                 ? nb.Content[..nb.Content.IndexOf('\n')]
-                : (nb.Content.Length > 50 ? nb.Content[..50] : nb.Content);
+                : (nb.Content.Length > 200 ? nb.Content[..200] : nb.Content);
             _db.Notifications.Add(new Models.Notification
             {
                 UserId = user.Id,
                 Type = "system",
                 Title = title,
-                Content = nb.Content.Length > 100 ? nb.Content[..100] + "..." : nb.Content,
+                Content = nb.Content.Length > 200 ? nb.Content[..200] + "..." : nb.Content,
                 RelatedBottleId = nb.Id,
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow

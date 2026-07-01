@@ -281,7 +281,7 @@ public class BottlesController : ControllerBase
                     UserId = bottle.UserId.Value,
                     Type = "like",
                     Title = "瓶子获得了点赞",
-                    Content = bottle.Content.Length > 50 ? bottle.Content[..50] + "..." : bottle.Content,
+                    Content = bottle.Content.Length > 200 ? bottle.Content[..200] + "..." : bottle.Content,
                     RelatedBottleId = id,
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow

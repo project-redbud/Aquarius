@@ -9,7 +9,7 @@ public class Bottle
 {
     public int Id { get; set; }
 
-    [MaxLength(500)]
+    [MaxLength(2000)]
     public string Content { get; set; } = string.Empty;
 
     /// <summary>图片相对路径，如 "uploads/abc123.jpg"；null 表示纯文字。</summary>

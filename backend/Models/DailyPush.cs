@@ -13,7 +13,7 @@ public class DailyPush
     [MaxLength(20)]
     public string Type { get; set; } = "story";
 
-    [MaxLength(500)]
+    [MaxLength(2000)]
     public string Content { get; set; } = string.Empty;
 
     [MaxLength(500)]

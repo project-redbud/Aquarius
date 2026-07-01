@@ -6,7 +6,7 @@
       @if (news()) {
         <a [routerLink]="['/bottle', news().id]" class="push-card news">
           <span class="badge">📰 每日新闻</span>
-          <p>{{ truncate(news().content, 100) }}</p>
+          <p>{{ truncate(news().content, 200) }}</p>
           <span class="detail-btn">查看详情 →</span>
         </a>
       }
@@ -15,14 +15,14 @@
           @if (story()) {
             <a [routerLink]="['/bottle', story().id]" class="push-card story">
               <span class="badge">📖 每日故事</span>
-              <p>{{ truncate(story().content, 100) }}</p>
+              <p>{{ truncate(story().content, 200) }}</p>
               <span class="detail-btn">查看详情 →</span>
             </a>
           }
           @if (qa()) {
             <a [routerLink]="['/bottle', qa().id]" class="push-card qa">
               <span class="badge">❓ 每日问答</span>
-              <p>{{ truncate(qa().content, 100) }}</p>
+              <p>{{ truncate(qa().content, 200) }}</p>
               <span class="detail-btn">查看详情 →</span>
             </a>
           }
@@ -36,7 +36,7 @@
         @for (n of notices(); track n.id) {
           <a [routerLink]="['/bottle', n.id]" class="notice-item">
             <span class="notice-author">{{ n.authorName || '系统通知' }}</span>
-            <span class="notice-content">{{ truncate(n.content, 80) }}</span>
+            <span class="notice-content">{{ truncate(n.content, 200) }}</span>
             <span class="notice-time">{{ n.createdAt | date:'MM-dd' }}</span>
           </a>
         }
@@ -48,7 +48,7 @@
       @for (b of latest(); track b.id) {
         <a [routerLink]="['/bottle', b.id]" class="bottle-item">
           <span class="author">{{ b.authorName || '匿名' }}</span>
-          <span class="content">{{ truncate(b.content, 60) }}</span>
+          <span class="content">{{ truncate(b.content, 200) }}</span>
           <span class="meta">❤️{{ b.likeCount }} 💬{{ b.commentCount }} · {{ b.createdAt | date:'MM-dd HH:mm' }}</span>
         </a>
       }
@@ -59,7 +59,7 @@
       @for (b of hot(); track b.id) {
         <a [routerLink]="['/bottle', b.id]" class="bottle-item">
           <span class="author">{{ b.authorName || '匿名' }}</span>
-          <span class="content">{{ truncate(b.content, 60) }}</span>
+          <span class="content">{{ truncate(b.content, 200) }}</span>
           <span class="meta">🔥{{ b.heat }} · ❤️{{ b.likeCount }} 💬{{ b.commentCount }} · {{ b.createdAt | date:'MM-dd HH:mm' }}</span>
         </a>
       }
