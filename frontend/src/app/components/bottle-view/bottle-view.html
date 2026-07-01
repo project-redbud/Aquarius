@@ -63,6 +63,7 @@
   <div class="comments">
     <div class="comments-header">
       <h3>评论</h3>
+      <button class="sort-btn" (click)="showMineOnly.set(!showMineOnly())" [class.active]="showMineOnly()">{{ showMineOnly() ? '👁 全部' : '👁 只看我' }}</button>
       <button class="sort-btn" (click)="toggleSort()">{{ sortAsc() ? '🔼 最早' : '🔽 最新' }}</button>
     </div>
     @if (!replyTo()) {

@@ -29,6 +29,7 @@ export class BottleViewComponent implements OnChanges {
   replyText = signal('');
   expandedReplies = signal<Record<number, Comment[]>>({});
   sortAsc = signal(true);
+  showMineOnly = signal(false);
 
   editingBottle = signal(false);
   editBottleContent = signal('');
@@ -133,7 +134,11 @@ export class BottleViewComponent implements OnChanges {
   commentTotalPages = computed(() => Math.max(1, Math.ceil(this.comments().length / this.commentPageSize)));
 
   pagedComments(): Comment[] {
-    const list = [...this.comments()];
+    let list = [...this.comments()];
+    if (this.showMineOnly()) {
+      const myId = this.auth.user()?.userId;
+      list = list.filter(c => c.userId != null && c.userId === myId);
+    }
     if (this.sortAsc()) list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     const start = (this.commentPage() - 1) * this.commentPageSize;
     return list.slice(start, start + this.commentPageSize);
