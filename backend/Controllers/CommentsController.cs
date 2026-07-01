@@ -85,7 +85,7 @@ public class CommentsController : ControllerBase
         foreach (var aid in adminIds)
         {
             var u = await _db.Users.FindAsync(aid);
-            if (u != null) adminNames[aid] = u.Username;
+            if (u != null && u.ShowAdminUsername) adminNames[aid] = u.Username;
         }
         foreach (var c in result)
         {
@@ -177,7 +177,7 @@ public class CommentsController : ControllerBase
         foreach (var aid in adminIds)
         {
             var u = await _db.Users.FindAsync(aid);
-            if (u != null) names[aid] = u.Username;
+            if (u != null && u.ShowAdminUsername) names[aid] = u.Username;
         }
         foreach (var c in replyDtos)
         {
