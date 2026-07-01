@@ -349,6 +349,7 @@ public class CommentsController : ControllerBase
         }
 
         var isAdmin = User.FindFirst("isAdmin")?.Value == "true";
+        var currentUserId = GetUserId();
         var dto = new CommentDto
         {
             Id = c.Id,
@@ -357,7 +358,7 @@ public class CommentsController : ControllerBase
             ParentReplyId = c.ParentReplyId,
             CreatedAt = c.CreatedAt,
             EditedAt = c.EditedAt,
-            UserId = (isAdmin || c.IsAdminBadge) ? c.UserId : null,
+            UserId = (isAdmin || c.IsAdminBadge || c.UserId == currentUserId) ? c.UserId : null,
             ReplyCount = c.Replies.Count,
             ParentContent = parentContent,
             IsAdminBadge = c.IsAdminBadge,
