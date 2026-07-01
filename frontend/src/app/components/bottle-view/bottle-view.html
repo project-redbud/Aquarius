@@ -45,7 +45,7 @@
 
     @if (isMine(bottle.userId) && editingBottle()) {
       <div class="edit-block">
-        <textarea [(ngModel)]="editBottleContent" rows="3" maxlength="500"></textarea>
+        <textarea [(ngModel)]="editBottleContent" rows="3" maxlength="2000"></textarea>
         <div class="edit-actions">
           <button class="save" (click)="saveEditBottle()">保存</button>
           <button class="cancel" (click)="cancelEditBottle()">取消</button>

@@ -42,7 +42,7 @@
             <img [src]="api.imageUrl(b.imagePath)" alt="my bottle" />
           }
           @if (editingBottleId() === b.id) {
-            <textarea [(ngModel)]="editBottleContent" rows="3" maxlength="500"></textarea>
+            <textarea [(ngModel)]="editBottleContent" rows="3" maxlength="2000"></textarea>
             <input type="text" [(ngModel)]="editBottleAuthor" placeholder="留个名字（选填）" maxlength="50" />
             <div class="edit-actions">
               <button class="save" (click)="saveEditBottle(b.id)">保存</button>
