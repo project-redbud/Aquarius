@@ -92,7 +92,8 @@ export class NotificationsPage implements OnInit {
       system: '📢 系统通知',
       like: '❤️ 点赞',
       comment: '💬 评论',
-      bottle_processed: '✅ 已处理'
+      bottle_processed: '✅ 已处理',
+      bottle_essence: '💎 精华'
     };
     return m[t] || t;
   }
