@@ -357,7 +357,7 @@ public class CommentsController : ControllerBase
             ParentReplyId = c.ParentReplyId,
             CreatedAt = c.CreatedAt,
             EditedAt = c.EditedAt,
-            UserId = isAdmin ? c.UserId : null,
+            UserId = (isAdmin || c.IsAdminBadge) ? c.UserId : null,
             ReplyCount = c.Replies.Count,
             ParentContent = parentContent,
             IsAdminBadge = c.IsAdminBadge,
